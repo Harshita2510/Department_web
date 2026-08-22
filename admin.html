@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071b34">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Faculty Portal — SGSITS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <a class="skip-link" href="#adminMain">Skip to editor</a>
+
+  <div class="portal-shell">
+    <aside class="portal-sidebar" id="portalSidebar">
+      <div class="portal-brand">
+        <img src="assets/sgsits-logo.png" alt="SGSITS emblem">
+        <div><strong>SGSITS</strong><span>Faculty portal</span></div>
+        <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button>
+      </div>
+
+      <div class="signed-in-user">
+        <div class="sidebar-avatar" data-profile-initials>FM</div>
+        <div><strong data-profile-name>Faculty Member</strong><span data-profile-role>Teacher account</span></div>
+      </div>
+
+      <nav class="portal-nav" aria-label="Faculty portal navigation">
+        <span class="nav-label">Workspace</span>
+        <button class="active" type="button" data-panel-target="overviewPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+          Overview
+        </button>
+        <button type="button" data-panel-target="profilePanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+          My profile <span class="nav-status" id="profileNavStatus">Draft</span>
+        </button>
+        <button type="button" data-panel-target="academicPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5-9-5Z"></path><path d="M7 12v5c3 2 7 2 10 0v-5"></path></svg>
+          Academic details
+        </button>
+        <button type="button" data-panel-target="publicationsPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"></path><path d="M8 10h8M8 14h8M8 18h5"></path></svg>
+          Publications
+        </button>
+        <button type="button" data-panel-target="achievementsPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5V4Z"></path><path d="M8 6H4v2c0 2 2 3 4 3M16 6h4v2c0 2-2 3-4 3M12 13v4M8 21h8M9 17h6"></path></svg>
+          Achievements
+        </button>
+        <span class="nav-label nav-label-second">Account</span>
+        <button type="button" data-panel-target="settingsPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 0 0-1.7-1L14.5 3h-5L9 6.1a7 7 0 0 0-1.7 1L5 6.1 3 9.5 5.1 11a7 7 0 0 0 0 2L3 14.5 5 18l2.3-1a7 7 0 0 0 1.7 1l.5 3h5l.5-3a7 7 0 0 0 1.7-1l2.3 1 2-3.5-2.1-1.5a7 7 0 0 0 .1-1Z"></path></svg>
+          Account settings
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="index.html">← Return to website</a>
+        <button id="logoutButton" type="button">Sign out</button>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <main class="portal-main" id="adminMain">
+      <header class="portal-header">
+        <div class="header-title">
+          <button class="mobile-menu" id="sidebarOpen" type="button" aria-label="Open menu"><span></span><span></span><span></span></button>
+          <div><span>Faculty workspace</span><h1 id="panelHeading">Overview</h1></div>
+        </div>
+        <div class="portal-actions">
+          <span class="save-state" id="saveState"><i></i> All changes saved</span>
+          <button class="secondary-action" id="previewButton" type="button">Preview profile ↗</button>
+          <button class="primary-action" id="publishButton" type="button">Publish changes</button>
+        </div>
+      </header>
+
+      <div class="portal-content">
+        <section class="portal-panel active" id="overviewPanel" data-title="Overview">
+          <div class="welcome-banner">
+            <div><span>Good day</span><h2>Welcome, <strong data-profile-first-name>Professor</strong>.</h2><p>Keep your public faculty profile accurate, complete and easy for students and collaborators to discover.</p></div>
+            <div class="completion-ring" id="completionRing" style="--progress: 0"><strong id="completionValue">0%</strong><span>complete</span></div>
+          </div>
+
+          <div class="overview-grid">
+            <article class="overview-card profile-summary-card">
+              <div class="card-heading"><div><span>Your public profile</span><h3>At a glance</h3></div><button type="button" data-go-to="profilePanel">Edit profile →</button></div>
+              <div class="profile-summary">
+                <div class="summary-avatar" data-profile-avatar><span data-profile-initials>FM</span></div>
+                <div><h4 data-profile-name>Faculty Member</h4><p data-profile-designation>Designation not added</p><span data-profile-department>Department not selected</span></div>
+              </div>
+              <div class="summary-meta"><div><span>Profile visibility</span><strong id="visibilityLabel"><i></i> Draft</strong></div><div><span>Last updated</span><strong id="lastUpdated">Not yet</strong></div></div>
+            </article>
+
+            <article class="overview-card next-steps-card">
+              <div class="card-heading"><div><span>Recommended</span><h3>Complete your profile</h3></div></div>
+              <div id="completionTasks" class="completion-tasks"></div>
+            </article>
+
+            <article class="overview-card activity-card">
+              <div class="card-heading"><div><span>Profile content</span><h3>Your contribution</h3></div></div>
+              <div class="metric-row"><div><strong id="publicationMetric">0</strong><span>Publications</span></div><div><strong id="achievementMetric">0</strong><span>Achievements</span></div><div><strong id="courseMetric">0</strong><span>Courses</span></div></div>
+              <p>Published information becomes searchable in the faculty directory and institute-wide search.</p>
+            </article>
+
+            <article class="overview-card help-card">
+              <span>Need assistance?</span><h3>Profile support</h3><p>For designation, department or account corrections that you cannot edit, contact the website administration team.</p><a href="mailto:webmaster@sgsits.ac.in">Contact website team ↗</a>
+            </article>
+          </div>
+        </section>
+
+        <section class="portal-panel" id="profilePanel" data-title="My profile">
+          <div class="editor-heading"><div><span>Public information</span><h2>Personal &amp; professional details</h2><p>This information appears at the top of your public faculty profile.</p></div><div class="section-progress"><span>Section status</span><strong id="personalStatus">Incomplete</strong></div></div>
+          <form class="editor-form" id="profileForm">
+            <div class="form-card photo-card">
+              <div class="form-card-title"><span>01</span><div><h3>Profile photograph</h3><p>Use a recent, professional headshot.</p></div></div>
+              <div class="photo-editor"><div class="photo-preview" id="photoPreview"><span data-profile-initials>FM</span></div><div><label class="upload-button" for="profilePhoto">Upload new photo</label><input id="profilePhoto" type="file" accept="image/jpeg,image/png,image/webp" hidden><button class="remove-photo" id="removePhoto" type="button">Remove</button><p>JPG, PNG or WebP · Maximum 2 MB<br>Recommended: square image, at least 600 × 600 px.</p></div></div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-card-title"><span>02</span><div><h3>Basic details</h3><p>Use your official institute details.</p></div></div>
+              <div class="form-grid">
+                <label class="field small-field"><span>Title</span><select id="title" name="title"><option>Dr.</option><option>Prof.</option><option>Mr.</option><option>Ms.</option><option>Mrs.</option></select></label>
+                <label class="field wide-field"><span>Full name <b>*</b></span><input id="fullName" name="fullName" type="text" placeholder="Your full name" required></label>
+                <label class="field"><span>Designation <b>*</b></span><input id="designation" name="designation" type="text" placeholder="e.g. Associate Professor" required></label>
+                <label class="field"><span>Department <b>*</b></span><select id="department" name="department" required><option value="">Select department</option><option>Biomedical Engineering</option><option>Civil Engineering &amp; Applied Mechanics</option><option>Computer Engineering</option><option>Computer Technology &amp; Applications</option><option>Electrical Engineering</option><option>Electronics &amp; Instrumentation Engineering</option><option>Electronics &amp; Telecommunication Engineering</option><option>Industrial &amp; Production Engineering</option><option>Information Technology</option><option>Management Studies</option><option>Mechanical Engineering</option><option>Pharmacy</option><option>Applied Chemistry</option><option>Applied Mathematics &amp; Computational Sciences</option><option>Applied Physics &amp; Optoelectronics</option></select></label>
+                <label class="field"><span>Institute email</span><input id="instituteEmail" name="email" type="email" readonly></label>
+                <label class="field"><span>Contact number</span><input id="phone" name="phone" type="tel" placeholder="+91 00000 00000"></label>
+                <label class="field"><span>Office / room</span><input id="office" name="office" type="text" placeholder="e.g. CE-204, Main Building"></label>
+                <label class="field"><span>Consultation hours</span><input id="officeHours" name="officeHours" type="text" placeholder="e.g. Mon–Wed, 2:00–4:00 PM"></label>
+                <label class="field full-field"><span>Professional biography <b>*</b></span><textarea id="bio" name="bio" rows="7" maxlength="1200" placeholder="Introduce your academic background, current work and interests…" required></textarea><small><i id="bioCount">0</i> / 1200 characters</small></label>
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-card-title"><span>03</span><div><h3>Professional links</h3><p>Help students and collaborators find your verified work.</p></div></div>
+              <div class="form-grid">
+                <label class="field"><span>Google Scholar</span><input id="scholarUrl" name="scholarUrl" type="url" placeholder="https://scholar.google.com/…"></label>
+                <label class="field"><span>ORCID</span><input id="orcidUrl" name="orcidUrl" type="url" placeholder="https://orcid.org/…"></label>
+                <label class="field"><span>LinkedIn</span><input id="linkedinUrl" name="linkedinUrl" type="url" placeholder="https://linkedin.com/in/…"></label>
+                <label class="field"><span>Personal / lab website</span><input id="websiteUrl" name="websiteUrl" type="url" placeholder="https://…"></label>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <section class="portal-panel" id="academicPanel" data-title="Academic details">
+          <div class="editor-heading"><div><span>Teaching &amp; research</span><h2>Academic profile</h2><p>Add qualifications, expertise, research interests and current teaching.</p></div></div>
+          <form class="editor-form" id="academicForm">
+            <div class="form-card">
+              <div class="form-card-title"><span>01</span><div><h3>Qualifications</h3><p>Enter one qualification per line, highest degree first.</p></div></div>
+              <label class="field"><span>Academic qualifications</span><textarea id="qualifications" rows="6" placeholder="Ph.D. in Computer Science, IIT …&#10;M.Tech. in …&#10;B.E. in …"></textarea></label>
+            </div>
+            <div class="form-card">
+              <div class="form-card-title"><span>02</span><div><h3>Areas of expertise</h3><p>Use commas to separate items.</p></div></div>
+              <div class="form-grid"><label class="field full-field"><span>Research interests</span><input id="researchInterests" type="text" placeholder="Machine learning, Computer vision, Data systems"><small>Your profile will be searchable using these terms.</small></label><label class="field full-field"><span>Subjects / courses currently taught</span><input id="coursesTaught" type="text" placeholder="Data Structures, Database Systems, Machine Learning"></label></div>
+            </div>
+            <div class="form-card">
+              <div class="form-card-title"><span>03</span><div><h3>Experience &amp; supervision</h3><p>Summarise your current academic responsibilities.</p></div></div>
+              <div class="form-grid"><label class="field"><span>Teaching experience (years)</span><input id="experienceYears" type="number" min="0" max="60" placeholder="0"></label><label class="field"><span>Ph.D. scholars supervised</span><input id="scholarsSupervised" type="number" min="0" placeholder="0"></label><label class="field full-field"><span>Current research / lab summary</span><textarea id="researchSummary" rows="6" maxlength="900" placeholder="Describe your current projects, laboratory or research group…"></textarea></label></div>
+            </div>
+          </form>
+        </section>
+
+        <section class="portal-panel" id="publicationsPanel" data-title="Publications">
+          <div class="editor-heading"><div><span>Research output</span><h2>Selected publications</h2><p>Add the publications you want highlighted publicly. Newest work should come first.</p></div><button class="primary-action" id="addPublication" type="button">+ Add publication</button></div>
+          <div class="repeat-list" id="publicationList"></div>
+          <div class="empty-state" id="publicationEmpty"><div>⌑</div><h3>No publications added yet</h3><p>Add journal articles, conference papers, books or chapters to your public profile.</p><button class="secondary-action" type="button" data-add-publication>Add first publication</button></div>
+        </section>
+
+        <section class="portal-panel" id="achievementsPanel" data-title="Achievements">
+          <div class="editor-heading"><div><span>Recognition</span><h2>Awards &amp; achievements</h2><p>Share verified awards, professional recognition, funded projects and notable contributions.</p></div><button class="primary-action" id="addAchievement" type="button">+ Add achievement</button></div>
+          <div class="repeat-list" id="achievementList"></div>
+          <div class="empty-state" id="achievementEmpty"><div>✦</div><h3>No achievements added yet</h3><p>Add an award, grant, professional distinction or other verified recognition.</p><button class="secondary-action" type="button" data-add-achievement>Add first achievement</button></div>
+        </section>
+
+        <section class="portal-panel" id="settingsPanel" data-title="Account settings">
+          <div class="editor-heading"><div><span>Account &amp; security</span><h2>Settings</h2><p>Review your account details and profile visibility.</p></div></div>
+          <div class="settings-grid">
+            <div class="form-card"><div class="form-card-title"><span>01</span><div><h3>Account information</h3><p>Your sign-in identity is managed by the institute.</p></div></div><div class="account-row"><span>Institute email</span><strong id="settingsEmail">—</strong></div><div class="account-row"><span>Account role</span><strong>Faculty member</strong></div><div class="account-row"><span>Profile status</span><strong id="settingsVisibility">Draft</strong></div></div>
+            <div class="form-card"><div class="form-card-title"><span>02</span><div><h3>Change password</h3><p>This demo validates the interface only.</p></div></div><form id="passwordForm" class="password-form"><label class="field"><span>Current password</span><input type="password" required></label><label class="field"><span>New password</span><input id="newPassword" type="password" minlength="8" required><small>At least 8 characters.</small></label><label class="field"><span>Confirm new password</span><input id="confirmPassword" type="password" minlength="8" required></label><button class="secondary-action" type="submit">Update password</button></form></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="publish-modal" id="publishModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="publishTitle">
+    <div class="modal-backdrop" data-close-publish></div>
+    <div class="publish-card"><button class="modal-close" data-close-publish type="button" aria-label="Close">×</button><div class="publish-icon">✓</div><span>Ready to publish?</span><h2 id="publishTitle">Update your public profile.</h2><p>Your saved information will become visible in the faculty directory. You can continue editing and republish at any time.</p><div class="publish-summary"><div><span>Profile completion</span><strong id="publishCompletion">0%</strong></div><div><span>Required fields</span><strong id="requiredStatus">Incomplete</strong></div></div><div class="publish-actions"><button class="secondary-action" data-close-publish type="button">Keep editing</button><button class="primary-action" id="confirmPublish" type="button">Confirm &amp; publish</button></div></div>
+  </div>
+
+  <div class="portal-toast" id="portalToast" role="status" aria-live="polite"></div>
+  <script src="admin.js"></script>
+</body>
+</html>
