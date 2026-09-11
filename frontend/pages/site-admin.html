@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#071b34">
+  <title>Website Administration — SGSITS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/site-admin.css">
+</head>
+<body>
+  <a class="skip-link" href="#cmsMain">Skip to content</a>
+  <div class="cms-shell">
+    <aside class="cms-sidebar" id="cmsSidebar">
+      <div class="cms-brand"><img src="../assets/images/sgsits-logo.png" alt="SGSITS emblem"><div><strong>SGSITS</strong><span>Website administration</span></div><button id="closeSidebar" type="button" aria-label="Close menu">×</button></div>
+      <div class="admin-identity"><span class="admin-avatar">WA</span><div><strong>Website Admin</strong><span>Full publishing access</span></div></div>
+      <nav class="cms-nav" aria-label="Administration sections">
+        <span class="nav-label">Overview</span>
+        <button class="active" type="button" data-view="dashboard"><i>⌂</i>Dashboard</button>
+        <span class="nav-label">Website content</span>
+        <button type="button" data-view="notices"><i>≡</i>Notices <b data-count="notices">0</b></button>
+        <button type="button" data-view="news"><i>◇</i>News &amp; stories <b data-count="news">0</b></button>
+        <button type="button" data-view="events"><i>□</i>Events <b data-count="events">0</b></button>
+        <button type="button" data-view="placements"><i>↗</i>Placements <b data-count="placements">0</b></button>
+        <button type="button" data-view="documents"><i>▤</i>Documents <b data-count="documents">0</b></button>
+        <button type="button" data-view="media"><i>◉</i>Media library <b data-count="media">0</b></button>
+        <span class="nav-label">Administration</span>
+        <button type="button" data-view="faculty"><i>♙</i>Faculty profiles <b data-count="faculty">0</b></button>
+        <button type="button" data-view="homepage"><i>⌘</i>Homepage</button>
+        <button type="button" data-view="users"><i>♢</i>Users &amp; roles</button>
+        <button type="button" data-view="settings"><i>⚙</i>Settings</button>
+      </nav>
+      <div class="cms-sidebar-footer"><a href="../index.html">← View public website</a><button id="adminLogout" type="button">Sign out</button></div>
+    </aside>
+    <div class="sidebar-shade" id="sidebarShade"></div>
+
+    <main class="cms-main" id="cmsMain">
+      <header class="cms-header">
+        <div class="header-left"><button class="menu-button" id="openSidebar" type="button" aria-label="Open menu"><span></span><span></span><span></span></button><div><span>Content management system</span><h1 id="viewTitle">Dashboard</h1></div></div>
+        <div class="header-right"><button class="icon-action" id="globalSearch" type="button" aria-label="Search content">⌕</button><button class="view-site" type="button" id="viewSite">View site ↗</button><button class="new-content" type="button" id="globalCreate">+ Create content</button></div>
+      </header>
+
+      <div class="cms-content">
+        <section class="cms-view active" id="dashboardView" data-title="Dashboard">
+          <div class="dashboard-welcome"><div><span>Administrator workspace</span><h2>Everything on the website,<br><em>managed from one place.</em></h2><p>Create, upload, review and publish institutional content. Changes remain drafts until you choose to publish them.</p></div><div class="today-card"><span>Today</span><strong id="todayDate">—</strong><small id="todayMonth">—</small></div></div>
+          <div class="stat-grid">
+            <article><span>Published content</span><strong id="publishedStat">0</strong><small>Across all sections</small></article>
+            <article><span>Drafts</span><strong id="draftStat">0</strong><small>Waiting for completion</small></article>
+            <article><span>Faculty submissions</span><strong id="submissionStat">0</strong><small>Awaiting review</small></article>
+            <article><span>Media assets</span><strong id="mediaStat">0</strong><small>Images and files</small></article>
+          </div>
+          <div class="admin-access-strip" aria-label="Administrator-only publishing permissions"><div><span>Administrator-only access</span><strong>Events</strong><small>Create, upload and publish</small></div><div><span>Administrator-only access</span><strong>Placement sheets</strong><small>Add year and sheet link</small></div><div><span>Administrator-only access</span><strong>Documents</strong><small>Upload and publish official files</small></div></div>
+          <div class="dashboard-grid">
+            <article class="dashboard-card quick-create"><div class="card-head"><div><span>Quick actions</span><h3>Create new content</h3></div></div><div class="quick-action-grid"><button data-quick-create="notices"><i>≡</i><span>Notice</span></button><button data-quick-create="news"><i>◇</i><span>News story</span></button><button data-quick-create="events"><i>□</i><span>Event</span></button><button data-quick-create="documents"><i>▤</i><span>Document</span></button><button data-quick-create="placements"><i>↗</i><span>Placement</span></button><button data-quick-create="media"><i>◉</i><span>Upload media</span></button></div></article>
+            <article class="dashboard-card recent-card"><div class="card-head"><div><span>Activity</span><h3>Recently updated</h3></div><button type="button" data-view-jump="notices">View content →</button></div><div id="recentActivity" class="activity-list"></div></article>
+          </div>
+          <div class="dashboard-grid lower-grid"><article class="dashboard-card review-card"><div class="card-head"><div><span>Faculty workflow</span><h3>Profile submissions</h3></div><button type="button" data-view-jump="faculty">Review all →</button></div><div id="submissionPreview" class="submission-preview"></div></article><article class="dashboard-card storage-card"><div class="card-head"><div><span>Prototype storage</span><h3>Browser capacity</h3></div></div><div class="storage-meter"><span style="--used:0" id="storageMeter"></span></div><div class="storage-caption"><span id="storageUsed">0 KB used</span><span>Approx. 5 MB available</span></div><p>Production files should be uploaded to secure object storage rather than browser storage.</p></article></div>
+        </section>
+
+        <section class="cms-view" id="collectionView" data-title="Content">
+          <div class="collection-head"><div><span id="collectionKicker">Website content</span><h2 id="collectionTitle">Content</h2><p id="collectionDescription">Create, edit and publish website entries.</p></div><button class="primary-button" id="collectionCreate" type="button">+ Add new</button></div>
+          <div class="collection-tools"><label class="collection-search"><span>⌕</span><input id="collectionSearch" type="search" placeholder="Search content…"></label><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option></select><select id="categoryFilter" aria-label="Filter by category"><option value="all">All categories</option></select></div>
+          <div class="bulk-bar" id="bulkBar"><span><b id="selectedCount">0</b> selected</span><button id="bulkPublish" type="button">Publish</button><button id="bulkDraft" type="button">Move to draft</button><button class="danger-text" id="bulkDelete" type="button">Delete</button></div>
+          <div class="content-table-wrap"><table class="content-table"><thead><tr><th><input id="selectAll" type="checkbox" aria-label="Select all"></th><th>Title</th><th>Category</th><th>Updated</th><th>Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody id="contentRows"></tbody></table><div class="table-empty" id="tableEmpty"><span>◇</span><h3>No content here yet</h3><p>Create your first entry to begin building this section.</p><button class="secondary-button" id="emptyCreate" type="button">Create first entry</button></div></div>
+        </section>
+
+        <section class="cms-view" id="facultyView" data-title="Faculty profiles">
+          <div class="collection-head"><div><span>People directory</span><h2>Faculty profiles</h2><p>Review teacher changes, manage photographs and control what is published.</p></div><button class="primary-button" id="addFaculty" type="button">+ Add faculty profile</button></div>
+          <div class="permission-note"><strong>Admin-controlled publishing</strong><p>Teachers can edit text and submit changes. Only administrators can upload profile images and publish a faculty profile.</p></div>
+          <div class="faculty-grid" id="facultyGrid"></div><div class="table-empty" id="facultyEmpty"><span>♙</span><h3>No faculty profiles found</h3><p>Create a Faculty ID and temporary password to provide access.</p><button class="secondary-button" id="facultyEmptyAdd" type="button">Add faculty profile</button></div>
+        </section>
+
+        <section class="cms-view" id="homepageView" data-title="Homepage">
+          <div class="collection-head"><div><span>Page management</span><h2>Homepage settings</h2><p>Control hero messaging and section visibility without editing code.</p></div><button class="primary-button" id="saveHomepage" type="button">Save homepage</button></div>
+          <form class="homepage-form" id="homepageForm"><article class="editor-card"><div class="editor-card-head"><span>01</span><div><h3>Hero content</h3><p>The primary message visitors see first.</p></div></div><div class="form-grid"><label class="field full"><span>Eyebrow</span><input id="heroEyebrow" type="text"></label><label class="field full"><span>Headline</span><textarea id="heroHeadline" rows="3"></textarea></label><label class="field full"><span>Introduction</span><textarea id="heroIntro" rows="4"></textarea></label><label class="field"><span>Primary button label</span><input id="heroButton" type="text"></label><label class="field"><span>Primary button link</span><input id="heroLink" type="text"></label></div></article><article class="editor-card"><div class="editor-card-head"><span>02</span><div><h3>Visible sections</h3><p>Choose which homepage areas are currently shown.</p></div></div><div class="toggle-list" id="sectionToggles"></div></article></form>
+        </section>
+
+        <section class="cms-view" id="usersView" data-title="Users &amp; roles">
+          <div class="collection-head"><div><span>Access control</span><h2>Users &amp; roles</h2><p>Manage faculty credentials and keep publishing permissions restricted.</p></div><button class="primary-button" id="inviteUser" type="button">+ Add faculty login</button></div>
+          <div class="role-grid"><article><span class="role-icon admin-role">A</span><div><h3>Website administrator</h3><p>Exclusive create, upload, edit, delete and publish access for events, placement sheets and official documents.</p><strong>Events · Placement sheets · Documents</strong></div></article><article><span class="role-icon teacher-role">T</span><div><h3>Faculty member</h3><p>Can edit their own text profile and submit changes for administrator review.</p><strong>No event, placement, document upload or publish access</strong></div></article></div>
+          <div class="user-table"><div class="user-row user-head"><span>User</span><span>Role</span><span>Status</span><span>Access</span></div><div class="user-row"><span><b>Website Admin</b><small>admin@sgsits.ac.in</small></span><span>Administrator</span><span><i></i> Active</span><span>Full website</span></div><div id="facultyAccountRows"></div></div>
+        </section>
+
+        <section class="cms-view" id="settingsView" data-title="Settings">
+          <div class="collection-head"><div><span>Configuration</span><h2>Website settings</h2><p>General identity, contact and publishing controls.</p></div><button class="primary-button" id="saveSettings" type="button">Save settings</button></div>
+          <form class="editor-card settings-form" id="settingsForm"><div class="editor-card-head"><span>01</span><div><h3>Institute information</h3><p>Used throughout the website footer and metadata.</p></div></div><div class="form-grid"><label class="field full"><span>Institute name</span><input id="settingName" type="text"></label><label class="field"><span>Public email</span><input id="settingEmail" type="email"></label><label class="field"><span>Contact number</span><input id="settingPhone" type="text"></label><label class="field full"><span>Address</span><textarea id="settingAddress" rows="3"></textarea></label></div><div class="danger-zone"><div><strong>Export prototype data</strong><p>Download a JSON backup of all content created in this browser.</p></div><button class="secondary-button" id="exportData" type="button">Export data</button></div></form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="drawer" id="editorDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="drawer-shade" data-close-drawer></div><div class="drawer-panel"><header><div><span id="drawerKicker">Create content</span><h2 id="drawerTitle">New entry</h2></div><button data-close-drawer type="button" aria-label="Close editor">×</button></header><form id="contentForm"><input id="editingId" type="hidden"><div class="drawer-body"><div id="placementFields" hidden><div class="admin-only-label"><span>Administrator only</span><p>Publish one official placement sheet for each academic year.</p></div><label class="field full"><span>Academic year <b>*</b></span><input id="placementYear" type="text" inputmode="numeric" autocomplete="off" placeholder="2025-26"><small>Use the format YYYY-YY, for example 2025-26.</small></label><label class="field full"><span>Public sheet link <b>*</b></span><input id="placementSheetUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://docs.google.com/spreadsheets/..."><small>Use a view-only link that visitors can open without requesting access.</small></label></div><div id="genericContentFields"><label class="field full"><span>Title <b>*</b></span><input id="contentTitle" type="text" required></label><div class="form-grid"><label class="field"><span>Category</span><select id="contentCategory"></select></label><label class="field"><span>Display date</span><input id="contentDate" type="date"></label></div><label class="field full"><span>Summary</span><textarea id="contentSummary" rows="4" maxlength="400" placeholder="Short summary for cards and search results"></textarea></label><label class="field full"><span>Full content</span><textarea id="contentBody" rows="9" placeholder="Write the complete content here…"></textarea></label><div class="admin-only-label"><span>Administrator only</span><p id="uploadPermissionText">Only website administrators can upload this attachment.</p></div><div class="upload-zone" id="contentUploadZone"><input id="contentFile" type="file" hidden><span>⇧</span><div><strong>Upload attachment or image</strong><p id="uploadHelp">Click to choose a file · Maximum 2 MB in this prototype</p></div></div><div class="attached-file" id="attachedFile" hidden></div><label class="feature-check"><input id="contentFeatured" type="checkbox"><span><strong>Feature this content</strong><small>Give this item priority on relevant public pages.</small></span></label></div></div><footer><button class="danger-link" id="deleteCurrent" type="button" hidden>Delete</button><div><button class="secondary-button" data-close-drawer type="button">Cancel</button><button class="secondary-button" id="saveDraft" type="button">Save draft</button><button class="primary-button" id="savePublish" type="submit">Publish</button></div></footer></form></div></div>
+
+  <div class="drawer" id="facultyDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="facultyDrawerTitle"><div class="drawer-shade" data-close-faculty></div><div class="drawer-panel"><header><div><span>Faculty management</span><h2 id="facultyDrawerTitle">Faculty profile</h2></div><button data-close-faculty type="button" aria-label="Close editor">×</button></header><form id="facultyAdminForm"><input id="facultyEmailKey" type="hidden"><div class="drawer-body"><div class="admin-photo-editor"><div class="admin-photo" id="adminFacultyPhoto"><span id="adminFacultyInitials">FM</span></div><div><label class="primary-button upload-label" for="adminPhotoInput">Upload photograph</label><input id="adminPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden><button class="secondary-button" id="adminPhotoRemove" type="button">Remove</button><p>Only administrators can upload faculty photographs.</p></div></div><div class="form-grid"><label class="field"><span>Faculty ID</span><input id="facultyIdReview" type="text" readonly></label><label class="field"><span>Institute email</span><input id="facultyEmail" type="email"></label><label class="field"><span>Full name <b>*</b></span><input id="facultyName" type="text" required></label><label class="field"><span>Designation</span><input id="facultyDesignation" type="text"></label><label class="field"><span>Department</span><input id="facultyDepartment" type="text"></label><label class="field full"><span>Professional biography</span><textarea id="facultyBio" rows="7"></textarea></label></div><div class="submission-data" id="facultySubmissionData"></div></div><footer><button class="danger-link" id="deleteFaculty" type="button">Delete profile</button><div><button class="secondary-button" data-close-faculty type="button">Cancel</button><button class="secondary-button" id="saveFacultyDraft" type="button">Save draft</button><button class="primary-button" type="submit">Approve &amp; publish</button></div></footer></form></div></div>
+
+  <div class="modal" id="facultyAccountModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="facultyAccountTitle"><div class="modal-shade" data-close-account></div><div class="create-menu-card account-create-card"><button data-close-account type="button" aria-label="Close">×</button><span>New faculty access</span><h2 id="facultyAccountTitle">Add faculty profile</h2><p class="account-intro">Create only the login credentials. The faculty member will complete all profile information after signing in.</p><form id="facultyAccountForm"><label class="field"><span>Faculty ID <b>*</b></span><input id="newFacultyId" type="text" autocomplete="off" placeholder="e.g. FAC-001" required minlength="3" maxlength="30"><small>Must be unique. Letters, numbers and hyphens only.</small></label><label class="field"><span>Temporary password <b>*</b></span><div class="password-input"><input id="newFacultyPassword" type="password" autocomplete="new-password" minlength="8" required><button id="toggleFacultyPassword" type="button">Show</button></div><small>At least 8 characters. Give this password privately to the faculty member.</small></label><div class="credential-warning"><strong>Important</strong><p>The password will not be shown again after account creation. Ask the faculty member to change it after first login.</p></div><button class="primary-button" type="submit">Create faculty profile</button></form></div></div>
+
+  <div class="modal" id="createMenu" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="createMenuTitle"><div class="modal-shade" data-close-create-menu></div><div class="create-menu-card"><button data-close-create-menu type="button" aria-label="Close">×</button><span>Create new</span><h2 id="createMenuTitle">What would you like to publish?</h2><div class="create-menu-grid"><button data-create-type="notices"><i>≡</i>Notice</button><button data-create-type="news"><i>◇</i>News story</button><button data-create-type="events"><i>□</i>Event</button><button data-create-type="placements"><i>↗</i>Placement sheet</button><button data-create-type="documents"><i>▤</i>Document</button><button data-create-type="media"><i>◉</i>Media</button></div></div></div>
+  <div class="cms-toast" id="cmsToast" role="status" aria-live="polite"></div>
+  <script type="module" src="../assets/js/site-admin.js"></script>
+</body>
+</html>

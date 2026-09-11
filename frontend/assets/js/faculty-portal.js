@@ -1,21 +1,22 @@
-const $ = (selector, scope = document) => scope.querySelector(selector);
-const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+import { $, $$ } from './shared/dom.js';
+import { authService } from './services/auth.service.js';
+import { facultyService } from './services/faculty.service.js';
 
 const sessionKey = 'sgsitsFacultySession';
 const session = JSON.parse(sessionStorage.getItem(sessionKey) || 'null');
 
-if (!session?.email) {
-  window.location.replace('index.html?login=required');
+if (!session?.facultyId || session?.role !== 'faculty') {
+  window.location.replace('../index.html?login=required');
 }
 
-const normalizedEmail = (session?.email || '').trim().toLowerCase();
-const storageKey = `sgsitsFacultyProfile:${normalizedEmail}`;
+const facultyId = (session?.facultyId || '').trim().toUpperCase();
 const defaultProfile = {
+  facultyId,
   title: 'Dr.',
   fullName: '',
   designation: '',
   department: '',
-  email: normalizedEmail,
+  email: '',
   phone: '',
   office: '',
   officeHours: '',
@@ -34,12 +35,13 @@ const defaultProfile = {
   publications: [],
   achievements: [],
   isPublished: false,
+  reviewStatus: 'draft',
   updatedAt: '',
   publishedAt: ''
 };
 
-let profile = { ...defaultProfile, ...JSON.parse(localStorage.getItem(storageKey) || '{}') };
-profile.email = normalizedEmail;
+let profile = { ...defaultProfile };
+profile.facultyId = facultyId;
 let saveTimer;
 let toastTimer;
 
@@ -50,7 +52,7 @@ const editableFields = [
 ];
 
 function initials(name = '') {
-  const value = name.trim() || normalizedEmail.split('@')[0].replace(/[._-]+/g, ' ');
+  const value = name.trim() || facultyId;
   return value.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'FM';
 }
 
@@ -74,7 +76,6 @@ function calculateCompletion() {
     Boolean(profile.designation.trim()),
     Boolean(profile.department),
     profile.bio.trim().length >= 50,
-    Boolean(profile.photo),
     Boolean(profile.qualifications.trim()),
     Boolean(profile.researchInterests.trim()),
     Boolean(profile.coursesTaught.trim()),
@@ -95,6 +96,7 @@ function markSaving(state = 'unsaved') {
 }
 
 function queueSave() {
+  if (profile.reviewStatus === 'approved' || profile.reviewStatus === 'submitted') profile.reviewStatus = 'draft';
   markSaving('unsaved');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => saveProfile(), 650);
@@ -105,17 +107,31 @@ function collectFields() {
     const field = $(`#${fieldId}`);
     if (field) profile[fieldId] = field.value;
   });
+  profile.email=$('#instituteEmail').value.trim();
 }
 
-function saveProfile(showConfirmation = false) {
+function apiDraft() {
+  const list=(value)=>value.split(/\r?\n|,/).map((item)=>item.trim()).filter(Boolean);
+  const number=(value)=>value===''?undefined:Number(value);
+  return {
+    title:profile.title,fullName:profile.fullName,designation:profile.designation,department:profile.department,email:profile.email,
+    phone:profile.phone,office:profile.office,officeHours:profile.officeHours,bio:profile.bio,scholarUrl:profile.scholarUrl,orcidUrl:profile.orcidUrl,
+    linkedinUrl:profile.linkedinUrl,websiteUrl:profile.websiteUrl,qualifications:list(profile.qualifications),researchInterests:list(profile.researchInterests),
+    coursesTaught:list(profile.coursesTaught),experienceYears:number(profile.experienceYears),scholarsSupervised:number(profile.scholarsSupervised),researchSummary:profile.researchSummary,
+    publications:profile.publications.map((item)=>({...item,year:number(item.year)})),achievements:profile.achievements.map((item)=>({...item,year:number(item.year)}))
+  };
+}
+
+function applyApiProfile(record) {
+  const draft=record.draft||{};const text=(value,separator='\n')=>Array.isArray(value)?value.join(separator):value||'';
+  profile={...defaultProfile,...draft,facultyId:record.facultyId,photo:draft.photoUrl||'',qualifications:text(draft.qualifications),researchInterests:text(draft.researchInterests,', '),coursesTaught:text(draft.coursesTaught,', '),experienceYears:draft.experienceYears??'',scholarsSupervised:draft.scholarsSupervised??'',publications:draft.publications||[],achievements:draft.achievements||[],reviewStatus:record.reviewStatus,isPublished:Boolean(record.approvedSnapshot),updatedAt:record.updatedAt,publishedAt:record.publishedAt||''};
+}
+
+async function saveProfile(showConfirmation = false) {
   clearTimeout(saveTimer);
   collectFields();
   markSaving('saving');
-  profile.updatedAt = new Date().toISOString();
-  localStorage.setItem(storageKey, JSON.stringify(profile));
-  setTimeout(() => markSaving('saved'), 260);
-  renderDashboard();
-  if (showConfirmation) showToast('Your profile changes have been saved.');
+  try{const record=await facultyService.updateOwn(apiDraft());applyApiProfile(record);markSaving('saved');populateForms();renderPublications();renderAchievements();renderDashboard();if(showConfirmation)showToast('Your profile changes have been saved to MongoDB.');return record}catch(error){markSaving('unsaved');showToast(error.message);return null}
 }
 
 function showToast(message) {
@@ -172,8 +188,9 @@ function renderDashboard() {
   $('#achievementMetric').textContent = profile.achievements.length;
   $('#courseMetric').textContent = commaItems(profile.coursesTaught).length;
   $('#lastUpdated').textContent = formatDate(profile.updatedAt);
+  $('#settingsEmail').textContent = profile.email || 'Not added';
 
-  const visibilityText = profile.isPublished ? 'Published' : 'Draft';
+  const visibilityText = profile.reviewStatus === 'submitted' ? 'In review' : profile.isPublished ? 'Published' : 'Draft';
   const visibilityLabel = $('#visibilityLabel');
   visibilityLabel.innerHTML = `<i></i> ${visibilityText}`;
   visibilityLabel.classList.toggle('published', profile.isPublished);
@@ -195,8 +212,9 @@ function populateForms() {
     const field = $(`#${fieldId}`);
     if (field) field.value = profile[fieldId] ?? '';
   });
-  $('#instituteEmail').value = normalizedEmail;
-  $('#settingsEmail').textContent = normalizedEmail;
+  $('#instituteEmail').value = profile.email || '';
+  $('#settingsFacultyId').textContent = facultyId;
+  $('#settingsEmail').textContent = profile.email || 'Not added';
   $('#bioCount').textContent = profile.bio.length;
 }
 
@@ -315,10 +333,10 @@ function closeSidebar() {
   document.body.classList.remove('no-scroll');
 }
 
-populateForms();
-renderPublications();
-renderAchievements();
-renderDashboard();
+async function bootstrapProfile(){
+  try{applyApiProfile(await facultyService.getOwn());populateForms();renderPublications();renderAchievements();renderDashboard()}catch(error){showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?login=required'),1000)}
+}
+bootstrapProfile();
 
 $$('[data-panel-target]').forEach((button) => button.addEventListener('click', () => showPanel(button.dataset.panelTarget)));
 bindGoToButtons();
@@ -336,36 +354,17 @@ editableFields.forEach((fieldId) => {
     queueSave();
   });
 });
+$('#instituteEmail').addEventListener('input',()=>{profile.email=$('#instituteEmail').value;queueSave()});
 
-$('#profilePhoto').addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-    showToast('Please choose a JPG, PNG or WebP image.');
-    event.target.value = '';
-    return;
-  }
-  if (file.size > 2 * 1024 * 1024) {
-    showToast('That image is larger than 2 MB. Please choose a smaller file.');
-    event.target.value = '';
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = () => {
-    profile.photo = reader.result;
-    queueSave();
-    renderDashboard();
-    showToast('Profile photograph updated.');
-  };
-  reader.readAsDataURL(file);
-});
-
-$('#removePhoto').addEventListener('click', () => {
-  profile.photo = '';
-  $('#profilePhoto').value = '';
+$('#instituteEmail').addEventListener('input', (event) => {
+  profile.email = event.target.value.trim().toLowerCase();
   queueSave();
-  renderDashboard();
 });
+
+if (session.mustChangePassword) {
+  showPanel('settingsPanel');
+  showToast('Please replace the temporary password provided by the administrator.');
+}
 
 $('#addPublication').addEventListener('click', addPublication);
 $$('[data-add-publication]').forEach((button) => button.addEventListener('click', addPublication));
@@ -378,47 +377,37 @@ $('#confirmPublish').addEventListener('click', () => {
   if (!hasRequiredFields()) {
     closePublishModal();
     showPanel('profilePanel');
-    showToast('Complete your name, designation, department and a biography of at least 50 characters before publishing.');
+    showToast('Complete your name, designation, department and a biography of at least 50 characters before submitting.');
     return;
   }
-  profile.isPublished = true;
-  profile.publishedAt = new Date().toISOString();
-  saveProfile();
-  closePublishModal();
-  showToast('Your faculty profile is now published.');
+  saveProfile().then((saved)=>saved?facultyService.submitOwn():null).then((record)=>{if(!record)return;applyApiProfile(record);closePublishModal();renderDashboard();showToast('Your changes were submitted to the website administrator for review.')}).catch((error)=>showToast(error.message));
 });
 
 $('#previewButton').addEventListener('click', () => {
   saveProfile();
-  window.open(`faculty-profile.html?email=${encodeURIComponent(normalizedEmail)}&preview=1`, '_blank', 'noopener');
+  window.open(`faculty-profile.html?facultyId=${encodeURIComponent(facultyId)}&preview=1`, '_blank', 'noopener');
 });
 
-$('#passwordForm').addEventListener('submit', (event) => {
+$('#passwordForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   if ($('#newPassword').value !== $('#confirmPassword').value) {
     showToast('The new passwords do not match.');
     return;
   }
-  event.currentTarget.reset();
-  showToast('Demo only: connect this form to the institute identity service to change passwords.');
+  try{await authService.changePassword($('#currentPassword').value,$('#newPassword').value);sessionStorage.removeItem(sessionKey);event.currentTarget.reset();showToast('Password updated. Please sign in again.');setTimeout(()=>window.location.href='../index.html',1200)}catch(error){showToast(error.message)}
 });
 
 $('#logoutButton').addEventListener('click', () => {
-  saveProfile();
+  authService.logout().catch(()=>{});
   sessionStorage.removeItem(sessionKey);
-  window.location.href = 'index.html';
+  window.location.href = '../index.html';
 });
 
 $('#sidebarOpen').addEventListener('click', openSidebar);
 $('#sidebarClose').addEventListener('click', closeSidebar);
 $('#sidebarBackdrop').addEventListener('click', closeSidebar);
 
-window.addEventListener('beforeunload', () => {
-  clearTimeout(saveTimer);
-  collectFields();
-  profile.updatedAt = new Date().toISOString();
-  localStorage.setItem(storageKey, JSON.stringify(profile));
-});
+window.addEventListener('beforeunload',()=>clearTimeout(saveTimer));
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {

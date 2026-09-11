@@ -18,6 +18,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 body.no-scroll { overflow: hidden; }
@@ -190,6 +191,8 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .story-copy a { display: inline-flex; gap: 35px; margin-top: 9px; color: #895d0c; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .event-stack { border-top: 1px solid var(--line); }
 .event-card { min-height: 158px; display: grid; grid-template-columns: 74px 1fr 38px; gap: 20px; align-items: center; border-bottom: 1px solid var(--line); }
+.event-card.has-image { grid-template-columns: 74px 112px 1fr 38px; }
+.event-thumbnail { width: 112px; height: 84px; border-radius: 3px; object-fit: cover; background: var(--paper); }
 .event-date { display: flex; align-items: center; gap: 8px; }
 .event-date strong { font: 700 34px var(--font-display); letter-spacing: -.05em; }
 .event-date span { font-size: 8px; color: var(--muted); line-height: 1.3; }
@@ -330,6 +333,10 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .modal-card > small { display: block; margin-top: 16px; color: #8a949d; font-size: 9px; }
 .modal-card > small strong { color: var(--ink); }
 .form-error { min-height: 15px; margin: 2px 0 0; color: #a33d36; font-size: 9px; line-height: 1.4; }
+.login-role-tabs { display: grid; grid-template-columns: 1fr 1fr; margin: 22px 0 17px; border-bottom: 1px solid var(--line); }
+.login-role-tabs button { position: relative; min-height: 39px; border: 0; background: transparent; color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+.login-role-tabs button.active { color: var(--navy); }
+.login-role-tabs button.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--gold); }
 .toast { position: fixed; z-index: 4000; right: 25px; bottom: 25px; max-width: 360px; padding: 14px 18px; background: var(--navy); color: white; box-shadow: var(--shadow); font-size: 11px; line-height: 1.5; transform: translateY(100px); opacity: 0; transition: .3s; }
 .toast.show { transform: translateY(0); opacity: 1; }
 
@@ -396,6 +403,8 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   .section-title-row.compact .arrow-link { justify-self: start; }
   .story-image { height: 250px; }
   .event-card { grid-template-columns: 65px 1fr 32px; gap: 12px; }
+  .event-card.has-image { grid-template-columns: 65px 76px 1fr 32px; }
+  .event-thumbnail { width: 76px; height: 66px; }
   .notice-panel, .quick-panel { padding: 28px 22px; }
   .panel-head { display: block; }
   .notice-tabs { margin-top: 20px; }
@@ -426,3 +435,14 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+.placement-archive-preview { min-height: 510px; padding: clamp(28px, 5vw, 64px); background: #f3f0e9; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.placement-year-link { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 25px 28px; color: var(--navy); background: #fff; border: 1px solid rgba(7,27,52,.1); box-shadow: 0 10px 24px rgba(7,27,52,.08); transition: transform .2s ease, background .2s ease, color .2s ease; }
+.placement-year-link:hover { transform: translateX(5px); background: var(--blue); color: #fff; }
+.placement-year-link span { font-family: var(--font-display); font-size: clamp(18px, 2vw, 24px); font-weight: 700; }
+.placement-year-link b { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.placement-all-link { align-self: flex-end; margin-top: 14px; color: var(--navy); font-weight: 700; }
+.placement-empty span { color: var(--gold-dark); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.placement-empty h4 { margin: 18px 0 12px; color: var(--navy); font: 700 clamp(26px, 3vw, 38px)/1.15 var(--font-display); }
+.placement-empty p { max-width: 520px; color: var(--muted); line-height: 1.7; }
+@media (max-width: 600px) { .placement-year-link { align-items: flex-start; flex-direction: column; } }

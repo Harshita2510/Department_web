@@ -1,26 +1,16 @@
+import { $, escapeHtml, initials } from './shared/dom.js';
+import { safeHttpsUrl as safeLink } from './shared/security.js';
+import { facultyService } from './services/faculty.service.js';
+
 const params = new URLSearchParams(window.location.search);
-const email = (params.get('email') || '').trim().toLowerCase();
+const facultyId = (params.get('facultyId') || '').trim().toUpperCase();
 const preview = params.get('preview') === '1';
-const storageKey = `sgsitsFacultyProfile:${email}`;
-const profile = email ? JSON.parse(localStorage.getItem(storageKey) || 'null') : null;
+let profile = null;
 
-const $ = (selector, scope = document) => scope.querySelector(selector);
-const listItems = (value = '', separator = /\r?\n/) => value.split(separator).map((item) => item.trim()).filter(Boolean);
-const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[character]);
-
-function initials(name = '') {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('') || 'FM';
-}
-
-function safeLink(value) {
-  try {
-    const url = new URL(value);
-    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
-  } catch { return ''; }
-}
+const listItems = (value = '', separator = /\r?\n/) => (Array.isArray(value)?value:String(value).split(separator)).map((item) => item.trim()).filter(Boolean);
 
 function renderProfile() {
-  if (!profile || (!profile.isPublished && !preview)) {
+  if (!profile) {
     $('#profileEmpty').hidden = false;
     return;
   }
@@ -34,8 +24,8 @@ function renderProfile() {
   $('#publicDesignation').textContent = profile.designation || 'Faculty member';
   $('#publicDepartment').textContent = profile.department || 'SGSITS Indore';
   $('#publicBio').textContent = profile.bio || 'Biography has not been added yet.';
-  if (profile.photo) {
-    $('#publicAvatar').style.backgroundImage = `url("${profile.photo}")`;
+  if (profile.photoUrl) {
+    $('#publicAvatar').style.backgroundImage = `url("${profile.photoUrl}")`;
     $('#publicInitials').style.visibility = 'hidden';
   }
 
@@ -78,4 +68,7 @@ function renderProfile() {
 }
 
 $('#publicYear').textContent = new Date().getFullYear();
-renderProfile();
+async function loadProfile(){
+  try{const record=preview?await facultyService.getOwn():await facultyService.getPublic(facultyId);profile=preview?record.draft:record.approvedSnapshot;renderProfile()}catch{$('#profileEmpty').hidden=false}
+}
+loadProfile();
