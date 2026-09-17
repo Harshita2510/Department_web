@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SGSITS faculty profile">
+  <title>Faculty Profile — SGSITS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/faculty-profile.css">
+</head>
+<body>
+  <div class="preview-bar" id="previewBar" hidden><div><span>Preview mode</span> This is how your saved faculty profile will appear.</div><a href="faculty-portal.html">Return to editor</a></div>
+  <header class="public-header"><div class="profile-shell"><a class="public-brand" href="../index.html"><img src="../assets/images/sgsits-logo.png" alt="SGSITS emblem"><div><strong>SGSITS</strong><span>Faculty directory</span></div></a><nav><a href="../index.html#people">All faculty</a><a href="../index.html#departments">Departments</a><a href="../index.html">Institute home ↗</a></nav></div></header>
+
+  <main id="profileContent" hidden>
+    <section class="profile-hero">
+      <div class="profile-shell hero-layout">
+        <div class="public-avatar" id="publicAvatar"><span id="publicInitials">FM</span></div>
+        <div class="identity"><span id="publicDepartment">Department</span><h1 id="publicName">Faculty member</h1><p id="publicDesignation">Designation</p><div class="identity-links" id="identityLinks"></div></div>
+        <div class="contact-card"><span>Contact &amp; consultation</span><div id="contactDetails"></div></div>
+      </div>
+    </section>
+
+    <section class="profile-body">
+      <div class="profile-shell body-layout">
+        <aside class="profile-index"><span>On this page</span><a href="#biography">Biography</a><a href="#expertise">Expertise</a><a href="#teaching">Teaching</a><a href="#publications">Publications</a><a href="#achievements">Achievements</a></aside>
+        <div class="profile-sections">
+          <section id="biography"><span class="section-kicker">About</span><h2>Biography</h2><p class="biography" id="publicBio"></p></section>
+          <section id="expertise"><span class="section-kicker">Academic profile</span><h2>Qualifications &amp; expertise</h2><div class="split-section"><div><h3>Qualifications</h3><ul id="qualificationList"></ul></div><div><h3>Research interests</h3><div class="tag-list" id="interestList"></div></div></div><div class="research-summary" id="researchSummaryWrap"><h3>Current research</h3><p id="publicResearchSummary"></p></div></section>
+          <section id="teaching"><span class="section-kicker">In the classroom</span><h2>Teaching &amp; supervision</h2><div class="teaching-grid"><div><span>Current courses</span><div class="course-list" id="courseList"></div></div><div class="teaching-stats"><div><strong id="experienceValue">—</strong><span>Years of teaching</span></div><div><strong id="scholarsValue">—</strong><span>Scholars supervised</span></div></div></div></section>
+          <section id="publications"><div class="section-heading-row"><div><span class="section-kicker">Selected work</span><h2>Publications</h2></div><a id="scholarLink" href="#" target="_blank" rel="noreferrer" hidden>Google Scholar ↗</a></div><div class="public-list" id="publicPublicationList"></div></section>
+          <section id="achievements"><span class="section-kicker">Recognition</span><h2>Awards &amp; achievements</h2><div class="public-list" id="publicAchievementList"></div></section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="profile-empty" id="profileEmpty" hidden><img src="../assets/images/sgsits-logo.png" alt=""><span>Faculty directory</span><h1>This profile is not available.</h1><p>It may still be a draft or the link may be incomplete.</p><a href="../index.html#people">Return to faculty directory</a></section>
+
+  <footer class="public-footer"><div class="profile-shell"><p>© <span id="publicYear"></span> Shri G. S. Institute of Technology &amp; Science, Indore</p><a href="../index.html#contact">Contact the institute ↗</a></div></footer>
+  <script type="module" src="../assets/js/faculty-profile.js"></script>
+</body>
+</html>
