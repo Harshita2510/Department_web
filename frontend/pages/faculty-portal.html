@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/faculty-portal.css">
   <link rel="stylesheet" href="../assets/css/faculty-syllabus.css">
   <link rel="stylesheet" href="../assets/css/faculty-timetable.css">
+  <link rel="stylesheet" href="../assets/css/faculty-notices.css">
 </head>
 <body>
   <a class="skip-link" href="#adminMain">Skip to editor</a>
@@ -58,6 +59,10 @@
         <button type="button" data-panel-target="timetableUploadPanel">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16"></rect><path d="M4 9h16M9 4v16"></path></svg>
           Timetable uploads <span class="nav-status" id="timetableAssignmentCount">0</span>
+        </button>
+        <button id="noticeWorkspaceNav" type="button" data-panel-target="noticeWorkspacePanel" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
+          Notice drafts
         </button>
         <span class="nav-label nav-label-second">Account</span>
         <button type="button" data-panel-target="settingsPanel">
@@ -200,6 +205,21 @@
           <input id="facultyTimetableFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
         </section>
 
+        <section class="portal-panel" id="noticeWorkspacePanel" data-title="Notice drafts" hidden>
+          <div class="editor-heading"><div><span>Assigned access</span><h2>Submit a notice</h2><p>Create an official notice draft with its public summary, complete details and PDF.</p></div></div>
+          <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Your draft remains private until the website administrator reviews and publishes it.</p></div>
+          <div class="faculty-notice-layout">
+            <form id="facultyNoticeForm" class="form-card faculty-notice-form">
+              <div class="form-grid"><label class="field full-field"><span>Notice title</span><input id="facultyNoticeTitle" required maxlength="200"></label><label class="field"><span>Category</span><select id="facultyNoticeCategory"><option>Academic</option><option>Examination</option><option>Admission</option><option>Student affairs</option><option>General</option></select></label><label class="field"><span>Display date</span><input id="facultyNoticeDate" type="date"></label></div>
+              <label class="field"><span>Short description</span><textarea id="facultyNoticeShort" rows="3" required minlength="5" maxlength="240" placeholder="Shown on the homepage"></textarea></label>
+              <label class="field"><span>Long description</span><textarea id="facultyNoticeLong" rows="7" required minlength="10" maxlength="50000" placeholder="Complete notice details"></textarea></label>
+              <label class="field"><span>Official notice PDF</span><input id="facultyNoticePdf" type="file" accept="application/pdf" required><small>PDF only · Maximum 10 MB</small></label>
+              <button class="primary-action" type="submit">Submit notice draft</button><p id="facultyNoticeFeedback" class="faculty-notice-feedback" role="status"></p>
+            </form>
+            <div><h3>Your notice drafts</h3><div id="facultyNoticeList" class="faculty-notice-list"></div><div id="facultyNoticeEmpty" class="empty-state"><div>≡</div><h3>No notice drafts</h3><p>Notices you submit will appear here.</p></div></div>
+          </div>
+        </section>
+
         <section class="portal-panel" id="settingsPanel" data-title="Account settings">
           <div class="editor-heading"><div><span>Account &amp; security</span><h2>Settings</h2><p>Review your account details and profile visibility.</p></div></div>
           <div class="settings-grid">
@@ -220,5 +240,6 @@
   <script type="module" src="../assets/js/faculty-portal.js"></script>
   <script type="module" src="../assets/js/faculty-syllabus.js"></script>
   <script type="module" src="../assets/js/faculty-timetable.js"></script>
+  <script type="module" src="../assets/js/faculty-notices.js"></script>
 </body>
 </html>

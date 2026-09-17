@@ -212,6 +212,7 @@ function openContentDrawer(type, id = '') {
   const config = typeConfig[type];
   const item = id ? store[type].find((entry) => entry.id === id) : null;
   const isPlacement = type === 'placements';
+  const isNotice = type === 'notices';
   $('#drawerKicker').textContent = item ? `Edit ${config.singular.toLowerCase()}` : `Create ${config.singular.toLowerCase()}`;
   $('#drawerTitle').textContent = item?.title || `New ${config.singular.toLowerCase()}`;
   $('#editingId').value = item?.id || '';
@@ -231,16 +232,26 @@ function openContentDrawer(type, id = '') {
   $('#contentDate').value = item?.date || new Date().toISOString().slice(0, 10);
   $('#contentSummary').value = item?.summary || '';
   $('#contentBody').value = item?.body || '';
+  const summaryLabel = $('#contentSummary').closest('label').querySelector('span');
+  const bodyLabel = $('#contentBody').closest('label').querySelector('span');
+  summaryLabel.innerHTML = isNotice ? 'Short description <b>*</b>' : 'Summary';
+  bodyLabel.innerHTML = isNotice ? 'Long description <b>*</b>' : 'Full content';
+  $('#contentSummary').required = isNotice;
+  $('#contentSummary').maxLength = isNotice ? 240 : 400;
+  $('#contentSummary').placeholder = isNotice ? 'Brief text shown in the homepage notice ticker' : 'Short summary for cards and search results';
+  $('#contentBody').required = isNotice;
+  $('#contentBody').placeholder = isNotice ? 'Complete notice details shown in the notice archive' : 'Write the complete content here…';
   $('#contentFeatured').checked = Boolean(item?.featured);
   pendingFile = item?.file || null;
   const uploadRules = {
+    notices: { accept: 'application/pdf', help: 'Official notice PDF · Maximum 10 MB' },
     events: { accept: 'image/jpeg,image/png,image/webp,application/pdf', help: 'Event image or PDF · Maximum 2 MB in this prototype' },
     documents: { accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv', help: 'PDF, Word, Excel or CSV · Maximum 2 MB' }
   };
   const uploadRule = uploadRules[type] || { accept: '', help: 'Click to choose a file · Maximum 2 MB in this prototype' };
   $('#contentFile').accept = uploadRule.accept;
   $('#uploadHelp').textContent = uploadRule.help;
-  $('#uploadPermissionText').textContent = ADMIN_UPLOAD_COLLECTIONS.has(type) ? `Only the website administrator can upload ${config.title.toLowerCase()}.` : 'Only website administrators can upload this attachment.';
+  $('#uploadPermissionText').textContent = isNotice ? 'The administrator and faculty granted Notice upload access can attach a PDF. Only the administrator can publish it.' : ADMIN_UPLOAD_COLLECTIONS.has(type) ? `Only the website administrator can upload ${config.title.toLowerCase()}.` : 'Only website administrators can upload this attachment.';
   $('#deleteCurrent').hidden = !item;
   renderAttachedFile();
   $('#editorDrawer').classList.add('open');
@@ -281,7 +292,9 @@ function renderAttachedFile() {
 function readUpload(file, callback) {
   if (!requireAdministrator('upload files')) return;
   if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { showToast('This prototype accepts files up to 2 MB.'); return; }
+  const limit = currentType === 'notices' ? 10 : 2;
+  if (currentType === 'notices' && file.type !== 'application/pdf') { showToast('Notice attachments must be PDF files.'); return; }
+  if (file.size > limit * 1024 * 1024) { showToast(`Files in this section must be ${limit} MB or smaller.`); return; }
   const reader = new FileReader();
   reader.onload = () => callback({ name:file.name, type:file.type || 'application/octet-stream', size:file.size, data:reader.result, raw:file });
   reader.onerror = () => showToast('The selected file could not be read.');
@@ -293,6 +306,7 @@ async function saveContent(status) {
   if (!$('#contentForm').reportValidity()) return;
   if (currentType === 'media' && !pendingFile) { showToast('Choose a file before saving a media asset.'); return; }
   if (currentType === 'documents' && !pendingFile) { showToast('Choose a document before saving this entry.'); return; }
+  if (currentType === 'notices' && !pendingFile) { showToast('Choose the official notice PDF before saving.'); return; }
   const id = $('#editingId').value;
   const existing = id ? store[currentType].find((entry) => entry.id === id) : null;
   let entry;
@@ -335,9 +349,11 @@ async function saveContent(status) {
   else{
     try{
       let asset=existing?.asset||null;
-      if(pendingFile?.raw)asset=pendingFile.type.startsWith('image/')
-        ? await uploadService.uploadImage(pendingFile.raw,currentType)
-        : await uploadService.upload(pendingFile.raw);
+      if(pendingFile?.raw)asset=currentType==='notices'
+        ? await uploadService.uploadNoticePdf(pendingFile.raw)
+        : pendingFile.type.startsWith('image/')
+          ? await uploadService.uploadImage(pendingFile.raw,currentType)
+          : await uploadService.upload(pendingFile.raw);
       const payload={type:API_CONTENT_TYPES[currentType],title:entry.title,category:entry.category,summary:entry.summary,body:entry.body,displayDate:entry.date||undefined,featured:entry.featured,status};
       if(asset)payload.asset=asset;
       const saved=id?await contentService.update(id,payload):await contentService.create(payload);entry=flattenContent(saved);
@@ -421,7 +437,20 @@ function setupSettings() {
 
 function renderUserAccounts() {
   const accounts = getFacultyAccounts();
-  $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
+  $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => {
+    const canUploadNotices=account.permissions?.includes('notice_upload');
+    return `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member${canUploadNotices?'<small>Notice uploader</small>':''}</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span class="user-access-actions"><button type="button" data-notice-access="${escapeHtml(account.facultyId)}" data-allowed="${!canUploadNotices}">${canUploadNotices?'Remove notice access':'Allow notices'}</button><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`;
+  }).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
+}
+
+async function setFacultyNoticeAccess(facultyId,allowed){
+  try{
+    const updated=await authService.setFacultyNoticePermission(facultyId,allowed);
+    const account=facultyAccounts.find((item)=>item.facultyId===facultyId);
+    if(account)account.permissions=updated.permissions||[];
+    renderUserAccounts();
+    showToast(`${facultyId} ${allowed?'can now submit notice drafts':'no longer has notice upload access'}.`);
+  }catch(error){showToast(error.message)}
 }
 
 function openFacultyAccountModal() {
@@ -515,7 +544,12 @@ $('#adminPhotoInput').addEventListener('change',(event)=>readUpload(event.target
 $('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();saveFaculty(true)}); $('#saveFacultyDraft').addEventListener('click',()=>saveFaculty(false)); $('#deleteFaculty').addEventListener('click',async()=>{const id=$('#facultyEmailKey').value;if(!id||!confirm('Delete this faculty profile and its login?'))return;try{const facultyId=$('#facultyIdReview').value;await facultyService.remove(id);facultyProfiles=facultyProfiles.filter((profile)=>profile.id!==id);facultyAccounts=facultyAccounts.filter((account)=>account.facultyId!==facultyId);closeFacultyDrawer();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast('Faculty profile and login deleted.')}catch(error){showToast(error.message)}});
 $('#saveHomepage').addEventListener('click',saveHomepage); $('#saveSettings').addEventListener('click',()=>{localStorage.setItem(SETTINGS_KEY,JSON.stringify({name:$('#settingName').value,email:$('#settingEmail').value,phone:$('#settingPhone').value,address:$('#settingAddress').value}));showToast('Website settings saved.')}); $('#exportData').addEventListener('click',exportData);
 $('#inviteUser').addEventListener('click',openFacultyAccountModal); $('#facultyAccountForm').addEventListener('submit',async(event)=>{event.preventDefault();await createFacultyAccount()}); $$('[data-close-account]').forEach((button)=>button.addEventListener('click',closeFacultyAccountModal)); $('#toggleFacultyPassword').addEventListener('click',()=>{const input=$('#newFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleFacultyPassword').textContent=input.type==='password'?'Show':'Hide'}); $('#openSidebar').addEventListener('click',openSidebar); $('#closeSidebar').addEventListener('click',closeSidebar); $('#sidebarShade').addEventListener('click',closeSidebar);
-$('#facultyAccountRows').addEventListener('click',(event)=>{const button=event.target.closest('[data-reset-faculty-password]');if(button)openFacultyPasswordReset(button.dataset.resetFacultyPassword)});
+$('#facultyAccountRows').addEventListener('click',(event)=>{
+  const resetButton=event.target.closest('[data-reset-faculty-password]');
+  if(resetButton)openFacultyPasswordReset(resetButton.dataset.resetFacultyPassword);
+  const accessButton=event.target.closest('[data-notice-access]');
+  if(accessButton)setFacultyNoticeAccess(accessButton.dataset.noticeAccess,accessButton.dataset.allowed==='true');
+});
 $('#facultyPasswordResetForm').addEventListener('submit',async(event)=>{event.preventDefault();await resetFacultyPassword()});
 $$('[data-close-password-reset]').forEach((button)=>button.addEventListener('click',closeFacultyPasswordReset));
 $('#toggleResetFacultyPassword').addEventListener('click',()=>{const input=$('#resetFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleResetFacultyPassword').textContent=input.type==='password'?'Show':'Hide'});

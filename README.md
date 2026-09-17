@@ -21,7 +21,9 @@ The following public-facing features are built:
 - M.Tech CSE syllabus interface covering 4 semesters.
 - Subject-wise syllabus lists inside every semester, with published PDF or image links.
 - Timetable interface with the same UG and PG semester structure, split into class timetable and exam timetable sections (MST 1, MST 2, optional MST 3 and end semester).
-- Institute-wide academic-calendar page with support for semester-wise updates and archives.
+- Institute-wide academic-calendar page with administrator-only PDF upload, semester-wise updates and archives.
+- Notice workflow with homepage short descriptions, full archive details, official PDF attachments and administrator publishing.
+- Granular notice permission that administrators can grant to selected faculty; faculty submissions remain private drafts until reviewed.
 - Public approved-faculty profile page.
 - Responsive layouts for desktop, tablet and mobile screens.
 
@@ -325,16 +327,22 @@ Run backend tests:
 npm test --workspace backend
 ```
 
+## Notice and academic-calendar storage
+
+- Notice and academic-calendar PDFs are stored in MongoDB GridFS. MongoDB stores the file chunks and metadata; content records store the public API URL used to stream the file inline.
+- Notice text, publication status, authorship and faculty permissions are stored as normal MongoDB documents.
+- Event and other website images remain in Cloudinary, which is better suited to image delivery and transformation.
+- Only administrators publish notices and academic calendars. Selected faculty can upload notice drafts, but cannot publish them.
+
 ## Partially completed or remaining work
 
 The following work is still required before a production launch:
 
-- Add administrator UI for academic-calendar records. Timetable management is implemented.
 - Move homepage configuration and general website settings from browser `localStorage` into MongoDB.
 - Finish Cloudinary-backed faculty photograph upload and cleanup.
 - Delete replaced Cloudinary assets and GridFS documents to avoid orphaned files.
 - Extend granular faculty permissions to other content modules if required; syllabus and timetable permissions are already scoped.
-- Add password reset/recovery and administrator password-management UI.
+- Add email-based self-service password recovery if required. Administrator-driven faculty password reset is implemented.
 - Expand automated API, authorization, upload and end-to-end tests.
 - Add CSRF protection or an equivalent hardened cross-origin request strategy for production cookie authentication.
 - Configure production hosting, HTTPS, secure production origins and environment secrets.

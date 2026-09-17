@@ -7,3 +7,7 @@ export const resetFacultyPasswordSchema=z.object({
   params:z.object({facultyId:z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,30}$/)}),
   body:z.object({temporaryPassword:z.string().min(10).max(128)})
 });
+export const facultyNoticePermissionSchema=z.object({
+  params:z.object({facultyId:z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,30}$/)}),
+  body:z.object({allowed:z.boolean()})
+});

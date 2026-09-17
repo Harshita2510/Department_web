@@ -64,8 +64,8 @@ async function applyPublishedCMSContent() {
   if(!data)return;
   const notices = (data.notices || []).filter((item) => item.status === 'published').sort((a,b) => (b.date || '').localeCompare(a.date || ''));
   if (notices.length) {
-    $('#noticeTicker').innerHTML = notices.slice(0, 5).map((item) => { const date = displayCMSDate(item.date); const href = item.file?.data || '#notices'; return `<a href="${href}"><time>${date.day} ${date.month}</time> ${escapeCMS(item.title)}</a>`; }).join('');
-    $('#noticeList').innerHTML = notices.slice(0, 6).map((item) => { const date = displayCMSDate(item.date); const category = ['Academic','Examination','Admission'].includes(item.category) ? 'academic' : 'student'; return `<a href="${item.file?.data || '#notices'}" data-category="${category}" ${item.file?.data ? 'download' : ''}><time><strong>${date.day}</strong>${date.month}</time><span><b>${escapeCMS(item.title)}</b><small>${escapeCMS(item.category)}${item.file ? ` · ${escapeCMS(item.file.name)}` : ''}</small></span><i>↗</i></a>`; }).join('');
+    $('#noticeTicker').innerHTML = notices.slice(0, 5).map((item) => { const date = displayCMSDate(item.date); return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}"><time>${date.day} ${date.month}</time> ${escapeCMS(item.summary||item.title)}</a>`; }).join('');
+    $('#noticeList').innerHTML = notices.slice(0, 6).map((item) => { const date = displayCMSDate(item.date); const category = ['Academic','Examination','Admission'].includes(item.category) ? 'academic' : 'student'; return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}" data-category="${category}"><time><strong>${date.day}</strong>${date.month}</time><span><b>${escapeCMS(item.title)}</b><small>${escapeCMS(item.summary||item.category||'Notice')}</small></span><i>↗</i></a>`; }).join('');
   }
   const events = (data.events || []).filter((item) => item.status === 'published').sort((a,b) => (a.date || '').localeCompare(b.date || ''));
   if (events.length) {

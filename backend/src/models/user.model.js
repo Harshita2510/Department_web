@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
-import { ROLES } from '../constants/roles.js';
+import { PERMISSIONS,ROLES } from '../constants/roles.js';
 
 const userSchema = new mongoose.Schema({
   facultyId: { type: String, trim: true, uppercase: true },
   email: { type: String, trim: true, lowercase: true },
   passwordHash: { type: String, required: true, select: false },
   role: { type: String, enum: Object.values(ROLES), required: true },
+  permissions: [{ type:String, enum:Object.values(PERMISSIONS) }],
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   mustChangePassword: { type: Boolean, default: true },
   tokenVersion: { type: Number, default: 0 }

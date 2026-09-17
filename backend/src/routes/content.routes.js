@@ -8,8 +8,8 @@ import { asyncHandler } from '../utils/async-handler.js';
 
 export const contentRouter=Router();
 contentRouter.get('/public',asyncHandler(listPublicContent));
-contentRouter.use(authenticate,authorize(ROLES.ADMIN));
-contentRouter.get('/',asyncHandler(listAdminContent));
-contentRouter.post('/',validate(createContentSchema),asyncHandler(createContent));
-contentRouter.patch('/:id',validate(updateContentSchema),asyncHandler(updateContent));
-contentRouter.delete('/:id',validate(contentIdSchema),asyncHandler(deleteContent));
+contentRouter.get('/managed',authenticate,authorize(ROLES.ADMIN,ROLES.FACULTY),asyncHandler(listAdminContent));
+contentRouter.get('/',authenticate,authorize(ROLES.ADMIN),asyncHandler(listAdminContent));
+contentRouter.post('/',authenticate,authorize(ROLES.ADMIN,ROLES.FACULTY),validate(createContentSchema),asyncHandler(createContent));
+contentRouter.patch('/:id',authenticate,authorize(ROLES.ADMIN,ROLES.FACULTY),validate(updateContentSchema),asyncHandler(updateContent));
+contentRouter.delete('/:id',authenticate,authorize(ROLES.ADMIN,ROLES.FACULTY),validate(contentIdSchema),asyncHandler(deleteContent));
