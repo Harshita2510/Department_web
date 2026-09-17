@@ -1,7 +1,7 @@
 import { AcademicSubject } from '../models/academic-subject.model.js';
 import { User } from '../models/user.model.js';
 import { ROLES } from '../constants/roles.js';
-import { deleteCloudinaryImage,uploadSyllabusAsset,verifySyllabusDelivery } from '../services/cloudinary.service.js';
+import { deleteCloudinaryImage,uploadSyllabusAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
 import { recordAudit } from '../services/audit.service.js';
 import { AppError } from '../utils/app-error.js';
 
@@ -73,7 +73,7 @@ export async function uploadSubjectSyllabus(request,response){
 export async function publishSubjectSyllabus(request,response){
   const item=await AcademicSubject.findById(request.params.id);if(!item)throw new AppError(404,'Subject not found');
   if(!item.syllabus)throw new AppError(400,'Upload a syllabus before publishing');
-  await verifySyllabusDelivery(item.syllabus);
+  await verifyCloudinaryFileDelivery(item.syllabus);
   item.syllabusStatus='published';item.approvedBy=request.user.id;item.updatedBy=request.user.id;item.publishedAt=new Date();await item.save();
   await recordAudit(request,'SUBJECT_SYLLABUS_PUBLISHED','AcademicSubject',item.id,{name:item.name});
   response.json({success:true,data:item});

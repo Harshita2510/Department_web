@@ -79,8 +79,10 @@ html[data-theme="dark"] :is(
   .create-menu-card,
   .create-menu-grid button,
   .upload-zone,
+  .placement-source-choice label,
   .feature-check
 ) { color: var(--ink); background: #0f2438; border-color: var(--line); }
+html[data-theme="dark"] .placement-source-choice label:has(input:checked) { background:#4a3923; border-color:#dfa33b; }
 html[data-theme="dark"] .faculty-card-photo { color: var(--ink); background: #173149; }
 html[data-theme="dark"] :is(.subject-admin-card, .subject-editor-field #subjectEditorOptions label) { color: var(--ink); background: #0f2438; border-color: var(--line); }
 

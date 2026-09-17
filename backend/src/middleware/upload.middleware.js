@@ -25,3 +25,18 @@ export const uploadSyllabus = multer({
     ? callback(null, true)
     : callback(new AppError(415, 'Syllabus files must be PDF, JPEG, PNG or WebP'))
 }).single('file');
+
+export const uploadPlacementPdf=multer({
+  storage:multer.memoryStorage(),
+  limits:{fileSize:10*1024*1024,files:1},
+  fileFilter:(_request,file,callback)=>file.mimetype==='application/pdf'
+    ?callback(null,true)
+    :callback(new AppError(415,'Placement documents must be PDF files'))
+}).single('file');
+
+export const uploadTimetableFile=multer({
+  storage:multer.memoryStorage(),limits:{fileSize:10*1024*1024,files:1},
+  fileFilter:(_request,file,callback)=>syllabusTypes.has(file.mimetype)
+    ?callback(null,true)
+    :callback(new AppError(415,'Timetables must be PDF, JPEG, PNG or WebP files'))
+}).single('file');

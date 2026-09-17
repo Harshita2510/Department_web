@@ -27,7 +27,7 @@ const typeConfig = {
   notices: { title: 'Notices', singular: 'Notice', description: 'Publish academic, examination, admission and student notices.', categories: ['Academic', 'Examination', 'Admission', 'Student affairs', 'General'] },
   news: { title: 'News & stories', singular: 'News story', description: 'Share institute news, achievements, announcements and campus stories.', categories: ['Institute', 'Department', 'Research', 'Achievement', 'Campus'] },
   events: { title: 'Events', singular: 'Event', description: 'Manage seminars, workshops, conferences and student activities.', categories: ['Workshop', 'Seminar', 'Conference', 'Students', 'Cultural'] },
-  placements: { title: 'Placement sheets', singular: 'Placement sheet', description: 'Publish a year-wise archive by entering an academic year and its public sheet link.', categories: ['Placement sheet'] },
+  placements: { title: 'Placement resources', singular: 'Placement resource', description: 'Publish a year-wise archive using either a public sheet link or an uploaded PDF.', categories: ['Placement sheet'] },
   documents: { title: 'Documents', singular: 'Document', description: 'Upload syllabi, calendars, forms, reports, policies and official PDFs.', categories: ['Academic', 'NIRF', 'IQAC', 'Policy', 'Form', 'Report'] },
   media: { title: 'Media library', singular: 'Media asset', description: 'Upload and organise approved website images and files.', categories: ['Image', 'Document', 'Video', 'Other'] }
 };
@@ -45,9 +45,11 @@ Object.keys(typeConfig).forEach((type) => { if (!Array.isArray(store[type])) sto
 let currentType = 'notices';
 let selectedIds = new Set();
 let pendingFile = null;
+let pendingPlacementPdf=null;
 let editingFacultyPhoto = '';
 let toastTimer;
 let facultyProfiles=[];
+let facultyAccounts=[];
 
 function loadJson(key, fallback) {
   try { return { ...fallback, ...JSON.parse(localStorage.getItem(key) || '{}') }; }
@@ -79,7 +81,7 @@ function getFacultyProfiles() {
 }
 
 function getFacultyAccounts() {
-  return facultyProfiles.map((profile)=>({facultyId:profile.facultyId,status:'active'}));
+  return facultyAccounts;
 }
 
 function flattenFaculty(record){
@@ -93,12 +95,13 @@ function flattenContent(item){
 
 async function hydrateMongoData(){
   try{
-    const [profiles,placements,content]=await Promise.all([facultyService.list(),placementService.listAdmin(1),contentService.listAdmin()]);
+    const [profiles,accounts,placements,content]=await Promise.all([facultyService.list(),authService.listFacultyAccounts(),placementService.listAdmin(1),contentService.listAdmin()]);
     facultyProfiles=profiles.map(flattenFaculty);
+    facultyAccounts=accounts;
     ['notices','news','events','documents','media'].forEach((key)=>{store[key]=[]});
     const collectionKeys={notice:'notices',news:'news',event:'events',document:'documents',media:'media'};
     content.forEach((item)=>{const key=collectionKeys[item.type];if(key)store[key].push(flattenContent(item))});
-    store.placements=placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '–')}`,category:'Placement sheet',summary:`Open the placement sheet for academic year ${item.academicYear.replace('-', '–')}.`}));
+    store.placements=placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '–')}`,category:item.sourceType==='pdf'?'Placement PDF':'Placement sheet',summary:`Open the placement ${item.sourceType==='pdf'?'PDF':'sheet'} for academic year ${item.academicYear.replace('-', '–')}.`,file:item.document?{...item.document,type:item.document.mimeType,data:item.document.url}:null}));
     updateCounts();updateDashboard();renderUserAccounts();if(currentType==='placements')renderCollection();
   }catch(error){showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?adminLogin=required'),900)}
 }
@@ -217,9 +220,13 @@ function openContentDrawer(type, id = '') {
   $('#placementFields').hidden = !isPlacement;
   $('#contentTitle').required = !isPlacement;
   $('#placementYear').required = isPlacement;
-  $('#placementSheetUrl').required = isPlacement;
   $('#placementYear').value = item?.academicYear || (item?.title || '').replace(/^Placement\s+/i, '').replace(/–/g, '-');
   $('#placementSheetUrl').value = item?.sheetUrl || '';
+  const placementSource=item?.sourceType||(item?.document?'pdf':'link');
+  const sourceInput=document.querySelector(`input[name="placementSource"][value="${placementSource}"]`);
+  if(sourceInput)sourceInput.checked=true;
+  pendingPlacementPdf=item?.document?{...item.document,raw:null}:null;
+  setPlacementSource(placementSource);
   $('#contentCategory').innerHTML = config.categories.map((category) => `<option ${item?.category === category ? 'selected' : ''}>${escapeHtml(category)}</option>`).join('');
   $('#contentDate').value = item?.date || new Date().toISOString().slice(0, 10);
   $('#contentSummary').value = item?.summary || '';
@@ -246,7 +253,22 @@ function closeContentDrawer() {
   $('#editorDrawer').classList.remove('open');
   $('#editorDrawer').setAttribute('aria-hidden', 'true');
   document.body.classList.remove('no-scroll');
-  $('#contentForm').reset(); pendingFile = null;
+  $('#contentForm').reset(); pendingFile = null;pendingPlacementPdf=null;
+}
+
+function setPlacementSource(source){
+  const isLink=source==='link';
+  $('#placementLinkFields').hidden=!isLink;
+  $('#placementPdfFields').hidden=isLink;
+  $('#placementSheetUrl').required=currentType==='placements'&&isLink;
+  renderPlacementPdf();
+}
+
+function renderPlacementPdf(){
+  const box=$('#placementPdfName');
+  box.hidden=!pendingPlacementPdf;
+  box.innerHTML=pendingPlacementPdf?`<strong>${escapeHtml(pendingPlacementPdf.name)}</strong> · ${Math.ceil(pendingPlacementPdf.size/1024)} KB <button type="button" id="removePlacementPdf">Remove</button>`:'';
+  $('#removePlacementPdf')?.addEventListener('click',()=>{pendingPlacementPdf=null;$('#placementPdfInput').value='';renderPlacementPdf()});
 }
 
 function renderAttachedFile() {
@@ -280,11 +302,14 @@ async function saveContent(status) {
     const [startYear, shortEndYear] = academicYear.split('-');
     if ((Number(startYear) + 1) % 100 !== Number(shortEndYear)) { showToast('The placement year must cover consecutive years, for example 2025-26.'); $('#placementYear').focus(); return; }
     if (store.placements.some((item) => item.id !== id && item.academicYear === academicYear)) { showToast(`A placement sheet for ${academicYear} already exists.`); $('#placementYear').focus(); return; }
-    let sheetUrl;
-    try { sheetUrl = new URL($('#placementSheetUrl').value.trim()); } catch { showToast('Enter a valid public sheet link.'); $('#placementSheetUrl').focus(); return; }
-    if (sheetUrl.protocol !== 'https:') { showToast('The public sheet link must begin with https://.'); $('#placementSheetUrl').focus(); return; }
+    const sourceType=document.querySelector('input[name="placementSource"]:checked')?.value||'link';
+    let sheetUrl='';
+    if(sourceType==='link'){
+      try { sheetUrl = new URL($('#placementSheetUrl').value.trim()).href; } catch { showToast('Enter a valid public sheet link.'); $('#placementSheetUrl').focus(); return; }
+      if (!sheetUrl.startsWith('https://')) { showToast('The public sheet link must begin with https://.'); $('#placementSheetUrl').focus(); return; }
+    }else if(!pendingPlacementPdf){showToast('Choose a placement PDF before saving.');return}
     const displayYear = `${startYear}–${shortEndYear}`;
-    entry = { id: id || crypto.randomUUID(), title: `Placement ${displayYear}`, academicYear, sheetUrl: sheetUrl.href, category: 'Placement sheet', date: '', summary: `Open the placement sheet for academic year ${displayYear}.`, body: '', featured: false, file: null, status, updatedAt: new Date().toISOString() };
+    entry = { id: id || crypto.randomUUID(), title: `Placement ${displayYear}`, academicYear, sourceType, sheetUrl, category: sourceType==='pdf'?'Placement PDF':'Placement sheet', date: '', summary: `Open the placement ${sourceType==='pdf'?'PDF':'sheet'} for academic year ${displayYear}.`, body: '', featured: false, file:sourceType==='pdf'?pendingPlacementPdf:null, status, updatedAt: new Date().toISOString() };
   } else {
     entry = {
       id: id || crypto.randomUUID(), title: $('#contentTitle').value.trim(), category: $('#contentCategory').value,
@@ -293,7 +318,19 @@ async function saveContent(status) {
     };
   }
   if(currentType==='placements'){
-    try{const saved=id?await placementService.update(id,{academicYear:entry.academicYear,sheetUrl:entry.sheetUrl,status}):await placementService.create({academicYear:entry.academicYear,sheetUrl:entry.sheetUrl,status});entry={...entry,...saved,id:saved._id};}catch(error){showToast(error.message);return}
+    try{
+      const uploadingPdf=entry.sourceType==='pdf'&&Boolean(pendingPlacementPdf?.raw);
+      const placementPayload={academicYear:entry.academicYear,sourceType:entry.sourceType,sheetUrl:entry.sheetUrl,status:uploadingPdf?'draft':status};
+      let saved=id?await placementService.update(id,placementPayload):await placementService.create(placementPayload);
+      if(!id)$('#editingId').value=saved._id;
+      if(uploadingPdf){
+        saved=await placementService.uploadPdf(saved._id,pendingPlacementPdf.raw);
+        pendingPlacementPdf={...saved.document,raw:null};
+        renderPlacementPdf();
+        if(status==='published')saved=await placementService.update(saved._id,{status:'published'});
+      }
+      entry={...entry,...saved,id:saved._id,file:saved.document?{...saved.document,type:saved.document.mimeType,data:saved.document.url}:null};
+    }catch(error){showToast(error.message);return}
   }
   else{
     try{
@@ -384,7 +421,7 @@ function setupSettings() {
 
 function renderUserAccounts() {
   const accounts = getFacultyAccounts();
-  $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}</span><span>Own profile only</span></div>`).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
+  $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
 }
 
 function openFacultyAccountModal() {
@@ -404,12 +441,45 @@ function closeFacultyAccountModal() {
   document.body.classList.remove('no-scroll');
 }
 
+function openFacultyPasswordReset(facultyId){
+  if(!requireAdministrator('reset faculty passwords'))return;
+  $('#facultyPasswordResetForm').reset();
+  $('#resetFacultyId').value=facultyId;
+  $('#resetFacultyPassword').type='password';
+  $('#toggleResetFacultyPassword').textContent='Show';
+  $('#facultyPasswordResetModal').classList.add('open');
+  $('#facultyPasswordResetModal').setAttribute('aria-hidden','false');
+  document.body.classList.add('no-scroll');
+  setTimeout(()=>$('#resetFacultyPassword').focus(),80);
+}
+
+function closeFacultyPasswordReset(){
+  $('#facultyPasswordResetModal').classList.remove('open');
+  $('#facultyPasswordResetModal').setAttribute('aria-hidden','true');
+  document.body.classList.remove('no-scroll');
+}
+
+async function resetFacultyPassword(){
+  if(!requireAdministrator('reset faculty passwords')||!$('#facultyPasswordResetForm').reportValidity())return;
+  const facultyId=$('#resetFacultyId').value;
+  const password=$('#resetFacultyPassword').value;
+  if(password!==$('#confirmResetFacultyPassword').value){showToast('The temporary passwords do not match.');$('#confirmResetFacultyPassword').focus();return}
+  try{
+    await authService.resetFacultyPassword(facultyId,password);
+    const account=facultyAccounts.find((item)=>item.facultyId===facultyId);
+    if(account)account.mustChangePassword=true;
+    renderUserAccounts();
+    closeFacultyPasswordReset();
+    showToast(`Password reset for ${facultyId}. Share the temporary password privately.`);
+  }catch(error){showToast(error.message)}
+}
+
 async function createFacultyAccount() {
   if (!requireAdministrator('create faculty accounts') || !$('#facultyAccountForm').reportValidity()) return;
   const facultyId = $('#newFacultyId').value.trim().toUpperCase();
   const password = $('#newFacultyPassword').value;
   if (!/^[A-Z0-9-]+$/.test(facultyId)) { showToast('Faculty ID may contain only letters, numbers and hyphens.'); return; }
-  try{await authService.createFaculty(facultyId,password);facultyProfiles=(await facultyService.list()).map(flattenFaculty);window.dispatchEvent(new CustomEvent('faculty-account-created',{detail:{facultyId}}));closeFacultyAccountModal();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast(`Faculty profile ${facultyId} created in MongoDB. Give the temporary password privately to the faculty member.`)}catch(error){showToast(error.message)}
+  try{await authService.createFaculty(facultyId,password);[facultyProfiles,facultyAccounts]=await Promise.all([facultyService.list().then((items)=>items.map(flattenFaculty)),authService.listFacultyAccounts()]);window.dispatchEvent(new CustomEvent('faculty-account-created',{detail:{facultyId}}));closeFacultyAccountModal();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast(`Faculty profile ${facultyId} created in MongoDB. Give the temporary password privately to the faculty member.`)}catch(error){showToast(error.message)}
 }
 
 function exportData() {
@@ -437,12 +507,18 @@ $('#collectionSearch').addEventListener('input',renderCollection); $('#statusFil
 $('#selectAll').addEventListener('change',(event)=>{filteredItems().forEach((item)=>event.target.checked?selectedIds.add(item.id):selectedIds.delete(item.id));renderCollection()});
 $('#bulkPublish').addEventListener('click',()=>bulkSet('published')); $('#bulkDraft').addEventListener('click',()=>bulkSet('draft')); $('#bulkDelete').addEventListener('click',async()=>{if(!confirm(`Delete ${selectedIds.size} selected item(s)?`))return;try{const selected=store[currentType].filter((item)=>selectedIds.has(item.id));if(currentType==='placements')await Promise.all(selected.map((item)=>placementService.remove(item.id)));else await Promise.all(selected.map((item)=>contentService.remove(item.id)));store[currentType]=store[currentType].filter((item)=>!selectedIds.has(item.id));selectedIds.clear();updateDashboard();updateCounts();renderCollection();showToast('Selected content deleted.')}catch(error){showToast(error.message)}});
 $$('[data-close-drawer]').forEach((button)=>button.addEventListener('click',closeContentDrawer)); $('#contentUploadZone').addEventListener('click',()=>$('#contentFile').click()); $('#contentFile').addEventListener('change',(event)=>readUpload(event.target.files[0],(file)=>{pendingFile=file;renderAttachedFile()}));
+$$('input[name="placementSource"]').forEach((input)=>input.addEventListener('change',()=>setPlacementSource(input.value)));
+$('#placementPdfInput').addEventListener('change',(event)=>{const file=event.target.files[0];if(!file)return;if(file.type!=='application/pdf'){showToast('Placement documents must be PDF files.');event.target.value='';return}if(file.size>10*1024*1024){showToast('Placement PDFs must be 10 MB or smaller.');event.target.value='';return}pendingPlacementPdf={name:file.name,type:file.type,size:file.size,raw:file};renderPlacementPdf()});
 $('#contentForm').addEventListener('submit',(event)=>{event.preventDefault();saveContent('published')}); $('#saveDraft').addEventListener('click',()=>saveContent('draft')); $('#deleteCurrent').addEventListener('click',async()=>{const id=$('#editingId').value;if(!id||!confirm('Delete this content permanently?'))return;try{if(currentType==='placements')await placementService.remove(id);else await contentService.remove(id);store[currentType]=store[currentType].filter((item)=>item.id!==id);closeContentDrawer();showView(currentType);showToast('Content deleted.')}catch(error){showToast(error.message)}});
 $('#addFaculty').addEventListener('click',openFacultyAccountModal); $('#facultyEmptyAdd').addEventListener('click',openFacultyAccountModal); $$('[data-close-faculty]').forEach((button)=>button.addEventListener('click',closeFacultyDrawer)); $('#facultyName').addEventListener('input',renderAdminFacultyPhoto);
 $('#adminPhotoInput').addEventListener('change',(event)=>readUpload(event.target.files[0],(file)=>{if(!file.type.startsWith('image/')){showToast('Faculty photographs must be image files.');return}editingFacultyPhoto=file.data;renderAdminFacultyPhoto()})); $('#adminPhotoRemove').addEventListener('click',()=>{editingFacultyPhoto='';renderAdminFacultyPhoto()});
-$('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();saveFaculty(true)}); $('#saveFacultyDraft').addEventListener('click',()=>saveFaculty(false)); $('#deleteFaculty').addEventListener('click',async()=>{const id=$('#facultyEmailKey').value;if(!id||!confirm('Delete this faculty profile and its login?'))return;try{await facultyService.remove(id);facultyProfiles=facultyProfiles.filter((profile)=>profile.id!==id);closeFacultyDrawer();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast('Faculty profile and login deleted.')}catch(error){showToast(error.message)}});
+$('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();saveFaculty(true)}); $('#saveFacultyDraft').addEventListener('click',()=>saveFaculty(false)); $('#deleteFaculty').addEventListener('click',async()=>{const id=$('#facultyEmailKey').value;if(!id||!confirm('Delete this faculty profile and its login?'))return;try{const facultyId=$('#facultyIdReview').value;await facultyService.remove(id);facultyProfiles=facultyProfiles.filter((profile)=>profile.id!==id);facultyAccounts=facultyAccounts.filter((account)=>account.facultyId!==facultyId);closeFacultyDrawer();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast('Faculty profile and login deleted.')}catch(error){showToast(error.message)}});
 $('#saveHomepage').addEventListener('click',saveHomepage); $('#saveSettings').addEventListener('click',()=>{localStorage.setItem(SETTINGS_KEY,JSON.stringify({name:$('#settingName').value,email:$('#settingEmail').value,phone:$('#settingPhone').value,address:$('#settingAddress').value}));showToast('Website settings saved.')}); $('#exportData').addEventListener('click',exportData);
 $('#inviteUser').addEventListener('click',openFacultyAccountModal); $('#facultyAccountForm').addEventListener('submit',async(event)=>{event.preventDefault();await createFacultyAccount()}); $$('[data-close-account]').forEach((button)=>button.addEventListener('click',closeFacultyAccountModal)); $('#toggleFacultyPassword').addEventListener('click',()=>{const input=$('#newFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleFacultyPassword').textContent=input.type==='password'?'Show':'Hide'}); $('#openSidebar').addEventListener('click',openSidebar); $('#closeSidebar').addEventListener('click',closeSidebar); $('#sidebarShade').addEventListener('click',closeSidebar);
+$('#facultyAccountRows').addEventListener('click',(event)=>{const button=event.target.closest('[data-reset-faculty-password]');if(button)openFacultyPasswordReset(button.dataset.resetFacultyPassword)});
+$('#facultyPasswordResetForm').addEventListener('submit',async(event)=>{event.preventDefault();await resetFacultyPassword()});
+$$('[data-close-password-reset]').forEach((button)=>button.addEventListener('click',closeFacultyPasswordReset));
+$('#toggleResetFacultyPassword').addEventListener('click',()=>{const input=$('#resetFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleResetFacultyPassword').textContent=input.type==='password'?'Show':'Hide'});
 $('#adminLogout').addEventListener('click',async(event)=>{
   const button=event.currentTarget;
   button.disabled=true;
@@ -456,4 +532,4 @@ $('#adminLogout').addEventListener('click',async(event)=>{
     window.location.replace('../index.html');
   }
 });
-document.addEventListener('keydown',(event)=>{if(event.key==='Escape'){closeContentDrawer();closeFacultyDrawer();closeFacultyAccountModal();closeCreateMenu();closeSidebar()}if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();showView('notices');setTimeout(()=>$('#collectionSearch').focus(),50)}});
+document.addEventListener('keydown',(event)=>{if(event.key==='Escape'){closeContentDrawer();closeFacultyDrawer();closeFacultyAccountModal();closeFacultyPasswordReset();closeCreateMenu();closeSidebar()}if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();showView('notices');setTimeout(()=>$('#collectionSearch').focus(),50)}});

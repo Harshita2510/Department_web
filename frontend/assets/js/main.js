@@ -80,9 +80,9 @@ async function applyPublishedCMSContent() {
     const story = stories[0]; const date = displayCMSDate(story.date); const image = story.file?.type?.startsWith('image/') ? story.file.data : 'assets/images/campus-life.jpg';
     $('.feature-story').innerHTML = `<div class="story-image"><img src="${image}" alt=""><span>${escapeCMS(story.category)}</span></div><div class="story-copy"><time>${date.long}</time><h3>${escapeCMS(story.title)}</h3><p>${escapeCMS(story.summary)}</p><a href="${story.file?.data || '#events'}">Read the story <span>↗</span></a></div>`;
   }
-  const placements = (data.placements || []).filter((item) => item.status === 'published' && safeCMSLink(item.sheetUrl, '')).sort((a,b) => (b.academicYear || '').localeCompare(a.academicYear || ''));
+  const placements = (data.placements || []).filter((item) => item.status === 'published' && safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, '')).sort((a,b) => (b.academicYear || '').localeCompare(a.academicYear || ''));
   if (placements.length) {
-    $('#placementArchivePreview').innerHTML = placements.slice(0, 3).map((item) => `<a class="placement-year-link" href="${escapeCMS(safeCMSLink(item.sheetUrl, 'pages/placements.html'))}" target="_blank" rel="noopener noreferrer"><span>${escapeCMS(item.title||`Placement ${(item.academicYear||'').replace('-', '–')}`)}</span><b>Open sheet ↗</b></a>`).join('') + '<a class="placement-all-link" href="pages/placements.html">View complete archive →</a>';
+    $('#placementArchivePreview').innerHTML = placements.slice(0, 3).map((item) => `<a class="placement-year-link" href="${escapeCMS(safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, 'pages/placements.html'))}" target="_blank" rel="noopener noreferrer"><span>${escapeCMS(item.title||`Placement ${(item.academicYear||'').replace('-', '–')}`)}</span><b>Open ${item.sourceType==='pdf'?'PDF':'sheet'} ↗</b></a>`).join('') + '<a class="placement-all-link" href="pages/placements.html">View complete archive →</a>';
   }
 }
 
@@ -197,6 +197,7 @@ const searchIndex = [
   { title: 'Latest notices and news', meta: 'Notice centre', target: '#notices', keywords: 'notice news update circular pdf' },
   { title: 'Events, seminars and workshops', meta: 'Campus pulse', target: '#events', keywords: 'event seminar workshop hackathon orientation competition' },
   { title: 'CSE laboratories and department facilities', meta: 'Student life', target: '#campus', keywords: 'computer lab laboratory department facility map student' },
+  { title: 'SGSITS campus map and directions', meta: 'Visit the department', target: '#campus-map', keywords: 'campus map location directions address visit sgsits indore cse' },
   { title: 'Department academic resources', meta: 'Resources', target: '#reports', keywords: 'syllabus timetable calendar notices research' }
 ];
 

@@ -304,6 +304,22 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .campus-photo { position: relative; height: 480px; }
 .campus-photo img { width: 100%; height: 100%; object-fit: cover; }
 .photo-label { position: absolute; right: -18px; bottom: -18px; padding: 17px 22px; background: var(--gold); color: var(--navy); font-size: 9px; line-height: 1.5; text-transform: uppercase; }
+.campus-map-section { background: var(--navy); color: var(--white); }
+.campus-map-heading { display: grid; grid-template-columns: 1.05fr .95fr; gap: 110px; align-items: end; margin-bottom: 46px; }
+.campus-map-heading h2 { margin: 17px 0 0; font: 700 clamp(38px, 4.3vw, 60px)/1.04 var(--font-display); letter-spacing: -.055em; }
+.campus-map-heading h2 em { color: var(--gold-light); font-style: normal; }
+.campus-map-heading > p { margin: 0 0 7px; color: #b7c4d0; font-size: 14px; line-height: 1.75; }
+.campus-map-layout { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(300px,.65fr); min-height: 520px; background: #0b294b; box-shadow: 0 24px 60px rgba(0,0,0,.2); }
+.campus-map-frame { min-height: 520px; background: #dfe5e8; }
+.campus-map-frame iframe { display: block; width: 100%; height: 100%; min-height: 520px; border: 0; }
+.campus-map-card { display: flex; flex-direction: column; padding: 48px 40px; border-left: 1px solid rgba(255,255,255,.12); }
+.campus-map-card > span { color: var(--gold-light); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.campus-map-card h3 { margin: 20px 0 15px; font: 700 26px/1.25 var(--font-display); letter-spacing: -.035em; }
+.campus-map-card address { color: #bdc9d4; font-size: 12px; font-style: normal; line-height: 1.8; }
+.campus-map-actions { display: grid; gap: 0; margin-top: 30px; }
+.campus-map-actions > a:not(.button) { display: flex; align-items: center; justify-content: space-between; min-height: 49px; border-bottom: 1px solid rgba(255,255,255,.16); color: #dbe4eb; font-size: 11px; font-weight: 700; }
+.campus-map-actions .button { margin-bottom: 14px; }
+.campus-map-card > small { margin-top: auto; padding-top: 30px; color: #8598aa; font-size: 9px; line-height: 1.55; }
 .reports-section { padding: 38px 0; background: var(--cream); border-top: 1px solid #e1ddd4; }
 .report-links { display: grid; grid-template-columns: 1.3fr repeat(5, 1fr); align-items: center; }
 .report-links > span { color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
@@ -414,7 +430,7 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   .notice-strip-inner { grid-template-columns: 82px 1fr 35px; }
   .notice-label { font-size: 9px; padding-right: 8px; }
   .ticker a { margin-right: 35px; }
-  .intro-grid, .section-title-row, .department-layout, .story-grid, .notice-layout, .research-layout, .people-layout, .admissions-inner, .campus-grid { grid-template-columns: 1fr; gap: 40px; }
+  .intro-grid, .section-title-row, .department-layout, .story-grid, .notice-layout, .research-layout, .people-layout, .admissions-inner, .campus-grid, .campus-map-heading, .campus-map-layout { grid-template-columns: 1fr; gap: 40px; }
   .intro-copy { padding-top: 0; }
   .fact-rail { grid-template-columns: 1fr; }
   .fact-rail article, .fact-rail article:first-child { min-height: auto; padding: 25px 0; border-right: 0; border-bottom: 1px solid var(--line); }
@@ -449,6 +465,11 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   .admissions-inner { gap: 28px; }
   .campus-photo { height: 380px; }
   .photo-label { right: -4px; }
+  .campus-map-heading { margin-bottom: 35px; }
+  .campus-map-layout { gap: 0; min-height: 0; }
+  .campus-map-frame,.campus-map-frame iframe { min-height: 390px; }
+  .campus-map-card { padding: 36px 28px; border-top: 1px solid rgba(255,255,255,.12); border-left: 0; }
+  .campus-map-card > small { margin-top: 20px; }
   .report-links { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .report-links > span { grid-column: 1 / -1; margin-bottom: 10px; }
   .report-links a { border-left: 0; padding: 8px 0; }

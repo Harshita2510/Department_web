@@ -7,12 +7,10 @@
   <meta name="theme-color" content="#071b34">
   <title>Computer Science &amp; Engineering — SGSITS Indore</title>
   <link rel="icon" type="image/png" href="assets/images/sgsits-logo.png">
-  <script src="assets/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/theme.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -113,7 +111,7 @@
             <a href="#campus">Clubs &amp; chapters</a>
             <a href="#events">Events &amp; workshops</a>
             <a href="#campus">Campus facilities</a>
-            <a href="#contact">Campus map</a>
+            <a href="#campus-map">Campus map</a>
           </div>
         </div>
       </div>
@@ -280,7 +278,7 @@
             <a href="pages/timetable.html"><span>02</span>Time tables<b>↗</b></a>
             <a href="pages/academic-calendar.html"><span>03</span>Academic calendar<b>↗</b></a>
             <a href="#resources"><span>04</span>Forms &amp; downloads<b>↗</b></a>
-            <a href="#contact"><span>05</span>Campus map<b>↗</b></a>
+            <a href="#campus-map"><span>05</span>Campus map<b>↗</b></a>
           </div>
         </aside>
       </div>
@@ -343,8 +341,31 @@
 
     <section class="section campus-section" id="campus">
       <div class="shell campus-grid">
-        <div class="campus-copy reveal"><span class="kicker">Department facilities</span><h2>Spaces to code.<br><em>Room to collaborate.</em></h2><p>Department learning extends through computing laboratories, project work, seminars and student-led technical activities on the SGSITS campus.</p><div class="campus-links"><a href="#events">Events &amp; workshops <span>↗</span></a><a href="#research">Research &amp; projects <span>↗</span></a><a href="#contact">Visit the department <span>↗</span></a></div></div>
+        <div class="campus-copy reveal"><span class="kicker">Department facilities</span><h2>Spaces to code.<br><em>Room to collaborate.</em></h2><p>Department learning extends through computing laboratories, project work, seminars and student-led technical activities on the SGSITS campus.</p><div class="campus-links"><a href="#events">Events &amp; workshops <span>↗</span></a><a href="#research">Research &amp; projects <span>↗</span></a><a href="#campus-map">Visit the department <span>↗</span></a></div></div>
         <div class="campus-photo reveal delay-1"><img src="assets/images/sgsits-computer-engineering-department.jpg" alt="Department of Computer Engineering at SGSITS Indore"><div class="photo-label">Department of Computer Engineering<br><strong>SGSITS, Indore</strong></div></div>
+      </div>
+    </section>
+
+    <section class="section campus-map-section" id="campus-map" aria-labelledby="campusMapTitle">
+      <div class="shell campus-map-heading reveal">
+        <div><span class="kicker">Find us on campus</span><h2 id="campusMapTitle">Campus map.<br><em>Your route to CSE.</em></h2></div>
+        <p>The Computer Science &amp; Engineering department is located inside the SGSITS campus in central Indore. Use the interactive map for directions to the institute.</p>
+      </div>
+      <div class="shell campus-map-layout reveal delay-1">
+        <div class="campus-map-frame">
+          <iframe title="Map showing SGSITS campus in Indore" src="https://www.google.com/maps?q=SGSITS%20Indore%2C%20Madhya%20Pradesh&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+        </div>
+        <aside class="campus-map-card">
+          <span>Department destination</span>
+          <h3>Computer Science &amp; Engineering</h3>
+          <address>Shri G. S. Institute of Technology &amp; Science<br>23, Sir M. Visvesvaraya Marg<br>Indore, Madhya Pradesh 452003</address>
+          <div class="campus-map-actions">
+            <a class="button button-gold" href="https://www.google.com/maps/dir/?api=1&amp;destination=SGSITS%20Indore%2C%20Madhya%20Pradesh" target="_blank" rel="noopener noreferrer">Get directions <span>↗</span></a>
+            <a href="tel:+919425032185">Call department <span>↗</span></a>
+            <a href="mailto:hodcse@sgsits.ac.in">Email department <span>↗</span></a>
+          </div>
+          <small>The embedded map is provided by Google Maps. Opening directions leaves this website.</small>
+        </aside>
       </div>
     </section>
 
@@ -358,8 +379,8 @@
   <footer class="site-footer" id="contact">
     <div class="shell footer-top">
       <div class="footer-brand"><img src="assets/images/sgsits-logo.png" alt="" width="84" height="84"><h2>CSE<small>SGSITS Indore</small></h2><p>Computing foundations.<br>Engineering with purpose.</p></div>
-      <div class="footer-nav"><div><h3>Department</h3><a href="#about">About CSE</a><a href="#departments">Vision &amp; mission</a><a href="#people">Faculty</a><a href="#research">Research</a></div><div><h3>Students</h3><a href="pages/syllabus.html">Syllabus</a><a href="pages/timetable.html">Timetable</a><a href="pages/academic-calendar.html">Academic calendar</a><a href="pages/placements.html">Placements</a></div><div><h3>Quick links</h3><a href="#notices">Notices</a><a href="#events">Events</a><a href="#campus">Facilities</a><a href="#contact">Contact</a><button type="button" data-modal-open="adminModal">Faculty &amp; admin portals</button></div></div>
-      <div class="footer-contact"><h3>Department contact</h3><p>Department of Computer Engineering<br>23, Sir M. Visvesvaraya Marg<br>Indore, Madhya Pradesh 452003</p><a href="tel:+919425032185">+91 94250 32185</a><a href="mailto:hodcse@sgsits.ac.in">hodcse@sgsits.ac.in</a><a class="map-link" href="https://maps.google.com/?q=SGSITS+Indore" target="_blank" rel="noreferrer">Open in Maps ↗</a></div>
+      <div class="footer-nav"><div><h3>Department</h3><a href="#about">About CSE</a><a href="#departments">Vision &amp; mission</a><a href="#people">Faculty</a><a href="#research">Research</a></div><div><h3>Students</h3><a href="pages/syllabus.html">Syllabus</a><a href="pages/timetable.html">Timetable</a><a href="pages/academic-calendar.html">Academic calendar</a><a href="pages/placements.html">Placements</a></div><div><h3>Quick links</h3><a href="#notices">Notices</a><a href="#events">Events</a><a href="#campus">Facilities</a><a href="#campus-map">Campus map</a><a href="#contact">Contact</a><button type="button" data-modal-open="adminModal">Faculty &amp; admin portals</button></div></div>
+      <div class="footer-contact"><h3>Department contact</h3><p>Department of Computer Engineering<br>23, Sir M. Visvesvaraya Marg<br>Indore, Madhya Pradesh 452003</p><a href="tel:+919425032185">+91 94250 32185</a><a href="mailto:hodcse@sgsits.ac.in">hodcse@sgsits.ac.in</a><a class="map-link" href="#campus-map">View campus map ↗</a></div>
     </div>
     <div class="shell footer-bottom"><p>© <span id="year"></span> SGSITS website concept. Institutional information sourced from the official SGSITS website.</p><div><a href="#reports">Privacy</a><a href="#reports">Accessibility</a><a href="#top">Back to top ↑</a></div></div>
   </footer>
@@ -376,6 +397,5 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="assets/js/main.js"></script>
-  <script type="module" src="assets/js/theme-toggle.js"></script>
 </body>
 </html>

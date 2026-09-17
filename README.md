@@ -12,14 +12,15 @@ The following public-facing features are built:
 
 - Responsive Computer Science & Engineering department homepage with SGSITS branding and department-focused navigation.
 - Department hero, official Computer Engineering building photograph, programme overview, vision and mission, notices, events, research, people, admissions, facilities and placements.
-- Shared light/dark appearance switch across public, faculty and administrator pages, with device-preference detection and a saved browser preference.
+- Embedded SGSITS campus map with department address, accessible fallback and external directions.
+- Consistent light-only appearance across public, faculty and administrator pages.
 - Published notices, news, events and placements loaded from the backend API.
 - Published event images delivered from Cloudinary.
-- Year-wise placement archive where every entry opens an administrator-provided public sheet link.
+- Year-wise placement archive where each entry opens either an administrator-provided public sheet link or an uploaded official PDF.
 - B.Tech CSE syllabus interface covering 8 semesters.
 - M.Tech CSE syllabus interface covering 4 semesters.
 - Subject-wise syllabus lists inside every semester, with published PDF or image links.
-- Timetable interface with the same UG and PG semester structure.
+- Timetable interface with the same UG and PG semester structure, split into class timetable and exam timetable sections (MST 1, MST 2, optional MST 3 and end semester).
 - Institute-wide academic-calendar page with support for semester-wise updates and archives.
 - Public approved-faculty profile page.
 - Responsive layouts for desktop, tablet and mobile screens.
@@ -31,18 +32,21 @@ The administrator interface currently supports:
 - Administrator login using an account stored in MongoDB.
 - Dashboard and content collection views.
 - Creation of faculty accounts using a Faculty ID and temporary password.
+- Administrator password resets for faculty accounts, with session invalidation and a mandatory-change prompt on the next login.
 - Viewing and reviewing faculty-submitted profile information.
 - Saving faculty information as a draft.
 - Approving and publishing faculty profiles.
 - Deleting a faculty profile and its login account.
 - Creating, editing, publishing, moving to draft and deleting notices, news, events, documents and media records.
-- Creating placement records using an academic year and public HTTPS sheet URL.
+- Creating placement records using an academic year with either a public HTTPS sheet URL or a PDF upload.
 - Publishing and unpublishing placement records.
 - Bulk publishing, drafting and deletion for supported content.
 - Uploading public content images to Cloudinary through an authenticated backend endpoint.
 - Uploading supported documents to MongoDB GridFS.
 - Creating syllabus subjects under a programme and semester.
 - Assigning one or more faculty members as syllabus uploaders for an individual subject.
+- Creating semester timetable records and assigning selected faculty as timetable uploaders.
+- Uploading or individually deleting timetable PDFs/images for class, MST 1, MST 2, MST 3 and end-semester slots, with administrator-only publication and deletion.
 - Reviewing, publishing or requesting changes to faculty syllabus submissions.
 - Secure administrator logout.
 
@@ -113,9 +117,9 @@ The application uses the `sgsits_website` database and the following main collec
 |---|---|
 | `users` | Administrator/faculty identities, roles, status and bcrypt password hashes |
 | `facultyprofiles` | Faculty draft data, approved snapshots and review status |
-| `placements` | Academic year, public sheet URL and publication status |
+| `placements` | Academic year, source type, public sheet URL or Cloudinary PDF metadata, and publication status |
 | `contents` | Notices, news, events, documents, media metadata and publication status |
-| `academicdocuments` | Syllabus, timetable and academic-calendar metadata |
+| `academicdocuments` | Timetable/calendar metadata, per-slot publication state and assigned faculty IDs |
 | `academicsubjects` | Programme/semester subjects, assigned faculty, syllabus asset metadata and approval state |
 | `auditlogs` | Actor, action, resource, IP address and user-agent history |
 | `uploads.files` | GridFS document metadata |
@@ -125,7 +129,7 @@ Plain-text passwords are never stored in MongoDB.
 
 ## Image and document storage
 
-Public event, news and media images, plus subject syllabus PDFs/images, are uploaded to Cloudinary. MongoDB stores only their metadata, including:
+Public event, news and media images, plus subject syllabus and timetable PDFs/images, are uploaded to Cloudinary. MongoDB stores only their metadata, including:
 
 - Cloudinary provider and public ID.
 - Secure delivery URL.
@@ -325,11 +329,11 @@ npm test --workspace backend
 
 The following work is still required before a production launch:
 
-- Add administrator UI for timetable and academic-calendar records. The backend APIs and public interfaces already exist.
+- Add administrator UI for academic-calendar records. Timetable management is implemented.
 - Move homepage configuration and general website settings from browser `localStorage` into MongoDB.
 - Finish Cloudinary-backed faculty photograph upload and cleanup.
 - Delete replaced Cloudinary assets and GridFS documents to avoid orphaned files.
-- Extend granular faculty permissions to other content modules if required; syllabus permissions are already subject-scoped.
+- Extend granular faculty permissions to other content modules if required; syllabus and timetable permissions are already scoped.
 - Add password reset/recovery and administrator password-management UI.
 - Expand automated API, authorization, upload and end-to-end tests.
 - Add CSRF protection or an equivalent hardened cross-origin request strategy for production cookie authentication.

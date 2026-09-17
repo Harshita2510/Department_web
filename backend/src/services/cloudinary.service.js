@@ -44,8 +44,36 @@ export function uploadSyllabusAsset(file, folder) {
   });
 }
 
-export async function verifySyllabusDelivery(asset) {
-  if(!asset?.url)throw new AppError(400,'Upload a syllabus before publishing');
+export function uploadPlacementPdfAsset(file,academicYear){
+  if(!cloudinaryConfigured)throw new AppError(503,'Placement file storage is not configured');
+  return new Promise((resolve,reject)=>{
+    const upload=cloudinary.uploader.upload_stream({
+      folder:`sgsits/placements/${academicYear}`,
+      resource_type:'image',format:'pdf',unique_filename:true,overwrite:false
+    },(error,result)=>{
+      if(error)return reject(new AppError(502,'Cloudinary placement PDF upload failed'));
+      resolve(result);
+    });
+    upload.end(file.buffer);
+  });
+}
+
+export function uploadTimetableAsset(file,folder){
+  if(!cloudinaryConfigured)throw new AppError(503,'Timetable file storage is not configured');
+  const isPdf=file.mimetype==='application/pdf';
+  return new Promise((resolve,reject)=>{
+    const upload=cloudinary.uploader.upload_stream({
+      folder:`sgsits/timetables/${folder}`,resource_type:'image',format:isPdf?'pdf':undefined,unique_filename:true,overwrite:false
+    },(error,result)=>{
+      if(error)return reject(new AppError(502,'Cloudinary timetable upload failed'));
+      resolve(result);
+    });
+    upload.end(file.buffer);
+  });
+}
+
+export async function verifyCloudinaryFileDelivery(asset) {
+  if(!asset?.url)throw new AppError(400,'Upload a file before publishing');
   let response;
   try{
     response=await fetch(asset.url,{method:'HEAD',signal:AbortSignal.timeout(8000)});
@@ -57,5 +85,5 @@ export async function verifySyllabusDelivery(asset) {
   if(asset.mimeType==='application/pdf'&&response.status===401&&/deny|acl/i.test(cloudinaryError)){
     throw new AppError(409,'Cloudinary is blocking PDF delivery. Enable “Allow delivery of PDF and ZIP files” in Cloudinary Console → Settings → Security, then publish again.');
   }
-  throw new AppError(502,`Cloudinary could not deliver this syllabus file (HTTP ${response.status}).`);
+  throw new AppError(502,`Cloudinary could not deliver this file (HTTP ${response.status}).`);
 }

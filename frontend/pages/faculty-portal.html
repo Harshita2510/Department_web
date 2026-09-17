@@ -8,11 +8,10 @@
   <title>Faculty Portal — SGSITS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <script src="../assets/js/theme-init.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/faculty-portal.css">
   <link rel="stylesheet" href="../assets/css/faculty-syllabus.css">
-  <link rel="stylesheet" href="../assets/css/theme.css">
+  <link rel="stylesheet" href="../assets/css/faculty-timetable.css">
 </head>
 <body>
   <a class="skip-link" href="#adminMain">Skip to editor</a>
@@ -55,6 +54,10 @@
         <button type="button" data-panel-target="syllabusUploadPanel">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"></path><path d="M8 10h8M8 14h8M8 18h5"></path></svg>
           Syllabus uploads <span class="nav-status" id="syllabusAssignmentCount">0</span>
+        </button>
+        <button type="button" data-panel-target="timetableUploadPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16"></rect><path d="M4 9h16M9 4v16"></path></svg>
+          Timetable uploads <span class="nav-status" id="timetableAssignmentCount">0</span>
         </button>
         <span class="nav-label nav-label-second">Account</span>
         <button type="button" data-panel-target="settingsPanel">
@@ -190,6 +193,13 @@
           <input id="facultySyllabusFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
         </section>
 
+        <section class="portal-panel" id="timetableUploadPanel" data-title="Timetable uploads">
+          <div class="editor-heading"><div><span>Assigned access</span><h2>Class &amp; exam timetable uploads</h2><p>Upload a PDF or image only for programme semesters assigned to you by the administrator.</p></div></div>
+          <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Uploads are submitted for review and remain private until an administrator publishes them.</p></div>
+          <div class="faculty-timetable-list" id="facultyTimetableList"></div><div class="empty-state" id="facultyTimetableEmpty"><div>▥</div><h3>No timetable semesters assigned</h3><p>Ask the administrator to grant timetable upload access.</p></div>
+          <input id="facultyTimetableFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
+        </section>
+
         <section class="portal-panel" id="settingsPanel" data-title="Account settings">
           <div class="editor-heading"><div><span>Account &amp; security</span><h2>Settings</h2><p>Review your account details and profile visibility.</p></div></div>
           <div class="settings-grid">
@@ -209,6 +219,6 @@
   <div class="portal-toast" id="portalToast" role="status" aria-live="polite"></div>
   <script type="module" src="../assets/js/faculty-portal.js"></script>
   <script type="module" src="../assets/js/faculty-syllabus.js"></script>
-  <script type="module" src="../assets/js/theme-toggle.js"></script>
+  <script type="module" src="../assets/js/faculty-timetable.js"></script>
 </body>
 </html>
