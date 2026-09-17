@@ -8,8 +8,11 @@
   <title>Website Administration — SGSITS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="../assets/js/theme-init.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/site-admin.css">
+  <link rel="stylesheet" href="../assets/css/site-admin-syllabus.css">
+  <link rel="stylesheet" href="../assets/css/theme.css">
 </head>
 <body>
   <a class="skip-link" href="#cmsMain">Skip to content</a>
@@ -26,6 +29,7 @@
         <button type="button" data-view="events"><i>□</i>Events <b data-count="events">0</b></button>
         <button type="button" data-view="placements"><i>↗</i>Placements <b data-count="placements">0</b></button>
         <button type="button" data-view="documents"><i>▤</i>Documents <b data-count="documents">0</b></button>
+        <button type="button" data-view="syllabusManagement"><i>▦</i>Subject syllabus <b id="syllabusSubjectCount">0</b></button>
         <button type="button" data-view="media"><i>◉</i>Media library <b data-count="media">0</b></button>
         <span class="nav-label">Administration</span>
         <button type="button" data-view="faculty"><i>♙</i>Faculty profiles <b data-count="faculty">0</b></button>
@@ -67,6 +71,14 @@
           <div class="content-table-wrap"><table class="content-table"><thead><tr><th><input id="selectAll" type="checkbox" aria-label="Select all"></th><th>Title</th><th>Category</th><th>Updated</th><th>Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody id="contentRows"></tbody></table><div class="table-empty" id="tableEmpty"><span>◇</span><h3>No content here yet</h3><p>Create your first entry to begin building this section.</p><button class="secondary-button" id="emptyCreate" type="button">Create first entry</button></div></div>
         </section>
 
+        <section class="cms-view" id="syllabusManagementView" data-title="Subject syllabus">
+          <div class="collection-head"><div><span>Academic resources</span><h2>Subject-wise syllabus</h2><p>Create subjects, assign faculty upload access and publish approved syllabus files.</p></div><button class="primary-button" id="addSubject" type="button">+ Add subject</button></div>
+          <div class="permission-note"><strong>Controlled faculty access</strong><p>Assigned faculty can upload only for their allocated subjects. Only administrators can create subjects or publish files.</p></div>
+          <div class="syllabus-filters"><select id="subjectProgrammeFilter" aria-label="Filter programme"><option value="all">All programmes</option><option value="ug-cse">B.Tech CSE</option><option value="pg-cse">M.Tech CSE</option></select><select id="subjectSemesterFilter" aria-label="Filter semester"><option value="all">All semesters</option></select></div>
+          <div class="subject-admin-list" id="subjectAdminList"></div><div class="table-empty" id="subjectAdminEmpty"><span>▦</span><h3>No subjects added</h3><p>Add a subject under a programme and semester to begin.</p><button class="secondary-button" id="subjectEmptyAdd" type="button">Add first subject</button></div>
+          <input id="subjectSyllabusFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
+        </section>
+
         <section class="cms-view" id="facultyView" data-title="Faculty profiles">
           <div class="collection-head"><div><span>People directory</span><h2>Faculty profiles</h2><p>Review teacher changes, manage photographs and control what is published.</p></div><button class="primary-button" id="addFaculty" type="button">+ Add faculty profile</button></div>
           <div class="permission-note"><strong>Admin-controlled publishing</strong><p>Teachers can edit text and submit changes. Only administrators can upload profile images and publish a faculty profile.</p></div>
@@ -99,7 +111,38 @@
   <div class="modal" id="facultyAccountModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="facultyAccountTitle"><div class="modal-shade" data-close-account></div><div class="create-menu-card account-create-card"><button data-close-account type="button" aria-label="Close">×</button><span>New faculty access</span><h2 id="facultyAccountTitle">Add faculty profile</h2><p class="account-intro">Create only the login credentials. The faculty member will complete all profile information after signing in.</p><form id="facultyAccountForm"><label class="field"><span>Faculty ID <b>*</b></span><input id="newFacultyId" type="text" autocomplete="off" placeholder="e.g. FAC-001" required minlength="3" maxlength="30"><small>Must be unique. Letters, numbers and hyphens only.</small></label><label class="field"><span>Temporary password <b>*</b></span><div class="password-input"><input id="newFacultyPassword" type="password" autocomplete="new-password" minlength="8" required><button id="toggleFacultyPassword" type="button">Show</button></div><small>At least 8 characters. Give this password privately to the faculty member.</small></label><div class="credential-warning"><strong>Important</strong><p>The password will not be shown again after account creation. Ask the faculty member to change it after first login.</p></div><button class="primary-button" type="submit">Create faculty profile</button></form></div></div>
 
   <div class="modal" id="createMenu" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="createMenuTitle"><div class="modal-shade" data-close-create-menu></div><div class="create-menu-card"><button data-close-create-menu type="button" aria-label="Close">×</button><span>Create new</span><h2 id="createMenuTitle">What would you like to publish?</h2><div class="create-menu-grid"><button data-create-type="notices"><i>≡</i>Notice</button><button data-create-type="news"><i>◇</i>News story</button><button data-create-type="events"><i>□</i>Event</button><button data-create-type="placements"><i>↗</i>Placement sheet</button><button data-create-type="documents"><i>▤</i>Document</button><button data-create-type="media"><i>◉</i>Media</button></div></div></div>
+  <div class="modal" id="subjectModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="subjectModalTitle">
+    <div class="modal-shade" data-close-subject></div>
+    <div class="create-menu-card subject-modal-card">
+      <button data-close-subject type="button" aria-label="Close">×</button><span>Academic subject</span><h2 id="subjectModalTitle">Add subject</h2>
+      <form id="subjectForm">
+        <input id="subjectId" type="hidden">
+        <div class="form-grid">
+          <label class="field"><span>Programme</span><select id="subjectProgramme" required><option value="ug-cse">B.Tech CSE</option><option value="pg-cse">M.Tech CSE</option></select></label>
+          <label class="field"><span>Semester</span><select id="subjectSemester" required></select></label>
+          <label class="field"><span>Subject code</span><input id="subjectCode" maxlength="30" placeholder="CS-301"></label>
+          <label class="field"><span>Display order</span><input id="subjectSortOrder" type="number" min="0" max="999" value="0"></label>
+          <label class="field full"><span>Subject name</span><input id="subjectName" required maxlength="160" placeholder="Data Structures"></label>
+        </div>
+        <fieldset class="subject-editor-field">
+          <legend>Faculty allowed to upload</legend>
+          <label class="subject-faculty-search"><span class="visually-hidden">Search faculty accounts</span><input id="subjectFacultySearch" type="search" autocomplete="off" placeholder="Search by name or Faculty ID"></label>
+          <p class="subject-faculty-status" id="subjectFacultyStatus" role="status"></p>
+          <div id="subjectEditorOptions"></div>
+          <small>Select one or more faculty members, or leave empty for administrator-only uploading.</small>
+        </fieldset>
+        <div class="subject-inline-upload">
+          <label class="field full"><span>Syllabus PDF or image</span><input id="subjectInlineFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp"><small>Optional while creating the subject · PDF, JPG, PNG or WebP · Maximum 10 MB</small></label>
+          <label class="feature-check"><input id="subjectPublishAfterUpload" type="checkbox" checked><span><strong>Publish after upload</strong><small>Make the syllabus visible publicly immediately after a successful upload.</small></span></label>
+        </div>
+        <label class="feature-check"><input id="subjectActive" type="checkbox" checked><span><strong>Active subject</strong><small>Active subject names are visible publicly. The file appears only after publication.</small></span></label>
+        <button class="primary-button" type="submit">Save subject</button>
+      </form>
+    </div>
+  </div>
   <div class="cms-toast" id="cmsToast" role="status" aria-live="polite"></div>
   <script type="module" src="../assets/js/site-admin.js"></script>
+  <script type="module" src="../assets/js/site-admin-syllabus.js"></script>
+  <script type="module" src="../assets/js/theme-toggle.js"></script>
 </body>
 </html>

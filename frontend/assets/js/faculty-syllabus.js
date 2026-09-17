@@ -1,0 +1,10 @@
+import { escapeHtml } from './shared/dom.js';
+import { academicSubjectService } from './services/academic-subject.service.js';
+
+const $=(selector)=>document.querySelector(selector);let subjects=[];let selectedId='';let toastTimer;
+function notify(message){const toast=$('#portalToast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3600)}
+function render(){const list=$('#facultySubjectList');$('#syllabusAssignmentCount').textContent=subjects.length;$('#facultySubjectEmpty').classList.toggle('show',!subjects.length);list.innerHTML=subjects.map((subject)=>`<article class="faculty-subject-card"><div><h3>${subject.subjectCode?`<span>${escapeHtml(subject.subjectCode)}</span>`:''}${escapeHtml(subject.name)}</h3><p>${subject.programme==='ug-cse'?'B.Tech CSE':'M.Tech CSE'} · Semester ${subject.semester}</p>${subject.syllabus?`<small>Current file: ${escapeHtml(subject.syllabus.name)}</small>`:'<small>No syllabus uploaded yet</small>'}</div><span class="faculty-subject-state ${subject.syllabusStatus==='published'?'published':''}">${escapeHtml(subject.syllabusStatus.replace('_',' '))}</span><button type="button" data-faculty-syllabus-upload="${subject._id}">${subject.syllabus?'Replace & submit':'Upload & submit'}</button></article>`).join('')}
+async function load(){try{subjects=await academicSubjectService.listManaged();render()}catch(error){notify(error.message)}}
+$('#facultySubjectList').addEventListener('click',(event)=>{const button=event.target.closest('[data-faculty-syllabus-upload]');if(!button)return;selectedId=button.dataset.facultySyllabusUpload;$('#facultySyllabusFile').click()});
+$('#facultySyllabusFile').addEventListener('change',async(event)=>{const file=event.target.files[0];event.target.value='';if(!file)return;if(file.size>10*1024*1024){notify('Syllabus files must be 10 MB or smaller.');return}try{notify('Uploading syllabus…');await academicSubjectService.upload(selectedId,file);await load();notify('Syllabus submitted for administrator review.')}catch(error){notify(error.message)}});
+load();

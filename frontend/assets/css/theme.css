@@ -1,0 +1,108 @@
+.theme-switch {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 2450;
+  min-width: 94px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  color: #fff;
+  background: #071b34;
+  box-shadow: 0 12px 30px rgba(3, 16, 31, .24);
+  font: 700 11px/1 "DM Sans", sans-serif;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease, color .2s ease;
+}
+.theme-switch:hover { transform: translateY(-2px); }
+.theme-switch:focus-visible { outline: 3px solid #e6aa42; outline-offset: 3px; }
+.theme-switch span { font-size: 17px; line-height: 1; }
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #081727;
+  --ink: #edf3f8;
+  --muted: #a9b8c7;
+  --line: #2a4157;
+  --cream: #10263b;
+  --gold-soft: #4a3923;
+  --shadow: 0 18px 50px rgba(0, 0, 0, .34);
+}
+html[data-theme="dark"] body { color: var(--ink); background: var(--paper); }
+html[data-theme="dark"] .theme-switch { color: #071b34; background: #e6aa42; border-color: #e6aa42; }
+
+html[data-theme="dark"] :is(.site-header, .public-header, .cms-header, .portal-header) {
+  color: var(--ink);
+  background: rgba(10, 28, 45, .97);
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(.brand-copy strong, .brand-copy span, .brand strong, .section-heading h2, .archive-heading h2) { color: var(--ink); }
+html[data-theme="dark"] :is(.main-nav, .dropdown, .wide-dropdown) { background: #0a1c2e; }
+html[data-theme="dark"] :is(.nav-inner > a, .nav-group > button, nav a) { color: #dce7ef; }
+html[data-theme="dark"] :is(.dropdown > a, .wide-dropdown a) { border-color: var(--line); }
+html[data-theme="dark"] :is(.dropdown > a:hover, .wide-dropdown a:hover) { background: #132b41; }
+
+html[data-theme="dark"] :is(
+  .programme-card:not(.dark-card):not(.accent-card),
+  .feature-story,
+  .notice-panel,
+  .placement-archive-preview,
+  .placement-year-link,
+  .programme,
+  .programme-content,
+  .programme-content li a,
+  .programme-content li button,
+  .placement-row,
+  .archive-empty,
+  .public-header,
+  .dashboard-card,
+  .stat-grid article,
+  .faculty-card,
+  .faculty-directory-card,
+  .faculty-directory-empty,
+  .editor-card,
+  .role-grid article,
+  .user-table,
+  .content-table-wrap,
+  .content-table th,
+  .collection-search,
+  .collection-tools select,
+  .drawer-panel,
+  .drawer-panel > header,
+  .drawer-panel footer,
+  .create-menu-card,
+  .create-menu-grid button,
+  .upload-zone,
+  .feature-check
+) { color: var(--ink); background: #0f2438; border-color: var(--line); }
+html[data-theme="dark"] .faculty-card-photo { color: var(--ink); background: #173149; }
+html[data-theme="dark"] :is(.subject-admin-card, .subject-editor-field #subjectEditorOptions label) { color: var(--ink); background: #0f2438; border-color: var(--line); }
+
+html[data-theme="dark"] :is(.programme summary:hover, .quick-action-grid button, .content-table th, .user-head) { background: #132b41; }
+html[data-theme="dark"] :is(.notice-centre, .reports-section) { background: #0a1c2e; border-color: var(--line); }
+html[data-theme="dark"] :is(.programme-content, .placement-archive-preview) { background: #0b1d2f; }
+html[data-theme="dark"] :is(input, textarea, select) { color: var(--ink); background: #0a1c2e; border-color: var(--line); }
+html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color: #8294a5; }
+html[data-theme="dark"] :is(.modal-card, .quick-action-grid button, .row-actions button, .icon-action, .view-site, .secondary-button, .menu-button) {
+  color: var(--ink);
+  background: #0f2438;
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(.programme-card p, .story-copy p, .intro-copy p, .section-title-row > p) { color: var(--muted); }
+html[data-theme="dark"] .programme-content li a:hover,
+html[data-theme="dark"] .programme-content li button:hover { background: #15314a; }
+
+@media (max-width: 600px) {
+  .theme-switch { right: 14px; bottom: 14px; min-width: 44px; width: 44px; padding: 0; }
+  .theme-switch b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch { transition: none; }
+}

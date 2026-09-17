@@ -7,7 +7,7 @@ export const syllabusProgrammes = [
     semesters: Array.from({ length: 8 }, (_, index) => ({
       number: index + 1,
       label: `B.Tech. CSE Semester ${index + 1}`,
-      documentUrl: null
+      subjects: []
     }))
   },
   {
@@ -18,7 +18,7 @@ export const syllabusProgrammes = [
     semesters: Array.from({ length: 4 }, (_, index) => ({
       number: index + 1,
       label: `M.Tech. CSE Semester ${index + 1}`,
-      documentUrl: null
+      subjects: []
     }))
   }
 ];

@@ -1,0 +1,33 @@
+.syllabus-filters { display:flex; gap:10px; margin-bottom:16px; }
+.syllabus-filters select { height:40px; min-width:180px; padding:0 12px; border:1px solid var(--line); background:#fff; }
+.subject-admin-list { display:grid; gap:10px; }
+.subject-admin-card { display:grid; grid-template-columns:minmax(210px,1.3fr) .7fr .7fr auto; gap:18px; align-items:center; padding:18px 20px; background:#fff; border:1px solid var(--line); }
+.subject-admin-card h3 { margin:0; font:700 14px var(--display); }
+.subject-admin-card h3 span { margin-right:7px; color:#996811; }
+.subject-admin-card p,.subject-admin-card small { display:block; margin:4px 0 0; color:var(--muted); font-size:8px; }
+.subject-admin-card .subject-status { justify-self:start; padding:6px 8px; background:#f5eee2; color:#95650e; font-size:7px; font-weight:800; text-transform:uppercase; }
+.subject-admin-card .subject-status.published { background:#e8f2ed; color:var(--green); }
+.subject-admin-actions { display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
+.subject-admin-actions button { padding:7px 9px; border:1px solid var(--line); background:#fff; font-size:8px; font-weight:700; cursor:pointer; }
+.subject-admin-actions .publish-subject { color:#fff; background:var(--navy); border-color:var(--navy); }
+.subject-admin-actions .delete-subject { color:var(--red); }
+.subject-modal-card { width:min(620px,100%); max-height:90vh; overflow:auto; }
+.subject-modal-card form { display:grid; gap:18px; }
+.subject-editor-field { margin:0; padding:15px; border:1px solid var(--line); }
+.subject-editor-field legend { padding:0 6px; font-size:8px; font-weight:800; text-transform:uppercase; }
+.subject-editor-field > div { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.subject-editor-field label { display:flex; gap:8px; align-items:center; padding:9px; background:#f7f8f8; font-size:9px; }
+.subject-editor-field small { display:block; margin-top:9px; color:var(--muted); font-size:7px; }
+.subject-editor-field .subject-faculty-search { display:block; padding:0; background:transparent; }
+.subject-faculty-search input { width:100%; height:40px; padding:0 12px; border:1px solid var(--line); background:#fff; }
+.subject-faculty-status { min-height:15px; margin:9px 0; color:var(--muted); font-size:8px; }
+.subject-editor-field > #subjectEditorOptions { max-height:230px; overflow-y:auto; padding-right:4px; }
+.subject-editor-field #subjectEditorOptions label { cursor:pointer; }
+.subject-editor-field #subjectEditorOptions label:has(input:checked) { background:var(--gold-soft); outline:1px solid var(--gold); }
+.subject-editor-field #subjectEditorOptions span,.subject-editor-field #subjectEditorOptions small { display:block; }
+.subject-editor-field #subjectEditorOptions small { margin-top:3px; }
+.subject-inline-upload { display:grid; gap:12px; padding:15px; border:1px solid var(--line); background:var(--surface-soft, #f7f8f8); }
+.subject-inline-upload input[type="file"] { height:auto; min-height:42px; padding:9px; background:var(--surface, #fff); }
+.subject-inline-upload .field small { display:block; margin-top:6px; color:var(--muted); font-size:7px; }
+@media(max-width:850px) { .subject-admin-card { grid-template-columns:1fr 1fr; } .subject-admin-actions { grid-column:1/-1; justify-content:flex-start; } }
+@media(max-width:600px) { .syllabus-filters { flex-direction:column; } .syllabus-filters select { width:100%; } .subject-admin-card { grid-template-columns:1fr; } .subject-admin-actions { grid-column:auto; } .subject-editor-field > div { grid-template-columns:1fr; } }

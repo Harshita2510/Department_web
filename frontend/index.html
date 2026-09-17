@@ -3,20 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A modern student-focused portal concept for Shri G. S. Institute of Technology and Science, Indore.">
+  <meta name="description" content="Official department portal for Computer Science and Engineering at Shri G. S. Institute of Technology and Science, Indore.">
   <meta name="theme-color" content="#071b34">
-  <title>SGSITS Indore — Learn. Build. Lead.</title>
+  <title>Computer Science &amp; Engineering — SGSITS Indore</title>
+  <link rel="icon" type="image/png" href="assets/images/sgsits-logo.png">
+  <script src="assets/js/theme-init.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 
   <div class="utility-bar">
     <div class="shell utility-inner">
-      <p>An autonomous institute established in 1952, run by Government of Madhya Pradesh</p>
+      <p>Department of Computer Science &amp; Engineering · SGSITS Indore</p>
       <div class="utility-links" aria-label="Utility links">
         <a href="#notices">Notices</a>
         <a href="#contact">Contact</a>
@@ -28,12 +31,12 @@
 
   <header class="site-header" id="top">
     <div class="shell brand-row">
-      <a class="brand" href="#top" aria-label="SGSITS home">
+      <a class="brand" href="#top" aria-label="SGSITS Computer Science and Engineering home">
         <img src="assets/images/sgsits-logo.png" alt="SGSITS emblem" width="78" height="78">
         <span class="brand-copy">
-          <strong>SGSITS</strong>
-          <span>Shri G. S. Institute of Technology &amp; Science</span>
-          <small>Indore, Madhya Pradesh</small>
+          <strong>CSE</strong>
+          <span>Department of Computer Science &amp; Engineering</span>
+          <small>SGSITS · Indore</small>
         </span>
       </a>
       <div class="header-actions">
@@ -41,7 +44,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
         </button>
         <button class="button button-outline desktop-action" type="button" data-modal-open="adminModal">Faculty &amp; admin</button>
-        <a class="button button-gold desktop-action" href="#admissions">Admissions 2026</a>
+        <a class="button button-gold desktop-action" href="#programmes">Explore programmes</a>
         <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -52,12 +55,12 @@
       <div class="shell nav-inner">
         <a class="nav-home" href="#top">Home</a>
         <div class="nav-group">
-          <button type="button" aria-expanded="false">Institute <span>⌄</span></button>
+          <button type="button" aria-expanded="false">Department <span>⌄</span></button>
           <div class="dropdown">
-            <a href="#about">About SGSITS <small>Legacy, vision &amp; mission</small></a>
-            <a href="#leadership">Leadership <small>Director &amp; administration</small></a>
-            <a href="#achievements">Achievements <small>Awards &amp; recognition</small></a>
-            <a href="#reports">NIRF, IQAC &amp; reports <small>Institutional documents</small></a>
+            <a href="#about">About CSE <small>Department overview</small></a>
+            <a href="#departments">Vision &amp; mission <small>Our academic purpose</small></a>
+            <a href="#people">Faculty &amp; staff <small>Meet the department</small></a>
+            <a href="#campus">Facilities <small>Labs and learning spaces</small></a>
           </div>
         </div>
         <div class="nav-group">
@@ -67,7 +70,7 @@
               <b>Explore academics</b>
               <a href="#programmes">UG programmes</a>
               <a href="#programmes">PG programmes</a>
-              <a href="#departments">Departments</a>
+              <a href="#research">Research areas</a>
             </div>
             <div>
               <b>Academic resources</b>
@@ -80,10 +83,10 @@
         <div class="nav-group">
           <button type="button" aria-expanded="false">Admissions <span>⌄</span></button>
           <div class="dropdown">
-            <a href="#admissions">Undergraduate <small>B.Tech &amp; B.Pharm</small></a>
-            <a href="#admissions">Postgraduate <small>M.Tech, MCA, MBA &amp; M.Sc.</small></a>
-            <a href="#admissions">Doctoral <small>Research programmes</small></a>
-            <a href="#admissions">Seat matrix <small>Programme-wise intake</small></a>
+            <a href="#programmes">Undergraduate <small>B.Tech Computer Science &amp; Engineering</small></a>
+            <a href="#programmes">Postgraduate <small>M.Tech Computer Engineering</small></a>
+            <a href="#programmes">Doctoral <small>Research in computing</small></a>
+            <a href="https://www.sgsits.ac.in/academics-1" target="_blank" rel="noreferrer">Official admissions <small>Institute admission information</small></a>
           </div>
         </div>
         <div class="nav-group">
@@ -92,15 +95,15 @@
             <a href="#research">Research areas</a>
             <a href="#research">Publications &amp; papers</a>
             <a href="#research">Patents &amp; projects</a>
-            <a href="#research">Centres &amp; consultancy</a>
+            <a href="#campus">Laboratories</a>
           </div>
         </div>
         <div class="nav-group">
           <button type="button" aria-expanded="false">People <span>⌄</span></button>
           <div class="dropdown">
             <a href="#people">Faculty &amp; staff</a>
-            <a href="#people">Ph.D. scholars</a>
-            <a href="#people">Alumni</a>
+            <a href="#research">Ph.D. scholars</a>
+            <a href="#placements">Alumni &amp; outcomes</a>
           </div>
         </div>
         <a href="pages/placements.html">Placements</a>
@@ -122,26 +125,26 @@
       <div class="hero-noise" aria-hidden="true"></div>
       <div class="shell hero-grid">
         <div class="hero-copy reveal">
-          <div class="eyebrow"><span></span> Engineering excellence since 1952</div>
-          <h1>Learn deeply.<br><em>Build boldly.</em><br>Lead responsibly.</h1>
-          <p>Where rigorous engineering, meaningful research and an energetic student community come together in the heart of Indore.</p>
+          <div class="eyebrow"><span></span> Computer Science &amp; Engineering · SGSITS</div>
+          <h1>Think in systems.<br><em>Build with purpose.</em><br>Shape what’s next.</h1>
+          <p>A department for rigorous computer science, hands-on engineering, meaningful research and technology that responds to industry and society.</p>
           <div class="hero-actions">
-            <a class="button button-gold" href="#programmes">Explore programmes <span>↗</span></a>
-            <a class="play-link" href="#about"><span class="play-icon">▶</span> Discover SGSITS</a>
+            <a class="button button-gold" href="#programmes">Explore CSE programmes <span>↗</span></a>
+            <a class="play-link" href="#departments"><span class="play-icon">↓</span> Vision &amp; mission</a>
           </div>
-          <div class="hero-badges" aria-label="Institute credentials">
-            <div><strong>NAAC</strong><span>‘A’ Grade</span></div>
-            <div><strong>Autonomous</strong><span>Institute</span></div>
-            <div><strong>16</strong><span>Departments</span></div>
+          <div class="hero-badges" aria-label="Department highlights">
+            <div><strong>8</strong><span>UG semesters</span></div>
+            <div><strong>4</strong><span>PG semesters</span></div>
+            <div><strong>28</strong><span>Faculty members</span></div>
           </div>
         </div>
         <div class="hero-media reveal delay-1">
           <div class="hero-image-wrap">
-            <img src="assets/images/sgsits-campus.jpg" alt="Main academic building at SGSITS Indore">
+            <img src="assets/images/sgsits-computer-engineering-department.jpg" alt="Entrance of the Department of Computer Engineering at SGSITS Indore">
             <div class="image-shade"></div>
-            <div class="image-caption"><span>01</span><p>Main academic block<br><small>SGSITS, Indore</small></p></div>
+            <div class="image-caption"><span>CE</span><p>Computer Engineering Department<br><small>SGSITS, Indore · Official photograph</small></p></div>
           </div>
-          <div class="since-card"><strong>74</strong><span>years of<br>impact</span></div>
+          <div class="since-card"><strong>&lt;/&gt;</strong><span>learn<br>build<br>research</span></div>
         </div>
       </div>
       <div class="hero-scroll"><span></span> Scroll to explore</div>
@@ -162,30 +165,30 @@
     </section>
 
     <section class="section intro-section" id="about">
-      <span class="sr-only" id="leadership">Institute leadership</span>
+      <span class="sr-only" id="leadership">Department leadership</span>
       <div class="shell intro-grid">
         <div class="section-heading reveal">
-          <span class="kicker">This is SGSITS</span>
-          <h2>A legacy of learning.<br><em>A culture of making.</em></h2>
+          <span class="kicker">About the department</span>
+          <h2>Strong foundations.<br><em>Future-facing computing.</em></h2>
         </div>
         <div class="intro-copy reveal delay-1">
-          <p class="lead">Shri Govindram Seksaria Institute of Technology and Science is an autonomous institute established in 1952 and run by the Government of Madhya Pradesh.</p>
-          <p>Across engineering, technology, sciences, management and pharmacy, SGSITS brings classroom fundamentals together with hands-on learning and research.</p>
-          <a class="arrow-link" href="#campus">Explore our story <span>→</span></a>
+          <p class="lead">The Department of Computer Engineering at SGSITS develops computing professionals through theory, practical work, research and responsible problem-solving.</p>
+          <p>Students move from algorithms and systems fundamentals to contemporary areas of software, networks, data and intelligent computing, supported by faculty mentorship and laboratory learning.</p>
+          <a class="arrow-link" href="#programmes">Explore academics <span>→</span></a>
         </div>
       </div>
       <div class="shell fact-rail reveal">
-        <article><span>01</span><strong>Practice-led learning</strong><p>Labs, studios and projects that turn theory into working ideas.</p></article>
-        <article><span>02</span><strong>Research with purpose</strong><p>Inquiry shaped around useful, responsible and real-world outcomes.</p></article>
-        <article><span>03</span><strong>Community at the core</strong><p>Clubs, teams and collaborations that make campus life richer.</p></article>
+        <article><span>01</span><strong>Computing fundamentals</strong><p>Algorithms, architecture, operating systems, databases and software engineering.</p></article>
+        <article><span>02</span><strong>Learn by building</strong><p>Laboratory work, projects and technical communities turn concepts into systems.</p></article>
+        <article><span>03</span><strong>Responsible innovation</strong><p>Research and engineering shaped by ethics, social needs and sustainable development.</p></article>
       </div>
     </section>
 
     <section class="section programmes" id="programmes">
       <div class="shell">
         <div class="section-title-row reveal">
-          <div><span class="kicker">Find your direction</span><h2>Programmes that move<br><em>with the world.</em></h2></div>
-          <p>Choose a path grounded in strong fundamentals, guided by experienced faculty and extended through projects, labs and industry exposure.</p>
+          <div><span class="kicker">Study computer science</span><h2>One discipline.<br><em>Many directions.</em></h2></div>
+          <p>Build depth through structured undergraduate, postgraduate and doctoral study, with direct access to semester-wise syllabi and timetables.</p>
         </div>
         <div class="programme-tabs reveal" role="tablist" aria-label="Programme level">
           <button class="active" type="button" role="tab" aria-selected="true" data-programme-filter="all">All programmes</button>
@@ -195,24 +198,24 @@
         </div>
         <div class="programme-grid" id="programmeGrid">
           <article class="programme-card dark-card reveal" data-level="ug">
-            <div class="card-number">01</div><div class="programme-icon">⌘</div>
-            <h3>Engineering &amp;<br>Technology</h3><p>B.Tech programmes across core and emerging engineering disciplines.</p>
-            <a href="#departments" aria-label="Explore engineering programmes">Explore <span>↗</span></a>
+            <div class="card-number">01 · 8 SEMESTERS</div><div class="programme-icon">⌘</div>
+            <h3>B.Tech Computer Science &amp; Engineering</h3><p>An undergraduate pathway from mathematical and programming foundations to complete computing systems.</p>
+            <a href="pages/syllabus.html" aria-label="View undergraduate CSE syllabus">View syllabus <span>↗</span></a>
           </article>
-          <article class="programme-card reveal delay-1" data-level="ug">
-            <div class="card-number">02</div><div class="programme-icon">✣</div>
-            <h3>Pharmacy</h3><p>A practice-focused programme connecting pharmaceutical science and healthcare.</p>
-            <a href="#departments" aria-label="Explore pharmacy programme">Explore <span>↗</span></a>
+          <article class="programme-card reveal delay-1" data-level="pg">
+            <div class="card-number">02 · 4 SEMESTERS</div><div class="programme-icon">◇</div>
+            <h3>M.Tech Computer Engineering</h3><p>Advanced coursework and research for deeper technical specialisation and professional practice.</p>
+            <a href="pages/syllabus.html" aria-label="View postgraduate Computer Engineering syllabus">View syllabus <span>↗</span></a>
           </article>
-          <article class="programme-card reveal delay-2" data-level="pg">
-            <div class="card-number">03</div><div class="programme-icon">◇</div>
-            <h3>Postgraduate<br>study</h3><p>M.Tech, MCA, MBA, M.Pharm and M.Sc. pathways for deeper specialisation.</p>
-            <a href="#admissions" aria-label="Explore postgraduate programmes">Explore <span>↗</span></a>
+          <article class="programme-card reveal delay-2" data-level="research">
+            <div class="card-number">03 · RESEARCH</div><div class="programme-icon">◎</div>
+            <h3>Ph.D. &amp; doctoral research</h3><p>Original research guided by department faculty across contemporary computing domains.</p>
+            <a href="#research" aria-label="Explore doctoral research">Explore research <span>↗</span></a>
           </article>
-          <article class="programme-card accent-card reveal delay-3" data-level="research">
-            <div class="card-number">04</div><div class="programme-icon">◎</div>
-            <h3>Research &amp;<br>doctoral study</h3><p>Advanced inquiry supported by supervisors, facilities and collaborations.</p>
-            <a href="#research" aria-label="Explore doctoral programmes">Explore <span>↗</span></a>
+          <article class="programme-card accent-card reveal delay-3" data-level="ug pg">
+            <div class="card-number">04 · STUDENT DESK</div><div class="programme-icon">↗</div>
+            <h3>Curriculum &amp;<br>class resources</h3><p>Open semester-wise syllabus, current timetable and the latest academic calendar.</p>
+            <a href="pages/timetable.html" aria-label="Open academic resources">Open resources <span>↗</span></a>
           </article>
         </div>
       </div>
@@ -221,28 +224,19 @@
     <section class="section departments-section" id="departments">
       <div class="shell department-layout">
         <div class="department-intro reveal">
-          <span class="kicker light">Our academic community</span>
-          <h2>16 departments.<br><em>One shared purpose.</em></h2>
-          <p>Interdisciplinary thinking starts with strong disciplines. Explore the teaching and research communities across SGSITS.</p>
-          <button class="button button-light" type="button" id="departmentToggle">View all departments</button>
+          <span class="kicker light">Vision &amp; mission</span>
+          <h2>Computing excellence.<br><em>Human purpose.</em></h2>
+          <p>Our vision is to grow as a centre of excellence that develops capable computer science professionals for changing industrial and societal needs.</p>
+          <button class="button button-light" type="button" id="departmentToggle">Read all mission commitments</button>
         </div>
         <div class="department-list reveal delay-1" id="departmentList">
-          <a href="#programmes"><span>01</span> Computer Engineering <b>→</b></a>
-          <a href="#programmes"><span>02</span> Information Technology <b>→</b></a>
-          <a href="#programmes"><span>03</span> Mechanical Engineering <b>→</b></a>
-          <a href="#programmes"><span>04</span> Electrical Engineering <b>→</b></a>
-          <a href="#programmes"><span>05</span> Civil Engineering &amp; Applied Mechanics <b>→</b></a>
-          <a href="#programmes"><span>06</span> Electronics &amp; Telecommunication <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>07</span> Biomedical Engineering <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>08</span> Electronics &amp; Instrumentation <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>09</span> Industrial &amp; Production Engineering <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>10</span> Computer Technology &amp; Applications <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>11</span> Management Studies <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>12</span> Pharmacy <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>13</span> Applied Chemistry <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>14</span> Applied Mathematics &amp; Computational Sciences <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>15</span> Applied Physics &amp; Optoelectronics <b>→</b></a>
-          <a class="extra-department" href="#programmes"><span>16</span> Centre for Bhartiya Gyan Parampara <b>→</b></a>
+          <a href="#programmes"><span>M1</span> Combine sound theory with practical computing skills <b>01</b></a>
+          <a href="#research"><span>M2</span> Encourage innovation, research and analytical thinking <b>02</b></a>
+          <a href="#people"><span>M3</span> Build professional ethics and responsibility through quality education <b>03</b></a>
+          <a href="#campus"><span>M4</span> Create an industry-connected environment for continuous technological learning <b>04</b></a>
+          <a class="extra-department" href="#research"><span>M5</span> Apply computing knowledge to societal and environmental challenges <b>05</b></a>
+          <a class="extra-department" href="#programmes"><span>M6</span> Support lifelong learning and sustainable development <b>06</b></a>
+          <a class="extra-department official-mission-link" href="https://www.sgsits.ac.in/files/CS_Scheme_Syllabus_2017-18_Final_ME_PHD.pdf" target="_blank" rel="noreferrer"><span>PDF</span> Read the official department vision and mission <b>↗</b></a>
         </div>
       </div>
     </section>
@@ -250,13 +244,13 @@
     <section class="section news-events" id="events">
       <div class="shell">
         <div class="section-title-row compact reveal">
-          <div><span class="kicker">Campus pulse</span><h2>News, ideas &amp;<br><em>what’s next.</em></h2></div>
+          <div><span class="kicker">Department pulse</span><h2>Ideas, events &amp;<br><em>what’s next.</em></h2></div>
           <a class="arrow-link" href="#notices">View notice centre <span>→</span></a>
         </div>
         <div class="story-grid">
           <article class="feature-story reveal">
-            <div class="story-image"><img src="assets/images/campus-life.jpg" alt="SGSITS main academic block and campus"><span>Campus</span></div>
-            <div class="story-copy"><time datetime="2026-08-18">18 August 2026</time><h3>A campus built for ideas, collaboration and everyday discovery</h3><p>Explore laboratories, learning spaces, student chapters and the people who make SGSITS feel alive.</p><a href="#campus">Read the campus story <span>↗</span></a></div>
+            <div class="story-image"><img src="assets/images/sgsits-computer-engineering-department.jpg" alt="Computer Engineering Department building at SGSITS"><span>Department</span></div>
+            <div class="story-copy"><time datetime="2026-08-18">18 August 2026</time><h3>A department where computing moves from theory to working systems</h3><p>Explore laboratories, technical activities, research work and the people shaping the CSE community.</p><a href="#campus">Explore the department <span>↗</span></a></div>
           </article>
           <div class="event-stack">
             <article class="event-card reveal delay-1"><div class="event-date"><strong>24</strong><span>SEP<br>2026</span></div><div><span class="tag">Workshop</span><h3>Hands-on innovation and prototyping workshop</h3><p>Advanced Technology Centre · 10:00 AM</p></div><button type="button" aria-label="Open event" data-toast="Event details can be connected to the institute event feed.">↗</button></article>
@@ -295,15 +289,15 @@
     <section class="section research-section" id="research">
       <div class="shell research-layout">
         <div class="research-copy reveal">
-          <span class="kicker">Research at SGSITS</span>
-          <h2>Curiosity, shaped<br><em>into consequence.</em></h2>
-          <p>Our research interface brings together supervisors, scholars, publications, patents, funded projects and consultancy—making work easier to discover and connect with.</p>
+          <span class="kicker">Research in computing</span>
+          <h2>Questions become<br><em>working knowledge.</em></h2>
+          <p>Discover department supervisors, scholars, publications, projects and consultancy across systems, software, networks, data and intelligent computing.</p>
           <a class="button button-dark" href="#people">Find a researcher</a>
         </div>
         <div class="research-cards reveal delay-1">
-          <a href="#research"><span>R / 01</span><h3>Publications &amp;<br>research papers</h3><p>Search work by department, year and research area.</p><b>→</b></a>
-          <a href="#research"><span>R / 02</span><h3>Patents &amp;<br>innovation</h3><p>Discover ideas developed across institute laboratories.</p><b>→</b></a>
-          <a href="#research"><span>R / 03</span><h3>Projects &amp;<br>consultancy</h3><p>Connect with active projects and domain expertise.</p><b>→</b></a>
+          <a href="#research"><span>R / 01</span><h3>AI, data &amp;<br>intelligent systems</h3><p>Research and projects that turn data into useful, responsible computing systems.</p><b>→</b></a>
+          <a href="#research"><span>R / 02</span><h3>Networks, security<br>&amp; distributed systems</h3><p>Resilient connected systems, secure communication and modern infrastructure.</p><b>→</b></a>
+          <a href="#research"><span>R / 03</span><h3>Software systems<br>&amp; engineering</h3><p>Methods, tools and architectures for dependable real-world software.</p><b>→</b></a>
         </div>
       </div>
     </section>
@@ -312,8 +306,8 @@
     <section class="section placement-section" id="placements">
       <div class="shell">
         <div class="section-title-row reveal">
-          <div><span class="kicker">Beyond the classroom</span><h2>Ready for the work<br><em>that matters.</em></h2></div>
-          <p>The Training &amp; Placement Office connects students, departments and recruiting organisations while supporting professional readiness.</p>
+          <div><span class="kicker">CSE outcomes</span><h2>From the classroom<br><em>to professional impact.</em></h2></div>
+          <p>Access verified, year-wise placement records published by the department administrator and opened directly in their original sheets.</p>
         </div>
         <div class="placement-stage reveal">
           <div class="placement-copy">
@@ -331,38 +325,41 @@
     </section>
 
     <section class="section people-section" id="people">
-      <div class="shell people-layout">
-        <div class="people-visual reveal"><img src="assets/images/campus-life.jpg" alt="SGSITS campus"><div><strong>People make<br>the place.</strong><span>Faculty · Staff · Scholars · Alumni</span></div></div>
-        <div class="people-copy reveal delay-1"><span class="kicker">Meet the community</span><h2>Expertise you can<br><em>actually find.</em></h2><p>Searchable profiles help students, collaborators and visitors discover faculty, staff, research scholars and alumni by department and area of work.</p><form class="people-search" id="peopleSearch"><label class="sr-only" for="peopleQuery">Search people</label><input id="peopleQuery" type="search" placeholder="Try “Computer Engineering”"><button type="submit">Search <span>→</span></button></form><div id="peopleSearchResult" class="people-result" aria-live="polite"></div></div>
+      <div class="shell">
+        <div class="people-layout">
+          <div class="people-visual reveal"><img src="assets/images/campus-life.jpg" alt="Students and academic life at SGSITS"><div><strong>People power<br>the department.</strong><span>Faculty · Staff · Scholars · Alumni</span></div></div>
+          <div class="people-copy reveal delay-1"><span class="kicker">Meet the CSE community</span><h2>Find expertise.<br><em>Start a conversation.</em></h2><p>Searchable faculty profiles help students, collaborators and visitors discover teaching interests, research areas, publications and professional experience.</p><form class="people-search" id="peopleSearch"><label class="sr-only" for="peopleQuery">Search people</label><input id="peopleQuery" type="search" placeholder="Try “machine learning” or a faculty name"><button type="submit">Search <span>→</span></button></form><div id="peopleSearchResult" class="people-result" aria-live="polite">Loading published faculty profiles…</div></div>
+        </div>
+        <div class="faculty-directory" id="facultyDirectory" aria-live="polite"></div>
       </div>
     </section>
 
     <section class="section admissions-band" id="admissions">
       <div class="shell admissions-inner reveal">
-        <div><span class="kicker light">Your next chapter</span><h2>Bring your questions.<br><em>Bring your ambition.</em></h2></div>
-        <div><p>Explore undergraduate, postgraduate and doctoral pathways at SGSITS. Find eligibility, seat information, timelines and official admission resources in one place.</p><a class="button button-gold" href="https://www.sgsits.ac.in/academics-1" target="_blank" rel="noreferrer">Explore admissions <span>↗</span></a></div>
+        <div><span class="kicker light">Study at SGSITS CSE</span><h2>Bring your questions.<br><em>Build your direction.</em></h2></div>
+        <div><p>Explore B.Tech, M.Tech and doctoral pathways in computing. Admission rules and application timelines remain available through the official SGSITS portal.</p><a class="button button-gold" href="https://www.sgsits.ac.in/academics-1" target="_blank" rel="noreferrer">Official admissions <span>↗</span></a></div>
       </div>
     </section>
 
     <section class="section campus-section" id="campus">
       <div class="shell campus-grid">
-        <div class="campus-copy reveal"><span class="kicker">Life at SGSITS</span><h2>Thirty acres.<br><em>Countless directions.</em></h2><p>From student chapters and cultural teams to sports, workshops and everyday conversations—the campus gives ideas room to meet.</p><div class="campus-links"><a href="#events">Events &amp; festivals <span>↗</span></a><a href="#campus">Clubs &amp; chapters <span>↗</span></a><a href="#contact">Visit the campus <span>↗</span></a></div></div>
-        <div class="campus-photo reveal delay-1"><img src="assets/images/sgsits-campus.jpg" alt="SGSITS campus entrance"><div class="photo-label">23, Sir M. Visvesvaraya Marg<br><strong>Indore, Madhya Pradesh</strong></div></div>
+        <div class="campus-copy reveal"><span class="kicker">Department facilities</span><h2>Spaces to code.<br><em>Room to collaborate.</em></h2><p>Department learning extends through computing laboratories, project work, seminars and student-led technical activities on the SGSITS campus.</p><div class="campus-links"><a href="#events">Events &amp; workshops <span>↗</span></a><a href="#research">Research &amp; projects <span>↗</span></a><a href="#contact">Visit the department <span>↗</span></a></div></div>
+        <div class="campus-photo reveal delay-1"><img src="assets/images/sgsits-computer-engineering-department.jpg" alt="Department of Computer Engineering at SGSITS Indore"><div class="photo-label">Department of Computer Engineering<br><strong>SGSITS, Indore</strong></div></div>
       </div>
     </section>
 
     <section class="reports-section" id="reports">
       <div class="shell report-links reveal">
-        <span>Institutional resources</span><a href="#reports">NIRF <b>↗</b></a><a href="#reports">IQAC <b>↗</b></a><a href="#reports">Annual reports <b>↗</b></a><a href="#reports">Policies <b>↗</b></a><a href="#research">Patents <b>↗</b></a>
+        <span>Department resources</span><a href="pages/syllabus.html">Syllabus <b>↗</b></a><a href="pages/timetable.html">Timetable <b>↗</b></a><a href="pages/academic-calendar.html">Calendar <b>↗</b></a><a href="#notices">Notices <b>↗</b></a><a href="#research">Research <b>↗</b></a>
       </div>
     </section>
   </main>
 
   <footer class="site-footer" id="contact">
     <div class="shell footer-top">
-      <div class="footer-brand"><img src="assets/images/sgsits-logo.png" alt="" width="84" height="84"><h2>SGSITS<small>Indore</small></h2><p>Knowledge with character.<br>Engineering with purpose.</p></div>
-      <div class="footer-nav"><div><h3>Explore</h3><a href="#about">About</a><a href="#programmes">Academics</a><a href="#admissions">Admissions</a><a href="#research">Research</a></div><div><h3>Community</h3><a href="#people">People</a><a href="pages/placements.html">Placements</a><a href="#campus">Student life</a><a href="#events">Events</a></div><div><h3>Quick links</h3><a href="#notices">Notices</a><a href="pages/syllabus.html">Syllabus</a><a href="#resources">Downloads</a><a href="#reports">NIRF &amp; IQAC</a><button type="button" data-modal-open="adminModal">Faculty &amp; admin portals</button></div></div>
-      <div class="footer-contact"><h3>Get in touch</h3><p>23, Sir M. Visvesvaraya Marg<br>Indore, Madhya Pradesh 452003</p><a href="tel:+917312544415">+91 731 2544415</a><a href="mailto:director@sgsits.ac.in">director@sgsits.ac.in</a><a class="map-link" href="https://maps.google.com/?q=SGSITS+Indore" target="_blank" rel="noreferrer">Open in Maps ↗</a></div>
+      <div class="footer-brand"><img src="assets/images/sgsits-logo.png" alt="" width="84" height="84"><h2>CSE<small>SGSITS Indore</small></h2><p>Computing foundations.<br>Engineering with purpose.</p></div>
+      <div class="footer-nav"><div><h3>Department</h3><a href="#about">About CSE</a><a href="#departments">Vision &amp; mission</a><a href="#people">Faculty</a><a href="#research">Research</a></div><div><h3>Students</h3><a href="pages/syllabus.html">Syllabus</a><a href="pages/timetable.html">Timetable</a><a href="pages/academic-calendar.html">Academic calendar</a><a href="pages/placements.html">Placements</a></div><div><h3>Quick links</h3><a href="#notices">Notices</a><a href="#events">Events</a><a href="#campus">Facilities</a><a href="#contact">Contact</a><button type="button" data-modal-open="adminModal">Faculty &amp; admin portals</button></div></div>
+      <div class="footer-contact"><h3>Department contact</h3><p>Department of Computer Engineering<br>23, Sir M. Visvesvaraya Marg<br>Indore, Madhya Pradesh 452003</p><a href="tel:+919425032185">+91 94250 32185</a><a href="mailto:hodcse@sgsits.ac.in">hodcse@sgsits.ac.in</a><a class="map-link" href="https://maps.google.com/?q=SGSITS+Indore" target="_blank" rel="noreferrer">Open in Maps ↗</a></div>
     </div>
     <div class="shell footer-bottom"><p>© <span id="year"></span> SGSITS website concept. Institutional information sourced from the official SGSITS website.</p><div><a href="#reports">Privacy</a><a href="#reports">Accessibility</a><a href="#top">Back to top ↑</a></div></div>
   </footer>
@@ -379,5 +376,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/theme-toggle.js"></script>
 </body>
 </html>

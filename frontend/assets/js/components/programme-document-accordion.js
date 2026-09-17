@@ -13,11 +13,23 @@ function documentMarkup(item, programme, documentName) {
   return `<li><button type="button" data-unavailable="${escapeHtml(unavailableLabel)}"><span class="document-icon" aria-hidden="true">PDF</span><span><strong>Semester ${semester}</strong><small>Document awaiting publication</small></span><b>Not published</b></button></li>`;
 }
 
+function subjectMarkup(subject) {
+  const url=safeHttpsUrl(subject.syllabus?.url);
+  const type=subject.syllabus?.mimeType==='application/pdf'?'PDF':'IMAGE';
+  return `<li>${url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`:'<span class="subject-unavailable">'}<span class="document-icon" aria-hidden="true">${type}</span><span><strong>${escapeHtml(subject.subjectCode?`${subject.subjectCode} · ${subject.name}`:subject.name)}</strong><small>${url?'View official subject syllabus':'Syllabus awaiting publication'}</small></span><b>${url?'Open ↗':'Not published'}</b>${url?'</a>':'</span>'}</li>`;
+}
+
+function semesterMarkup(item, programme) {
+  const semester=romanNumerals[item.number-1];
+  const subjects=item.subjects||[];
+  return `<li class="semester-item"><details class="semester-group"><summary><span><strong>Semester ${semester}</strong><small>${subjects.length} ${subjects.length===1?'subject':'subjects'}</small></span><i aria-hidden="true"></i></summary><div class="subject-list"><ol>${subjects.length?subjects.map(subjectMarkup).join(''):`<li class="semester-empty">No subjects have been added for ${escapeHtml(programme.title)} Semester ${semester}.</li>`}</ol></div></details></li>`;
+}
+
 export function renderProgrammeDocuments({ container, programmes, documentName, notice }) {
   container.innerHTML = programmes.map((programme, index) => `
     <details class="programme" ${index === 0 ? 'open' : ''}>
       <summary><span><small>${escapeHtml(programme.level)}</small><strong>${escapeHtml(programme.title)}</strong><em>${escapeHtml(programme.duration)}</em></span><i aria-hidden="true"></i></summary>
-      <div class="programme-content"><p>Select a semester to open its official ${escapeHtml(documentName)} PDF.</p><ol>${programme.semesters.map((item) => documentMarkup(item, programme, documentName)).join('')}</ol></div>
+      <div class="programme-content"><p>${documentName==='syllabus'?'Select a semester, then open a subject syllabus PDF or image.':`Select a semester to open its official ${escapeHtml(documentName)} PDF.`}</p><ol>${programme.semesters.map((item) => documentName==='syllabus'?semesterMarkup(item,programme):documentMarkup(item, programme, documentName)).join('')}</ol></div>
     </details>
   `).join('');
 

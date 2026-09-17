@@ -10,13 +10,15 @@ The project contains a public institute website, an administrator portal, a facu
 
 The following public-facing features are built:
 
-- Responsive SGSITS homepage with institute branding and navigation.
-- Sections for programmes, departments, notices, news, events, research, people, admissions, campus life and placements.
+- Responsive Computer Science & Engineering department homepage with SGSITS branding and department-focused navigation.
+- Department hero, official Computer Engineering building photograph, programme overview, vision and mission, notices, events, research, people, admissions, facilities and placements.
+- Shared light/dark appearance switch across public, faculty and administrator pages, with device-preference detection and a saved browser preference.
 - Published notices, news, events and placements loaded from the backend API.
 - Published event images delivered from Cloudinary.
 - Year-wise placement archive where every entry opens an administrator-provided public sheet link.
 - B.Tech CSE syllabus interface covering 8 semesters.
 - M.Tech CSE syllabus interface covering 4 semesters.
+- Subject-wise syllabus lists inside every semester, with published PDF or image links.
 - Timetable interface with the same UG and PG semester structure.
 - Institute-wide academic-calendar page with support for semester-wise updates and archives.
 - Public approved-faculty profile page.
@@ -39,6 +41,9 @@ The administrator interface currently supports:
 - Bulk publishing, drafting and deletion for supported content.
 - Uploading public content images to Cloudinary through an authenticated backend endpoint.
 - Uploading supported documents to MongoDB GridFS.
+- Creating syllabus subjects under a programme and semester.
+- Assigning one or more faculty members as syllabus uploaders for an individual subject.
+- Reviewing, publishing or requesting changes to faculty syllabus submissions.
 - Secure administrator logout.
 
 ### Faculty portal
@@ -54,8 +59,9 @@ The faculty self-service flow currently supports:
 - Submission of changes for administrator review.
 - Password change after initial login.
 - Public visibility only after administrator approval.
+- Viewing assigned syllabus subjects and uploading a PDF or image for administrator approval.
 
-Faculty members currently have no content-management or publishing permissions. Granular delegated permissions for selected faculty members have been discussed but are not implemented yet.
+Faculty members have no general content-management or publishing permissions. Syllabus upload access is granted per subject by an administrator and does not allow the faculty member to create subjects or publish files.
 
 ### Backend and data layer
 
@@ -91,6 +97,8 @@ The backend currently includes:
 | Create faculty login | No | No | Yes |
 | Manage notices, news and events | No | No | Yes |
 | Upload event/public images | No | No | Yes |
+| Upload syllabus for an assigned subject | No | Assigned subjects only | Yes |
+| Publish a subject syllabus | No | No | Yes |
 | Manage placement links | No | No | Yes |
 | Manage documents | No | No | Yes |
 | Publish or delete website content | No | No | Yes |
@@ -108,6 +116,7 @@ The application uses the `sgsits_website` database and the following main collec
 | `placements` | Academic year, public sheet URL and publication status |
 | `contents` | Notices, news, events, documents, media metadata and publication status |
 | `academicdocuments` | Syllabus, timetable and academic-calendar metadata |
+| `academicsubjects` | Programme/semester subjects, assigned faculty, syllabus asset metadata and approval state |
 | `auditlogs` | Actor, action, resource, IP address and user-agent history |
 | `uploads.files` | GridFS document metadata |
 | `uploads.chunks` | GridFS document binary chunks |
@@ -116,7 +125,7 @@ Plain-text passwords are never stored in MongoDB.
 
 ## Image and document storage
 
-Public event, news and media images are uploaded to Cloudinary. MongoDB stores only their metadata, including:
+Public event, news and media images, plus subject syllabus PDFs/images, are uploaded to Cloudinary. MongoDB stores only their metadata, including:
 
 - Cloudinary provider and public ID.
 - Secure delivery URL.
@@ -126,6 +135,8 @@ Public event, news and media images are uploaded to Cloudinary. MongoDB stores o
 The Cloudinary API secret is used only by the backend. Documents can be stored in MongoDB GridFS and served through the API.
 
 Permanent interface assets such as the SGSITS logo remain inside `frontend/assets/images` and are version-controlled with the application.
+
+The homepage department photograph is stored locally as `sgsits-computer-engineering-department.jpg` and was obtained from the official SGSITS Computer Engineering department record. Keeping the image in the repository avoids runtime hotlinking to the institute website.
 
 ## Project structure
 
@@ -213,6 +224,12 @@ ADMIN_EMAIL=admin@sgsits.ac.in
 ADMIN_INITIAL_PASSWORD=replace-with-a-strong-temporary-password
 ```
 
+For syllabus PDFs, open the selected Cloudinary product environment and enable:
+
+`Settings → Security → Allow delivery of PDF and ZIP files`
+
+Cloudinary Free accounts block PDF delivery by default. Uploading can still succeed while the public PDF URL returns HTTP 401, so this setting is required before publishing syllabus PDFs. The API also checks delivery during publication and reports a configuration error if Cloudinary is still blocking the file.
+
 Never commit `backend/.env` or expose MongoDB, JWT or Cloudinary secrets in frontend code.
 
 ## Installation
@@ -285,6 +302,7 @@ All API routes use the `/api` prefix.
 | `/api/content` | Public content and administrator content management |
 | `/api/placements` | Public placement archive and administrator placement management |
 | `/api/academic-documents` | Syllabus, timetable and calendar records |
+| `/api/academic-subjects` | Subject creation, assignments, syllabus uploads, review and public subject syllabi |
 | `/api/files` | GridFS documents and Cloudinary image uploads |
 
 Public API routes return only published content or approved profile snapshots. Protected routes require the signed authentication cookie and appropriate role.
@@ -307,11 +325,11 @@ npm test --workspace backend
 
 The following work is still required before a production launch:
 
-- Add administrator UI for managing syllabus, timetable and academic-calendar records. The backend APIs and public interfaces already exist.
+- Add administrator UI for timetable and academic-calendar records. The backend APIs and public interfaces already exist.
 - Move homepage configuration and general website settings from browser `localStorage` into MongoDB.
 - Finish Cloudinary-backed faculty photograph upload and cleanup.
 - Delete replaced Cloudinary assets and GridFS documents to avoid orphaned files.
-- Implement granular, administrator-assigned faculty content permissions if required.
+- Extend granular faculty permissions to other content modules if required; syllabus permissions are already subject-scoped.
 - Add password reset/recovery and administrator password-management UI.
 - Expand automated API, authorization, upload and end-to-end tests.
 - Add CSRF protection or an equivalent hardened cross-origin request strategy for production cookie authentication.

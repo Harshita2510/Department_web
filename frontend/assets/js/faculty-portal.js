@@ -390,11 +390,46 @@ $('#previewButton').addEventListener('click', () => {
 
 $('#passwordForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  if ($('#newPassword').value !== $('#confirmPassword').value) {
-    showToast('The new passwords do not match.');
+  const form=event.currentTarget;
+  const submit=form.querySelector('button[type="submit"]');
+  const feedback=$('#passwordFeedback');
+  const currentPassword=$('#currentPassword').value;
+  const newPassword=$('#newPassword').value;
+  const confirmPassword=$('#confirmPassword').value;
+  const setFeedback=(message,state='error')=>{feedback.textContent=message;feedback.className=`password-feedback ${state}`};
+
+  if (newPassword.length < 10) {
+    setFeedback('The new password must contain at least 10 characters.');
+    $('#newPassword').focus();
     return;
   }
-  try{await authService.changePassword($('#currentPassword').value,$('#newPassword').value);sessionStorage.removeItem(sessionKey);event.currentTarget.reset();showToast('Password updated. Please sign in again.');setTimeout(()=>window.location.href='../index.html',1200)}catch(error){showToast(error.message)}
+  if (newPassword !== confirmPassword) {
+    setFeedback('The new passwords do not match.');
+    $('#confirmPassword').focus();
+    return;
+  }
+  if (currentPassword === newPassword) {
+    setFeedback('Choose a new password that is different from the current password.');
+    $('#newPassword').focus();
+    return;
+  }
+
+  submit.disabled=true;
+  submit.textContent='Updating password…';
+  setFeedback('Securely updating your password…','pending');
+  try {
+    await authService.changePassword(currentPassword,newPassword);
+    sessionStorage.removeItem(sessionKey);
+    form.reset();
+    setFeedback('Password updated. Redirecting you to sign in…','success');
+    showToast('Password updated. Please sign in again.');
+    setTimeout(()=>window.location.href='../index.html',1200);
+  } catch(error) {
+    setFeedback(error.message);
+    showToast(error.message);
+    submit.disabled=false;
+    submit.textContent='Update password';
+  }
 });
 
 $('#logoutButton').addEventListener('click', () => {

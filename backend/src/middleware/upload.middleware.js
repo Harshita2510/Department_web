@@ -16,3 +16,12 @@ export const uploadImage = multer({
     ? callback(null, true)
     : callback(new AppError(415, 'Only JPEG, PNG and WebP images are supported'))
 }).single('file');
+
+const syllabusTypes = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+export const uploadSyllabus = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize:10*1024*1024, files:1 },
+  fileFilter: (_request, file, callback) => syllabusTypes.has(file.mimetype)
+    ? callback(null, true)
+    : callback(new AppError(415, 'Syllabus files must be PDF, JPEG, PNG or WebP'))
+}).single('file');

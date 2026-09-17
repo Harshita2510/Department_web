@@ -8,8 +8,11 @@
   <title>Faculty Portal — SGSITS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="../assets/js/theme-init.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/faculty-portal.css">
+  <link rel="stylesheet" href="../assets/css/faculty-syllabus.css">
+  <link rel="stylesheet" href="../assets/css/theme.css">
 </head>
 <body>
   <a class="skip-link" href="#adminMain">Skip to editor</a>
@@ -48,6 +51,10 @@
         <button type="button" data-panel-target="achievementsPanel">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5V4Z"></path><path d="M8 6H4v2c0 2 2 3 4 3M16 6h4v2c0 2-2 3-4 3M12 13v4M8 21h8M9 17h6"></path></svg>
           Achievements
+        </button>
+        <button type="button" data-panel-target="syllabusUploadPanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"></path><path d="M8 10h8M8 14h8M8 18h5"></path></svg>
+          Syllabus uploads <span class="nav-status" id="syllabusAssignmentCount">0</span>
         </button>
         <span class="nav-label nav-label-second">Account</span>
         <button type="button" data-panel-target="settingsPanel">
@@ -176,11 +183,18 @@
           <div class="empty-state" id="achievementEmpty"><div>✦</div><h3>No achievements added yet</h3><p>Add an award, grant, professional distinction or other verified recognition.</p><button class="secondary-action" type="button" data-add-achievement>Add first achievement</button></div>
         </section>
 
+        <section class="portal-panel" id="syllabusUploadPanel" data-title="Syllabus uploads">
+          <div class="editor-heading"><div><span>Assigned access</span><h2>Subject syllabus uploads</h2><p>You can upload a PDF or image only for subjects assigned to you by the website administrator.</p></div></div>
+          <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Your upload is submitted for review and will not appear publicly until an administrator publishes it.</p></div>
+          <div class="faculty-subject-list" id="facultySubjectList"></div><div class="empty-state" id="facultySubjectEmpty"><div>▦</div><h3>No syllabus subjects assigned</h3><p>Ask the website administrator to assign a subject before uploading.</p></div>
+          <input id="facultySyllabusFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
+        </section>
+
         <section class="portal-panel" id="settingsPanel" data-title="Account settings">
           <div class="editor-heading"><div><span>Account &amp; security</span><h2>Settings</h2><p>Review your account details and profile visibility.</p></div></div>
           <div class="settings-grid">
             <div class="form-card"><div class="form-card-title"><span>01</span><div><h3>Account information</h3><p>Your sign-in identity is managed by the administrator.</p></div></div><div class="account-row"><span>Faculty ID</span><strong id="settingsFacultyId">—</strong></div><div class="account-row"><span>Institute email</span><strong id="settingsEmail">Not added</strong></div><div class="account-row"><span>Account role</span><strong>Faculty member</strong></div><div class="account-row"><span>Profile status</span><strong id="settingsVisibility">Draft</strong></div></div>
-            <div class="form-card"><div class="form-card-title"><span>02</span><div><h3>Change password</h3><p>Replace the temporary password given by the administrator.</p></div></div><form id="passwordForm" class="password-form"><label class="field"><span>Current password</span><input id="currentPassword" type="password" required></label><label class="field"><span>New password</span><input id="newPassword" type="password" minlength="8" required><small>At least 8 characters.</small></label><label class="field"><span>Confirm new password</span><input id="confirmPassword" type="password" minlength="8" required></label><button class="secondary-action" type="submit">Update password</button></form></div>
+            <div class="form-card"><div class="form-card-title"><span>02</span><div><h3>Change password</h3><p>Replace the temporary password given by the administrator.</p></div></div><form id="passwordForm" class="password-form"><label class="field"><span>Current password</span><input id="currentPassword" type="password" autocomplete="current-password" minlength="8" required></label><label class="field"><span>New password</span><input id="newPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><small>At least 10 characters.</small></label><label class="field"><span>Confirm new password</span><input id="confirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label><button class="secondary-action" type="submit">Update password</button><p class="password-feedback" id="passwordFeedback" role="status" aria-live="polite"></p></form></div>
           </div>
         </section>
       </div>
@@ -194,5 +208,7 @@
 
   <div class="portal-toast" id="portalToast" role="status" aria-live="polite"></div>
   <script type="module" src="../assets/js/faculty-portal.js"></script>
+  <script type="module" src="../assets/js/faculty-syllabus.js"></script>
+  <script type="module" src="../assets/js/theme-toggle.js"></script>
 </body>
 </html>

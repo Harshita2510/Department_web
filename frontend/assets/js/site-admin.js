@@ -365,7 +365,7 @@ async function saveFaculty(publish) {
 }
 
 function setupHomepage() {
-  const defaults = { eyebrow:'Engineering excellence since 1952', headline:'Learn deeply. Build boldly. Lead responsibly.', intro:'Where rigorous engineering, meaningful research and an energetic student community come together in the heart of Indore.', button:'Explore programmes', link:'#programmes', sections:{ about:true, programmes:true, departments:true, events:true, notices:true, research:true, placements:true, people:true, admissions:true, campus:true } };
+  const defaults = { eyebrow:'Computer Science & Engineering · SGSITS', headline:'Think in systems. Build with purpose. Shape what’s next.', intro:'A department for rigorous computer science, hands-on engineering, meaningful research and technology that responds to industry and society.', button:'Explore CSE programmes', link:'#programmes', sections:{ about:true, programmes:true, departments:true, events:true, notices:true, research:true, placements:true, people:true, admissions:true, campus:true } };
   const home = loadJson(HOME_KEY, defaults); home.sections = { ...defaults.sections, ...(home.sections || {}) };
   $('#heroEyebrow').value = home.eyebrow; $('#heroHeadline').value = home.headline; $('#heroIntro').value = home.intro; $('#heroButton').value = home.button; $('#heroLink').value = home.link;
   $('#sectionToggles').innerHTML = Object.entries(home.sections).map(([key,value]) => `<div class="toggle-row"><div><b>${key[0].toUpperCase()+key.slice(1)}</b><small>Show this section on the public homepage</small></div><label class="switch"><input type="checkbox" data-section="${key}" ${value ? 'checked' : ''}><span></span></label></div>`).join('');
@@ -409,7 +409,7 @@ async function createFacultyAccount() {
   const facultyId = $('#newFacultyId').value.trim().toUpperCase();
   const password = $('#newFacultyPassword').value;
   if (!/^[A-Z0-9-]+$/.test(facultyId)) { showToast('Faculty ID may contain only letters, numbers and hyphens.'); return; }
-  try{await authService.createFaculty(facultyId,password);facultyProfiles=(await facultyService.list()).map(flattenFaculty);closeFacultyAccountModal();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast(`Faculty profile ${facultyId} created in MongoDB. Give the temporary password privately to the faculty member.`)}catch(error){showToast(error.message)}
+  try{await authService.createFaculty(facultyId,password);facultyProfiles=(await facultyService.list()).map(flattenFaculty);window.dispatchEvent(new CustomEvent('faculty-account-created',{detail:{facultyId}}));closeFacultyAccountModal();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast(`Faculty profile ${facultyId} created in MongoDB. Give the temporary password privately to the faculty member.`)}catch(error){showToast(error.message)}
 }
 
 function exportData() {

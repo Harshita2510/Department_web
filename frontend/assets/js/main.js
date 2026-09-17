@@ -3,6 +3,7 @@ import { readJson } from './shared/storage.js';
 import { safeHttpsUrl } from './shared/security.js';
 import { authService } from './services/auth.service.js';
 import { contentService } from './services/content.service.js';
+import { facultyService } from './services/faculty.service.js';
 import { placementService } from './services/placement.service.js';
 
 const body = document.body;
@@ -38,17 +39,18 @@ function displayCMSDate(value) {
 async function applyPublishedCMSContent() {
   const homepage = readCMSData('sgsitsHomepageSettings');
   if (homepage) {
+    const isLegacyDefault = homepage.headline === 'Learn deeply. Build boldly. Lead responsibly.';
     const eyebrow = $('.hero .eyebrow');
-    if (eyebrow && homepage.eyebrow) eyebrow.innerHTML = `<span></span> ${escapeCMS(homepage.eyebrow)}`;
+    if (eyebrow && homepage.eyebrow && !isLegacyDefault) eyebrow.innerHTML = `<span></span> ${escapeCMS(homepage.eyebrow)}`;
     const heroTitle = $('.hero h1');
-    if (heroTitle && homepage.headline) {
+    if (heroTitle && homepage.headline && !isLegacyDefault) {
       const parts = homepage.headline.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) || [homepage.headline];
       heroTitle.innerHTML = parts.map((part, index) => index === 1 ? `<em>${escapeCMS(part)}</em>` : escapeCMS(part)).join('<br>');
     }
     const intro = $('.hero-copy > p');
-    if (intro && homepage.intro) intro.textContent = homepage.intro;
+    if (intro && homepage.intro && !isLegacyDefault) intro.textContent = homepage.intro;
     const heroButton = $('.hero-actions .button-gold');
-    if (heroButton) { if (homepage.button) heroButton.firstChild.textContent = `${homepage.button} `; if (homepage.link) heroButton.href = homepage.link; }
+    if (heroButton && !isLegacyDefault) { if (homepage.button) heroButton.firstChild.textContent = `${homepage.button} `; if (homepage.link) heroButton.href = homepage.link; }
     Object.entries(homepage.sections || {}).forEach(([id, visible]) => { const section = $(`#${id}`); if (section) section.hidden = !visible; });
   }
 
@@ -160,7 +162,7 @@ $$('[data-programme-filter]').forEach((button) => {
       item.setAttribute('aria-selected', String(item === button));
     });
     const selected = button.dataset.programmeFilter;
-    $$('.programme-card').forEach((card) => card.classList.toggle('hidden', selected !== 'all' && card.dataset.level !== selected));
+    $$('.programme-card').forEach((card) => card.classList.toggle('hidden', selected !== 'all' && !card.dataset.level.split(' ').includes(selected)));
   });
 });
 
@@ -172,19 +174,20 @@ $$('[data-notice-filter]').forEach((button) => {
   });
 });
 
-// Department expansion.
+// Vision and mission expansion.
 const departmentList = $('#departmentList');
 $('#departmentToggle').addEventListener('click', (event) => {
   const expanded = departmentList.classList.toggle('expanded');
-  event.currentTarget.textContent = expanded ? 'Show featured departments' : 'View all departments';
+  event.currentTarget.textContent = expanded ? 'Show core commitments' : 'Read all mission commitments';
 });
 
 // Site search uses the content structure and can later be replaced by a CMS search endpoint.
 const searchOverlay = $('#searchOverlay');
 const siteSearch = $('#siteSearch');
 const searchIndex = [
-  { title: 'Undergraduate and postgraduate admissions', meta: 'Admissions', target: '#admissions', keywords: 'admission apply ug pg btech mtech mba mca seats' },
-  { title: 'Programmes and departments', meta: 'Academics', target: '#programmes', keywords: 'programme course engineering pharmacy doctoral department' },
+  { title: 'CSE undergraduate and postgraduate admissions', meta: 'Admissions', target: '#admissions', keywords: 'admission apply ug pg btech mtech computer science engineering seats' },
+  { title: 'Computer Science and Engineering programmes', meta: 'Academics', target: '#programmes', keywords: 'programme course btech mtech doctoral cse computer engineering' },
+  { title: 'Department vision and mission', meta: 'About CSE', target: '#departments', keywords: 'vision mission department purpose values' },
   { title: 'CSE syllabus and curriculum', meta: 'Academic resource', target: 'pages/syllabus.html', keywords: 'syllabus curriculum scheme course btech mtech cse semester' },
   { title: 'CSE semester timetables', meta: 'Academic resource', target: 'pages/timetable.html', keywords: 'class timetable schedule btech mtech cse semester' },
   { title: 'Institute academic calendar', meta: 'Academic resource', target: 'pages/academic-calendar.html', keywords: 'academic calendar semester dates holiday examination schedule' },
@@ -193,8 +196,8 @@ const searchIndex = [
   { title: 'Past placement sheets', meta: 'Placement', target: 'pages/placements.html', keywords: 'placement recruiter company career training alumni sheet archive year' },
   { title: 'Latest notices and news', meta: 'Notice centre', target: '#notices', keywords: 'notice news update circular pdf' },
   { title: 'Events, seminars and workshops', meta: 'Campus pulse', target: '#events', keywords: 'event seminar workshop hackathon orientation competition' },
-  { title: 'Campus life, map and facilities', meta: 'Student life', target: '#campus', keywords: 'campus club chapter facility map hostel student' },
-  { title: 'NIRF, IQAC and annual reports', meta: 'Institutional resources', target: '#reports', keywords: 'nirf iqac report policy nba naac' }
+  { title: 'CSE laboratories and department facilities', meta: 'Student life', target: '#campus', keywords: 'computer lab laboratory department facility map student' },
+  { title: 'Department academic resources', meta: 'Resources', target: '#reports', keywords: 'syllabus timetable calendar notices research' }
 ];
 
 const publishedSearchContent = readCMSData('sgsitsAdminContent');
@@ -248,14 +251,49 @@ $('#searchClose').addEventListener('click', closeSearch);
 siteSearch.addEventListener('input', () => renderSearch(siteSearch.value));
 bindSearchTerms();
 
-// People finder demo.
-$('#peopleSearch').addEventListener('submit', (event) => {
+function facultyInitials(name='') {
+  return name.trim().split(/\s+/).slice(0,2).map((part)=>part[0]?.toUpperCase()).join('')||'FM';
+}
+
+function renderFacultyDirectory(records) {
+  const directory=$('#facultyDirectory');
+  if(!records.length){
+    directory.innerHTML='<div class="faculty-directory-empty"><strong>No published faculty profiles found.</strong><span>Try another name or research area.</span></div>';
+    return;
+  }
+  directory.innerHTML=records.map((record)=>{
+    const profile=record.approvedSnapshot||{};
+    const name=[profile.title,profile.fullName].filter(Boolean).join(' ');
+    const photo=safeCMSLink(profile.photoUrl,'');
+    const href=`pages/faculty-profile.html?facultyId=${encodeURIComponent(record.facultyId)}`;
+    const expertise=(profile.researchInterests||[]).slice(0,2).join(' · ');
+    return `<article class="faculty-directory-card"><a href="${href}" aria-label="View ${escapeCMS(name||record.facultyId)}'s faculty profile"><div class="faculty-card-photo">${photo?`<img src="${escapeCMS(photo)}" alt="${escapeCMS(name)}" loading="lazy">`:`<span>${escapeCMS(facultyInitials(name||record.facultyId))}</span>`}<div class="faculty-card-overlay"><b>View profile</b><i aria-hidden="true">↗</i></div></div><div class="faculty-card-copy"><h3>${escapeCMS(name||'Faculty member')}</h3><p>${escapeCMS(profile.designation||'Faculty member')}</p><small>${escapeCMS(expertise||profile.department||'Computer Science & Engineering')}</small></div></a></article>`;
+  }).join('');
+}
+
+async function loadFacultyDirectory(query='') {
+  const result=$('#peopleSearchResult');
+  result.textContent=query?`Searching published profiles for “${query}”…`:'Loading published faculty profiles…';
+  try{
+    const records=await facultyService.listPublic(query);
+    renderFacultyDirectory(records);
+    result.textContent=query?`${records.length} profile ${records.length===1?'match':'matches'} for “${query}”.`:`Showing ${records.length} published faculty ${records.length===1?'profile':'profiles'}.`;
+  }catch(error){
+    $('#facultyDirectory').innerHTML='<div class="faculty-directory-empty"><strong>Faculty profiles could not be loaded.</strong><span>Please refresh when the API is available.</span></div>';
+    result.textContent=error.message;
+  }
+}
+
+$('#peopleSearch').addEventListener('submit', async (event) => {
   event.preventDefault();
   const query = $('#peopleQuery').value.trim();
-  $('#peopleSearchResult').textContent = query
-    ? `Showing profile matches for “${query}” — ready to connect to the faculty directory.`
-    : 'Enter a name, department or research area.';
+  const button=$('button[type="submit"]',event.currentTarget);
+  button.disabled=true;
+  await loadFacultyDirectory(query);
+  button.disabled=false;
 });
+
+loadFacultyDirectory();
 
 // Modal controls.
 function openModal(modal) {
