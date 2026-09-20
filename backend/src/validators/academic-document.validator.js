@@ -9,7 +9,9 @@ const baseBody=z.object({
   resourceType:z.enum(['syllabus','timetable','academic-calendar']), programme:z.enum(['ug-cse','pg-cse','institute-wide']),
   semester:z.number().int().min(1).max(8).nullable().optional(), academicYear:academicYear.nullable().optional(),
   term:z.enum(['odd','even','annual']).nullable().optional(), title:z.string().trim().min(2).max(200),
-  documentUrl:z.literal('').or(z.url().refine((value)=>value.startsWith('https://'),'Document URL must use HTTPS')).optional(),
+  documentUrl:z.literal('').or(z.url().refine((value)=>{
+    const url=new URL(value);return url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname));
+  },'Document URL must use HTTPS (HTTP is allowed only on localhost)')).optional(),
   editors:z.array(z.string().regex(/^[a-f\d]{24}$/i)).max(100).optional(),
   status:z.enum(['draft','published']).optional(),isCurrent:z.boolean().optional()
 });

@@ -38,3 +38,8 @@ test('validates all supported timetable upload slots',()=>{
   }
   assert.equal(timetableSlotParamsSchema.safeParse({params:{id:facultyId,slot:'quiz'}}).success,false);
 });
+
+test('accepts a localhost GridFS URL for development calendar uploads',()=>{
+  const result=createAcademicDocumentSchema.safeParse({body:{resourceType:'academic-calendar',programme:'institute-wide',semester:null,academicYear:'2026-27',term:'odd',title:'Academic calendar',documentUrl:'http://localhost:5000/api/files/507f1f77bcf86cd799439011',status:'published',isCurrent:true}});
+  assert.equal(result.success,true);
+});

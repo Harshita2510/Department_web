@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../assets/css/site-admin.css">
   <link rel="stylesheet" href="../assets/css/site-admin-syllabus.css">
   <link rel="stylesheet" href="../assets/css/site-admin-timetable.css">
+  <link rel="stylesheet" href="../assets/css/site-admin-calendar.css">
 </head>
 <body>
   <a class="skip-link" href="#cmsMain">Skip to content</a>
@@ -29,6 +30,7 @@
         <button type="button" data-view="placements"><i>↗</i>Placements <b data-count="placements">0</b></button>
         <button type="button" data-view="documents"><i>▤</i>Documents <b data-count="documents">0</b></button>
         <button type="button" data-view="timetableManagement"><i>▥</i>Timetables <b id="timetableRecordCount">0</b></button>
+        <button type="button" data-view="calendarManagement"><i>▤</i>Academic calendar <b id="calendarRecordCount">0</b></button>
         <button type="button" data-view="syllabusManagement"><i>▦</i>Subject syllabus <b id="syllabusSubjectCount">0</b></button>
         <button type="button" data-view="media"><i>◉</i>Media library <b data-count="media">0</b></button>
         <span class="nav-label">Administration</span>
@@ -86,6 +88,12 @@
           <input id="timetableUploadInput" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
         </section>
 
+        <section class="cms-view" id="calendarManagementView" data-title="Academic calendar">
+          <div class="collection-head"><div><span>Institute academic schedule</span><h2>Academic calendar PDFs</h2><p>Upload the institute-wide calendar for each semester and retain previous publications in the archive.</p></div><button class="primary-button" id="addCalendarRecord" type="button">+ Upload calendar</button></div>
+          <div class="permission-note"><strong>Administrator only</strong><p>Only the website administrator can upload, replace, publish or delete an academic calendar PDF.</p></div>
+          <div class="calendar-admin-list" id="calendarAdminList"></div><div class="table-empty" id="calendarAdminEmpty"><span>▤</span><h3>No academic calendars uploaded</h3><p>Upload the current semester calendar as a PDF.</p><button class="secondary-button" id="calendarEmptyAdd" type="button">Upload first calendar</button></div>
+        </section>
+
         <section class="cms-view" id="facultyView" data-title="Faculty profiles">
           <div class="collection-head"><div><span>People directory</span><h2>Faculty profiles</h2><p>Review teacher changes, manage photographs and control what is published.</p></div><button class="primary-button" id="addFaculty" type="button">+ Add faculty profile</button></div>
           <div class="permission-note"><strong>Admin-controlled publishing</strong><p>Teachers can edit text and submit changes. Only administrators can upload profile images and publish a faculty profile.</p></div>
@@ -99,7 +107,7 @@
 
         <section class="cms-view" id="usersView" data-title="Users &amp; roles">
           <div class="collection-head"><div><span>Access control</span><h2>Users &amp; roles</h2><p>Manage faculty credentials and keep publishing permissions restricted.</p></div><button class="primary-button" id="inviteUser" type="button">+ Add faculty login</button></div>
-          <div class="role-grid"><article><span class="role-icon admin-role">A</span><div><h3>Website administrator</h3><p>Exclusive create, upload, edit, delete and publish access for events, placement sheets and official documents.</p><strong>Events · Placement sheets · Documents</strong></div></article><article><span class="role-icon teacher-role">T</span><div><h3>Faculty member</h3><p>Can edit their own text profile and submit changes for administrator review.</p><strong>No event, placement, document upload or publish access</strong></div></article></div>
+          <div class="role-grid"><article><span class="role-icon admin-role">A</span><div><h3>Website administrator</h3><p>Exclusive publishing access, plus control over events, placements, academic calendars and faculty permissions.</p><strong>Full website publishing access</strong></div></article><article><span class="role-icon teacher-role">T</span><div><h3>Faculty member</h3><p>Can edit their own profile. Selected faculty may also submit notice drafts for administrator review.</p><strong>No publishing access</strong></div></article></div>
           <div class="user-table"><div class="user-row user-head"><span>User</span><span>Role</span><span>Status</span><span>Access</span></div><div class="user-row"><span><b>Website Admin</b><small>admin@sgsits.ac.in</small></span><span>Administrator</span><span><i></i> Active</span><span>Full website</span></div><div id="facultyAccountRows"></div></div>
         </section>
 
@@ -165,9 +173,11 @@
     </div>
   </div>
   <div class="modal" id="timetableModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="timetableModalTitle"><div class="modal-shade" data-close-timetable></div><div class="create-menu-card timetable-modal-card"><button data-close-timetable type="button" aria-label="Close">×</button><span>Semester timetable</span><h2 id="timetableModalTitle">Add semester</h2><form id="timetableForm"><input id="timetableId" type="hidden"><div class="form-grid"><label class="field"><span>Programme</span><select id="timetableProgramme"><option value="ug-cse">B.Tech CSE</option><option value="pg-cse">M.Tech CSE</option></select></label><label class="field"><span>Semester</span><select id="timetableSemester"></select></label><label class="field"><span>Academic year</span><input id="timetableYear" placeholder="2026-27" pattern="\d{4}-\d{2}"></label><label class="field"><span>Term</span><select id="timetableTerm"><option value="odd">Odd semester</option><option value="even">Even semester</option></select></label><label class="field full"><span>Title</span><input id="timetableTitle" value="Semester timetable" required maxlength="200"></label></div><fieldset class="timetable-editor-field"><legend>Faculty allowed to upload</legend><div id="timetableFacultyOptions"></div><small>Leave empty when only administrators should upload.</small></fieldset><button class="primary-button" type="submit">Save semester</button></form></div></div>
+  <div class="modal" id="calendarModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="calendarModalTitle"><div class="modal-shade" data-close-calendar></div><div class="create-menu-card calendar-modal-card"><button data-close-calendar type="button" aria-label="Close">×</button><span>Administrator upload</span><h2 id="calendarModalTitle">Upload academic calendar</h2><form id="calendarForm"><input id="calendarId" type="hidden"><div class="form-grid"><label class="field full"><span>Title</span><input id="calendarTitle" required maxlength="200" value="Academic calendar"></label><label class="field"><span>Academic year</span><input id="calendarYear" required placeholder="2026-27" pattern="\d{4}-\d{2}"></label><label class="field"><span>Semester</span><select id="calendarTerm"><option value="odd">Odd semester</option><option value="even">Even semester</option><option value="annual">Annual</option></select></label><label class="field full"><span>Calendar PDF</span><input id="calendarPdf" type="file" accept="application/pdf"><small id="calendarExisting">PDF only · Maximum 10 MB</small></label></div><label class="feature-check"><input id="calendarCurrent" type="checkbox" checked><span><strong>Current calendar</strong><small>Show this calendar prominently above the archive.</small></span></label><label class="feature-check"><input id="calendarPublished" type="checkbox" checked><span><strong>Publish now</strong><small>Make the PDF visible on the public academic calendar page.</small></span></label><button class="primary-button" type="submit">Save calendar</button></form></div></div>
   <div class="cms-toast" id="cmsToast" role="status" aria-live="polite"></div>
   <script type="module" src="../assets/js/site-admin.js"></script>
   <script type="module" src="../assets/js/site-admin-syllabus.js"></script>
   <script type="module" src="../assets/js/site-admin-timetable.js"></script>
+  <script type="module" src="../assets/js/site-admin-calendar.js"></script>
 </body>
 </html>

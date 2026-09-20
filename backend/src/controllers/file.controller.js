@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { uploadCloudinaryImage } from '../services/cloudinary.service.js';
+import { PERMISSIONS,ROLES } from '../constants/roles.js';
 
 const bucket=()=>new mongoose.mongo.GridFSBucket(mongoose.connection.db,{bucketName:'uploads'});
 
@@ -13,6 +14,18 @@ export async function uploadFile(request,response){
   await new Promise((resolve,reject)=>{Readable.from(request.file.buffer).pipe(stream).on('finish',resolve).on('error',reject)});
   const data={provider:'gridfs',id:String(stream.id),key:String(stream.id),url:`${env.API_PUBLIC_URL}/files/${stream.id}`,name:request.file.originalname,mimeType:request.file.mimetype,size:request.file.size};
   await recordAudit(request,'FILE_UPLOADED','GridFS',stream.id,{name:data.name,mimeType:data.mimeType,size:data.size});
+  response.status(201).json({success:true,data});
+}
+
+export async function uploadNoticeFile(request,response){
+  const permitted=request.user.role===ROLES.ADMIN||request.user.permissions?.includes(PERMISSIONS.NOTICE_UPLOAD);
+  if(!permitted)throw new AppError(403,'Notice upload permission is required');
+  if(!request.file)throw new AppError(400,'Choose a notice PDF');
+  if(request.file.buffer.subarray(0,5).toString()!=='%PDF-')throw new AppError(415,'The uploaded file is not a valid PDF');
+  const stream=bucket().openUploadStream(request.file.originalname,{contentType:'application/pdf',metadata:{uploadedBy:request.user.id,purpose:'notice'}});
+  await new Promise((resolve,reject)=>{Readable.from(request.file.buffer).pipe(stream).on('finish',resolve).on('error',reject)});
+  const data={provider:'gridfs',id:String(stream.id),key:String(stream.id),url:`${env.API_PUBLIC_URL}/files/${stream.id}`,name:request.file.originalname,mimeType:'application/pdf',size:request.file.size};
+  await recordAudit(request,'NOTICE_PDF_UPLOADED','GridFS',stream.id,{name:data.name,size:data.size});
   response.status(201).json({success:true,data});
 }
 

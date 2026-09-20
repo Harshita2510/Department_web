@@ -40,3 +40,10 @@ export const uploadTimetableFile=multer({
     ?callback(null,true)
     :callback(new AppError(415,'Timetables must be PDF, JPEG, PNG or WebP files'))
 }).single('file');
+
+export const uploadNoticePdf=multer({
+  storage:multer.memoryStorage(),limits:{fileSize:10*1024*1024,files:1},
+  fileFilter:(_request,file,callback)=>file.mimetype==='application/pdf'
+    ?callback(null,true)
+    :callback(new AppError(415,'Notice attachments must be PDF files'))
+}).single('file');
