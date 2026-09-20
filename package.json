@@ -7,7 +7,7 @@
     "backend"
   ],
   "scripts": {
-    "frontend": "NO_UPDATE_CHECK=1 serve frontend -l 4173 --no-clipboard",
+    "frontend": "serve frontend -l 4173 --no-clipboard",
     "backend": "npm --workspace backend run dev",
     "check": "npm --workspace backend run check"
   },
