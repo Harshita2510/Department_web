@@ -63,7 +63,10 @@ test('public profile without photo renders initials and registration fields, inc
   assert.equal(h.node('#publicAvatar').style.backgroundImage,undefined);
   assert.equal(h.node('#publicHighestQualification').textContent,'PhD');
   assert.equal(h.node('#publicSpecialisation').textContent,'Computer vision');
+  assert.equal(h.node('#publicEmployeeNumber').textContent,'EMP-001');
+  assert.equal(h.node('#publicEmail').textContent,'teacher@example.org');
   assert.equal(h.node('#experienceValue').textContent,0);
+  assert.equal(h.node('#contactWrap').hidden,true);
   assert.equal(h.node('#profileContent').hidden,false);
 });
 
@@ -97,8 +100,15 @@ test('legacy public profile without new fields still renders its placeholder',as
   const h=pageContext({...record,approvedSnapshot:{fullName:'Legacy Teacher'}});
   await loadScript('assets/js/faculty-profile.js',h);
   assert.equal(h.node('#publicInitials').textContent,'LT');
-  assert.equal(h.node('#highestQualificationWrap').hidden,true);
-  assert.equal(h.node('#specialisationWrap').hidden,true);
+  assert.equal(h.node('#publicHighestQualification').textContent,'—');
+  assert.equal(h.node('#publicSpecialisation').textContent,'—');
+  assert.equal(h.node('#contactWrap').hidden,true);
+});
+
+test('public faculty page exposes only the approved minimal profile fields',async()=>{
+  const html=await source('pages/faculty-profile.html');
+  for(const id of ['publicName','publicDesignation','publicEmployeeNumber','experienceValue','publicHighestQualification','publicSpecialisation','publicEmail','publicContact','publicAvatar'])assert.match(html,new RegExp(`id="${id}"`));
+  for(const removed of ['publicBio','publicDepartment','qualificationList','interestList','courseList','scholarsValue','publicPublicationList','publicAchievementList','identityLinks'])assert.doesNotMatch(html,new RegExp(`id="${removed}"`));
 });
 
 test('faculty portal without photo keeps avatar placeholders and loads new fields',async()=>{

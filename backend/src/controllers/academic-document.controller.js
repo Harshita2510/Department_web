@@ -5,7 +5,7 @@ import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { deleteCloudinaryImage,uploadTimetableAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
 
-const timetableSlots=new Set(['classTable','mst1','mst2','mst3','endSemester']);
+const timetableSlots=new Set(['classTable','quiz','mst1','mst2','mst3','endSemester']);
 const safeFolder=(item,slot)=>`${item.programme}/semester-${item.semester}/${item.academicYear||'current'}/${slot}`;
 
 function verifySignature(file){

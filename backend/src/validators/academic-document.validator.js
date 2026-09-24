@@ -25,4 +25,4 @@ const body=baseBody.superRefine((value,context)=>{
 export const createAcademicDocumentSchema=z.object({body});
 export const updateAcademicDocumentSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i)}),body:baseBody.partial().refine((value)=>Object.keys(value).length>0,'At least one field is required')});
 export const academicDocumentIdSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i)})});
-export const timetableSlotParamsSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i),slot:z.enum(['classTable','mst1','mst2','mst3','endSemester'])})});
+export const timetableSlotParamsSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i),slot:z.enum(['classTable','quiz','mst1','mst2','mst3','endSemester'])})});

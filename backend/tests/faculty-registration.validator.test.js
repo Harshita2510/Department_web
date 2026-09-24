@@ -27,3 +27,8 @@ test('later profile edits accept decimal experience and explicit academic fields
   assert.equal(facultyDraftSchema.safeParse({ body:{ experienceYears:3.5, highestQualification:'PhD', areaOfSpecialisation:'AI' } }).success, true);
   assert.equal(facultyDraftSchema.safeParse({ body:{ experienceYears:0 } }).success, true);
 });
+
+test('faculty profile email has no provider or format restriction', () => {
+  assert.equal(facultyDraftSchema.safeParse({ body:{ email:'faculty-contact-id' } }).success, true);
+  assert.equal(facultyDraftSchema.safeParse({ body:{ email:'teacher@personal.example' } }).success, true);
+});

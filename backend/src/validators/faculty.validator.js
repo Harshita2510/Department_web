@@ -3,7 +3,7 @@ import { z } from 'zod';
 const optionalHttpsUrl = z.union([z.literal(''), z.url().refine((value) => new URL(value).protocol === 'https:')]).optional();
 export const facultyDraftSchema = z.object({ body: z.object({
   title: z.string().max(20).optional(), fullName: z.string().max(120).optional(), designation: z.string().max(120).optional(),
-  department: z.string().max(150).optional(), email: z.union([z.literal(''), z.email()]).optional(), phone: z.string().max(30).optional(),
+  department: z.string().max(150).optional(), email: z.string().trim().max(254).optional(), phone: z.string().max(30).optional(),
   office: z.string().max(150).optional(), officeHours: z.string().max(150).optional(), bio: z.string().max(5000).optional(),
   scholarUrl: optionalHttpsUrl, orcidUrl: optionalHttpsUrl, linkedinUrl: optionalHttpsUrl, websiteUrl: optionalHttpsUrl,
   qualifications: z.array(z.string().max(300)).max(30).optional(), researchInterests: z.array(z.string().max(120)).max(50).optional(),

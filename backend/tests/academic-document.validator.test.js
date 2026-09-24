@@ -33,10 +33,10 @@ test('accepts an editor-only timetable update without injecting defaults',()=>{
 });
 
 test('validates all supported timetable upload slots',()=>{
-  for(const slot of ['classTable','mst1','mst2','mst3','endSemester']){
+  for(const slot of ['classTable','quiz','mst1','mst2','mst3','endSemester']){
     assert.equal(timetableSlotParamsSchema.safeParse({params:{id:facultyId,slot}}).success,true);
   }
-  assert.equal(timetableSlotParamsSchema.safeParse({params:{id:facultyId,slot:'quiz'}}).success,false);
+  assert.equal(timetableSlotParamsSchema.safeParse({params:{id:facultyId,slot:'surpriseTest'}}).success,false);
 });
 
 test('accepts a localhost GridFS URL for development calendar uploads',()=>{

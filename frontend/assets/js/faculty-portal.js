@@ -364,10 +364,8 @@ editableFields.forEach((fieldId) => {
     queueSave();
   });
 });
-$('#instituteEmail').addEventListener('input',()=>{profile.email=$('#instituteEmail').value;queueSave()});
-
 $('#instituteEmail').addEventListener('input', (event) => {
-  profile.email = event.target.value.trim().toLowerCase();
+  profile.email = event.target.value;
   queueSave();
 });
 
@@ -396,7 +394,7 @@ $('#confirmPublish').addEventListener('click', () => {
 
 $('#previewButton').addEventListener('click', () => {
   saveProfile();
-  window.open(`faculty-profile.html?facultyId=${encodeURIComponent(facultyId)}&preview=1`, '_blank', 'noopener');
+  window.open(`faculty-profile?facultyId=${encodeURIComponent(facultyId)}&preview=1`, '_blank', 'noopener');
 });
 
 $('#facultyPhotoInput').addEventListener('change',async(event)=>{

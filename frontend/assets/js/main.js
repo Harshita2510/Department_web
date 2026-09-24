@@ -1,10 +1,8 @@
-import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, $$, escapeHtml as escapeCMS } from './shared/dom.js';
 import { readJson } from './shared/storage.js';
 import { safeHttpsUrl } from './shared/security.js';
 import { authService } from './services/auth.service.js';
 import { contentService } from './services/content.service.js';
-import { facultyService } from './services/faculty.service.js';
 import { placementService } from './services/placement.service.js';
 
 const body = document.body;
@@ -73,7 +71,7 @@ async function applyPublishedCMSContent() {
     $('.event-stack').innerHTML = events.slice(0, 3).map((item, index) => {
       const date = displayCMSDate(item.date);
       const image = item.file?.type?.startsWith('image/') ? safeCMSLink(item.file.data, '') : '';
-      return `<article class="event-card ${image ? 'has-image' : ''} reveal visible delay-${Math.min(index+1,3)}"><div class="event-date"><strong>${date.day}</strong><span>${date.month}<br>${new Date(`${item.date}T12:00:00`).getFullYear()}</span></div>${image ? `<img class="event-thumbnail" src="${escapeCMS(image)}" alt="" loading="lazy">` : ''}<div><span class="tag">${escapeCMS(item.category)}</span><h3>${escapeCMS(item.title)}</h3><p>${escapeCMS(item.summary || 'View event details')}</p></div><button type="button" aria-label="Open event details" data-toast="${escapeCMS(item.body || item.summary || 'Event details')}">↗</button></article>`;
+      return `<article class="event-card ${image ? 'has-image' : ''} reveal visible delay-${Math.min(index+1,3)}"><div class="event-date"><strong>${date.day}</strong><span>${date.month}<br>${new Date(`${item.date}T12:00:00`).getFullYear()}</span></div>${image ? `<img class="event-thumbnail" src="${escapeCMS(image)}" alt="" loading="lazy">` : ''}<div><span class="tag">${escapeCMS(item.category)}</span><h3>${escapeCMS(item.title)}</h3><p>${escapeCMS(item.summary || 'View event details')}</p></div><a href="pages/events.html#event-${encodeURIComponent(item._id||item.id||'')}" aria-label="Open ${escapeCMS(item.title)} event details">↗</a></article>`;
     }).join('');
   }
   const stories = (data.news || []).filter((item) => item.status === 'published').sort((a,b) => (b.date || '').localeCompare(a.date || ''));
@@ -192,11 +190,11 @@ const searchIndex = [
   { title: 'CSE syllabus and curriculum', meta: 'Academic resource', target: 'pages/syllabus.html', keywords: 'syllabus curriculum scheme course btech mtech cse semester' },
   { title: 'CSE semester timetables', meta: 'Academic resource', target: 'pages/timetable.html', keywords: 'class timetable schedule btech mtech cse semester' },
   { title: 'Institute academic calendar', meta: 'Academic resource', target: 'pages/academic-calendar.html', keywords: 'academic calendar semester dates holiday examination schedule' },
-  { title: 'Faculty, staff and research scholars', meta: 'People', target: '#people', keywords: 'faculty staff phd scholar people professor' },
+  { title: 'Faculty, staff and research scholars', meta: 'People', target: 'pages/faculty.html', keywords: 'faculty staff phd scholar people professor' },
   { title: 'Research papers, patents and projects', meta: 'Research', target: '#research', keywords: 'research paper publication patent project consultancy' },
   { title: 'Past placement sheets', meta: 'Placement', target: 'pages/placements.html', keywords: 'placement recruiter company career training alumni sheet archive year' },
   { title: 'Latest notices and news', meta: 'Notice centre', target: '#notices', keywords: 'notice news update circular pdf' },
-  { title: 'Events, seminars and workshops', meta: 'Campus pulse', target: '#events', keywords: 'event seminar workshop hackathon orientation competition' },
+  { title: 'Events, seminars and workshops', meta: 'Campus pulse', target: 'pages/events.html', keywords: 'event seminar workshop hackathon orientation competition' },
   { title: 'CSE laboratories and department facilities', meta: 'Student life', target: '#campus', keywords: 'computer lab laboratory department facility map student' },
   { title: 'SGSITS campus map and directions', meta: 'Visit the department', target: '#campus-map', keywords: 'campus map location directions address visit sgsits indore cse' },
   { title: 'Department academic resources', meta: 'Resources', target: '#reports', keywords: 'syllabus timetable calendar notices research' }
@@ -204,7 +202,7 @@ const searchIndex = [
 
 const publishedSearchContent = readCMSData('sgsitsAdminContent');
 if (publishedSearchContent) {
-  const publicTargets = { notices: '#notices', news: '#events', events: '#events', placements: 'pages/placements.html', documents: '#resources', media: '#campus' };
+  const publicTargets = { notices: 'pages/notices.html', news: '#events', events: 'pages/events.html', placements: 'pages/placements.html', documents: '#resources', media: '#campus' };
   Object.entries(publishedSearchContent).forEach(([type, items]) => {
     (items || []).filter((item) => item.status === 'published').forEach((item) => searchIndex.push({ title: item.title, meta: item.category || type, target: type === 'placements' ? safeCMSLink(item.sheetUrl, publicTargets.placements) : item.file?.data || publicTargets[type] || '#top', keywords: `${type} ${item.summary || ''} ${item.body || ''}` }));
   });
@@ -252,50 +250,6 @@ $('#searchOpen').addEventListener('click', openSearch);
 $('#searchClose').addEventListener('click', closeSearch);
 siteSearch.addEventListener('input', () => renderSearch(siteSearch.value));
 bindSearchTerms();
-
-function facultyInitials(name='') {
-  return name.trim().split(/\s+/).slice(0,2).map((part)=>part[0]?.toUpperCase()).join('')||'FM';
-}
-
-function renderFacultyDirectory(records) {
-  const directory=$('#facultyDirectory');
-  if(!records.length){
-    directory.innerHTML='<div class="faculty-directory-empty"><strong>No published faculty profiles found.</strong><span>Try another name or research area.</span></div>';
-    return;
-  }
-  directory.innerHTML=records.map((record)=>{
-    const profile=record.approvedSnapshot||{};
-    const name=[profile.title,profile.fullName].filter(Boolean).join(' ');
-    const photo=facultyPhotoUrl(safeCMSLink(profile.photoUrl,''),400);
-    const href=`pages/faculty-profile.html?facultyId=${encodeURIComponent(record.facultyId)}`;
-    const expertise=(profile.researchInterests||[]).slice(0,2).join(' · ');
-    return `<article class="faculty-directory-card"><a href="${href}" aria-label="View ${escapeCMS(name||record.facultyId)}'s faculty profile"><div class="faculty-card-photo">${photo?`<img src="${escapeCMS(photo)}" alt="${escapeCMS(name)}" loading="lazy">`:`<span>${escapeCMS(facultyInitials(name||record.facultyId))}</span>`}<div class="faculty-card-overlay"><b>View profile</b><i aria-hidden="true">↗</i></div></div><div class="faculty-card-copy"><h3>${escapeCMS(name||'Faculty member')}</h3><p>${escapeCMS(profile.designation||'Faculty member')}</p><small>${escapeCMS(expertise||profile.department||'Computer Science & Engineering')}</small></div></a></article>`;
-  }).join('');
-}
-
-async function loadFacultyDirectory(query='') {
-  const result=$('#peopleSearchResult');
-  result.textContent=query?`Searching published profiles for “${query}”…`:'Loading published faculty profiles…';
-  try{
-    const records=await facultyService.listPublic(query);
-    renderFacultyDirectory(records);
-    result.textContent=query?`${records.length} profile ${records.length===1?'match':'matches'} for “${query}”.`:`Showing ${records.length} published faculty ${records.length===1?'profile':'profiles'}.`;
-  }catch(error){
-    $('#facultyDirectory').innerHTML='<div class="faculty-directory-empty"><strong>Faculty profiles could not be loaded.</strong><span>Please refresh when the API is available.</span></div>';
-    result.textContent=error.message;
-  }
-}
-
-$('#peopleSearch').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const query = $('#peopleQuery').value.trim();
-  const button=$('button[type="submit"]',event.currentTarget);
-  button.disabled=true;
-  await loadFacultyDirectory(query);
-  button.disabled=false;
-});
-
-loadFacultyDirectory();
 
 // Modal controls.
 function openModal(modal) {
