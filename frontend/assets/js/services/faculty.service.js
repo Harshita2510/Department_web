@@ -5,10 +5,9 @@ export const facultyService={
   updateOwn:(draft)=>apiRequest('/faculty/me',{method:'PATCH',body:JSON.stringify(draft)}),
   submitOwn:()=>apiRequest('/faculty/me/submit',{method:'POST'}),
   listPublic:(query='')=>apiRequest(`/faculty/public${query?`?q=${encodeURIComponent(query)}`:''}`,{cache:'no-store'}),
-  getPublic:(facultyId)=>apiRequest(`/faculty/public/${encodeURIComponent(facultyId)}`),
+  getPublic:(facultyId)=>apiRequest(`/faculty/public/${encodeURIComponent(facultyId)}`,{cache:'no-store'}),
   list:(status='')=>apiRequest(`/faculty${status?`?status=${encodeURIComponent(status)}`:''}`),
   listAccessOptions:()=>apiRequest('/faculty/access-options'),
-  updateByAdmin:(id,draft)=>apiRequest(`/faculty/${id}`,{method:'PATCH',body:JSON.stringify(draft)}),
-  approve:(id)=>apiRequest(`/faculty/${id}/approve`,{method:'POST'})
-  ,remove:(id)=>apiRequest(`/faculty/${id}`,{method:'DELETE'})
+  approve:(id)=>apiRequest(`/faculty/${id}/approve`,{method:'POST'}),
+  remove:(id)=>apiRequest(`/faculty/${id}`,{method:'DELETE'})
 };

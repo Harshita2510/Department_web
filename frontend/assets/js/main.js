@@ -1,3 +1,4 @@
+import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, $$, escapeHtml as escapeCMS } from './shared/dom.js';
 import { readJson } from './shared/storage.js';
 import { safeHttpsUrl } from './shared/security.js';
@@ -265,7 +266,7 @@ function renderFacultyDirectory(records) {
   directory.innerHTML=records.map((record)=>{
     const profile=record.approvedSnapshot||{};
     const name=[profile.title,profile.fullName].filter(Boolean).join(' ');
-    const photo=safeCMSLink(profile.photoUrl,'');
+    const photo=facultyPhotoUrl(safeCMSLink(profile.photoUrl,''),400);
     const href=`pages/faculty-profile.html?facultyId=${encodeURIComponent(record.facultyId)}`;
     const expertise=(profile.researchInterests||[]).slice(0,2).join(' · ');
     return `<article class="faculty-directory-card"><a href="${href}" aria-label="View ${escapeCMS(name||record.facultyId)}'s faculty profile"><div class="faculty-card-photo">${photo?`<img src="${escapeCMS(photo)}" alt="${escapeCMS(name)}" loading="lazy">`:`<span>${escapeCMS(facultyInitials(name||record.facultyId))}</span>`}<div class="faculty-card-overlay"><b>View profile</b><i aria-hidden="true">↗</i></div></div><div class="faculty-card-copy"><h3>${escapeCMS(name||'Faculty member')}</h3><p>${escapeCMS(profile.designation||'Faculty member')}</p><small>${escapeCMS(expertise||profile.department||'Computer Science & Engineering')}</small></div></a></article>`;
@@ -353,12 +354,12 @@ $$('[data-login-role]').forEach((button) => button.addEventListener('click', () 
     tab.setAttribute('aria-selected', String(tab === button));
   });
   $('#loginKicker').textContent = role === 'admin' ? 'Website administration' : 'Faculty self-service';
-  $('#loginDescription').textContent = role === 'admin' ? 'Sign in to upload, review, manage and publish all website content.' : 'Use the Faculty ID and temporary password provided by the administrator.';
+  $('#loginDescription').textContent = role === 'admin' ? 'Sign in to upload, review, manage and publish all website content.' : 'Use the Employee number and temporary password provided by the administrator.';
   $('#portalSubmitButton').textContent = role === 'admin' ? 'Open admin console' : 'Open faculty workspace';
-  $('#loginIdentifierLabel').textContent = role === 'admin' ? 'Administrator email' : 'Faculty ID';
+  $('#loginIdentifierLabel').textContent = role === 'admin' ? 'Administrator email' : 'Employee number';
   $('#adminEmail').type = role === 'admin' ? 'email' : 'text';
   $('#adminEmail').placeholder = role === 'admin' ? 'admin@sgsits.ac.in' : 'e.g. FAC-001';
-  $('#adminHint').innerHTML = role === 'admin' ? '<strong>Secure access:</strong> use the administrator account stored in MongoDB.' : '<strong>No self-registration:</strong> a website administrator must create your Faculty ID first.';
+  $('#adminHint').innerHTML = role === 'admin' ? '<strong>Secure access:</strong> use the administrator account stored in MongoDB.' : '<strong>No self-registration:</strong> a website administrator must create your Employee number first.';
   $('#adminError').textContent = '';
 }));
 

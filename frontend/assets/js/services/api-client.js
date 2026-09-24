@@ -8,6 +8,10 @@ export async function apiRequest(path, options = {}) {
     ...options
   });
   const payload = response.status === 204 ? null : await response.json().catch(() => null);
-  if (!response.ok) throw new Error(payload?.message || `Request failed with status ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(payload?.message || `Request failed with status ${response.status}`);
+    error.details = payload?.details;
+    throw error;
+  }
   return payload?.data ?? payload;
 }

@@ -1,6 +1,8 @@
+import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, $$ } from './shared/dom.js';
 import { authService } from './services/auth.service.js';
 import { facultyService } from './services/faculty.service.js';
+import { uploadService } from './services/upload.service.js';
 
 const sessionKey = 'sgsitsFacultySession';
 const session = JSON.parse(sessionStorage.getItem(sessionKey) || 'null');
@@ -10,12 +12,13 @@ if (!session?.facultyId || session?.role !== 'faculty') {
 }
 
 const facultyId = (session?.facultyId || '').trim().toUpperCase();
+const CSE_DEPARTMENT='Computer Science & Engineering';
 const defaultProfile = {
   facultyId,
   title: 'Dr.',
   fullName: '',
   designation: '',
-  department: '',
+  department: CSE_DEPARTMENT,
   email: '',
   phone: '',
   office: '',
@@ -27,6 +30,8 @@ const defaultProfile = {
   linkedinUrl: '',
   websiteUrl: '',
   qualifications: '',
+  highestQualification: '',
+  areaOfSpecialisation: '',
   researchInterests: '',
   coursesTaught: '',
   experienceYears: '',
@@ -48,7 +53,7 @@ let toastTimer;
 const editableFields = [
   'title', 'fullName', 'designation', 'department', 'phone', 'office', 'officeHours', 'bio',
   'scholarUrl', 'orcidUrl', 'linkedinUrl', 'websiteUrl', 'qualifications', 'researchInterests',
-  'coursesTaught', 'experienceYears', 'scholarsSupervised', 'researchSummary'
+  'coursesTaught', 'experienceYears', 'scholarsSupervised', 'researchSummary', 'highestQualification', 'areaOfSpecialisation'
 ];
 
 function initials(name = '') {
@@ -74,19 +79,17 @@ function calculateCompletion() {
   const checks = [
     Boolean(profile.fullName.trim()),
     Boolean(profile.designation.trim()),
-    Boolean(profile.department),
-    profile.bio.trim().length >= 50,
-    Boolean(profile.qualifications.trim()),
-    Boolean(profile.researchInterests.trim()),
-    Boolean(profile.coursesTaught.trim()),
-    profile.publications.length > 0,
-    Boolean(profile.scholarUrl || profile.orcidUrl || profile.linkedinUrl || profile.websiteUrl)
+    profile.experienceYears !== '',
+    Boolean(profile.highestQualification.trim()),
+    Boolean(profile.areaOfSpecialisation.trim()),
+    Boolean(profile.email.trim()),
+    Boolean(profile.photo)
   ];
   return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
 function hasRequiredFields() {
-  return Boolean(profile.fullName.trim() && profile.designation.trim() && profile.department && profile.bio.trim().length >= 50);
+  return Boolean(profile.fullName.trim() && profile.designation.trim() && profile.email.trim() && profile.highestQualification.trim() && profile.areaOfSpecialisation.trim() && profile.experienceYears !== '' && profile.photo);
 }
 
 function markSaving(state = 'unsaved') {
@@ -118,13 +121,15 @@ function apiDraft() {
     phone:profile.phone,office:profile.office,officeHours:profile.officeHours,bio:profile.bio,scholarUrl:profile.scholarUrl,orcidUrl:profile.orcidUrl,
     linkedinUrl:profile.linkedinUrl,websiteUrl:profile.websiteUrl,qualifications:list(profile.qualifications),researchInterests:list(profile.researchInterests),
     coursesTaught:list(profile.coursesTaught),experienceYears:number(profile.experienceYears),scholarsSupervised:number(profile.scholarsSupervised),researchSummary:profile.researchSummary,
+    highestQualification:profile.highestQualification,areaOfSpecialisation:profile.areaOfSpecialisation,
+    photoUrl:profile.photo,
     publications:profile.publications.map((item)=>({...item,year:number(item.year)})),achievements:profile.achievements.map((item)=>({...item,year:number(item.year)}))
   };
 }
 
 function applyApiProfile(record) {
   const draft=record.draft||{};const text=(value,separator='\n')=>Array.isArray(value)?value.join(separator):value||'';
-  profile={...defaultProfile,...draft,facultyId:record.facultyId,photo:draft.photoUrl||'',qualifications:text(draft.qualifications),researchInterests:text(draft.researchInterests,', '),coursesTaught:text(draft.coursesTaught,', '),experienceYears:draft.experienceYears??'',scholarsSupervised:draft.scholarsSupervised??'',publications:draft.publications||[],achievements:draft.achievements||[],reviewStatus:record.reviewStatus,isPublished:Boolean(record.approvedSnapshot),updatedAt:record.updatedAt,publishedAt:record.publishedAt||''};
+  profile={...defaultProfile,...draft,department:CSE_DEPARTMENT,facultyId:record.facultyId,photo:draft.photoUrl||'',qualifications:text(draft.qualifications),researchInterests:text(draft.researchInterests,', '),coursesTaught:text(draft.coursesTaught,', '),experienceYears:draft.experienceYears??'',scholarsSupervised:draft.scholarsSupervised??'',publications:draft.publications||[],achievements:draft.achievements||[],reviewStatus:record.reviewStatus,isPublished:Boolean(record.approvedSnapshot),updatedAt:record.updatedAt,publishedAt:record.publishedAt||''};
 }
 
 async function saveProfile(showConfirmation = false) {
@@ -142,9 +147,9 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3600);
 }
 
-function setAvatar(element, includeFallback = true) {
+function setAvatar(element, includeFallback = true, width = 156) {
   if (profile.photo) {
-    element.style.backgroundImage = `url("${profile.photo}")`;
+    element.style.backgroundImage = `url("${facultyPhotoUrl(profile.photo,width)}")`;
     if (!includeFallback) element.style.color = 'transparent';
     if (includeFallback) {
       const fallback = $('[data-profile-initials]', element);
@@ -175,8 +180,8 @@ function renderDashboard() {
   $$('[data-profile-initials]').forEach((element) => element.textContent = profileInitials);
 
   setAvatar($('.summary-avatar'));
-  setAvatar($('.sidebar-avatar'), false);
-  setAvatar($('#photoPreview'));
+  setAvatar($('.sidebar-avatar'), false, 74);
+  setAvatar($('#photoPreview'), true, 216);
 
   $('#completionRing').style.setProperty('--progress', completion);
   $('#completionValue').textContent = `${completion}%`;
@@ -198,10 +203,10 @@ function renderDashboard() {
   $('#profileNavStatus').textContent = visibilityText;
 
   const tasks = [
-    { label: 'Add basic profile details', done: Boolean(profile.fullName && profile.designation && profile.department), target: 'profilePanel' },
-    { label: 'Write a professional biography', done: profile.bio.trim().length >= 50, target: 'profilePanel' },
-    { label: 'Add qualifications and expertise', done: Boolean(profile.qualifications && profile.researchInterests), target: 'academicPanel' },
-    { label: 'Feature a selected publication', done: profile.publications.length > 0, target: 'publicationsPanel' }
+    { label: 'Add name and designation', done: Boolean(profile.fullName && profile.designation), target: 'profilePanel' },
+    { label: 'Add email and optional contact', done: Boolean(profile.email), target: 'profilePanel' },
+    { label: 'Add experience, qualification and specialisation', done: profile.experienceYears!==''&&Boolean(profile.highestQualification&&profile.areaOfSpecialisation), target: 'academicPanel' },
+    { label: 'Upload your profile photograph', done: Boolean(profile.photo), target: 'profilePanel' }
   ];
   $('#completionTasks').innerHTML = tasks.map((task) => `<div class="completion-task ${task.done ? 'done' : ''}"><i>✓</i><span>${task.label}</span><button type="button" data-go-to="${task.target}" aria-label="Open ${task.label}">→</button></div>`).join('');
   bindGoToButtons();
@@ -214,11 +219,16 @@ function populateForms() {
   });
   $('#instituteEmail').value = profile.email || '';
   $('#settingsFacultyId').textContent = facultyId;
+  $$('[data-faculty-id]').forEach((field)=>{field.value=facultyId});
   $('#settingsEmail').textContent = profile.email || 'Not added';
   $('#bioCount').textContent = profile.bio.length;
 }
 
 function showPanel(panelId) {
+  if(session.mustChangePassword&&panelId!=='settingsPanel'){
+    showToast('Change your temporary password before opening the profile editor.');
+    panelId='settingsPanel';
+  }
   $$('.portal-panel').forEach((panel) => panel.classList.toggle('active', panel.id === panelId));
   $$('[data-panel-target]').forEach((button) => button.classList.toggle('active', button.dataset.panelTarget === panelId));
   const activePanel = $(`#${panelId}`);
@@ -362,6 +372,7 @@ $('#instituteEmail').addEventListener('input', (event) => {
 });
 
 if (session.mustChangePassword) {
+  document.body.classList.add('password-change-required');
   showPanel('settingsPanel');
   showToast('Please replace the temporary password provided by the administrator.');
 }
@@ -377,7 +388,7 @@ $('#confirmPublish').addEventListener('click', () => {
   if (!hasRequiredFields()) {
     closePublishModal();
     showPanel('profilePanel');
-    showToast('Complete your name, designation, department and a biography of at least 50 characters before submitting.');
+    showToast('Complete all required profile fields and upload your photograph before submitting.');
     return;
   }
   saveProfile().then((saved)=>saved?facultyService.submitOwn():null).then((record)=>{if(!record)return;applyApiProfile(record);closePublishModal();renderDashboard();showToast('Your changes were submitted to the website administrator for review.')}).catch((error)=>showToast(error.message));
@@ -386,6 +397,33 @@ $('#confirmPublish').addEventListener('click', () => {
 $('#previewButton').addEventListener('click', () => {
   saveProfile();
   window.open(`faculty-profile.html?facultyId=${encodeURIComponent(facultyId)}&preview=1`, '_blank', 'noopener');
+});
+
+$('#facultyPhotoInput').addEventListener('change',async(event)=>{
+  const file=event.target.files[0];
+  if(!file)return;
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){
+    event.target.value='';
+    showToast('Choose a JPG, PNG or WebP photograph no larger than 5 MB.');
+    return;
+  }
+  const status=$('#facultyPhotoStatus');
+  status.textContent='Uploading photograph…';
+  try{
+    const asset=await uploadService.uploadFacultyPhoto(file);
+    profile.photo=asset.url;
+    const saved=await saveProfile();
+    if(saved){status.textContent='Photograph uploaded. Submit your profile when all details are complete.';showToast('Photograph uploaded successfully.')}
+  }catch(error){status.textContent='Photo upload failed. Please try again.';showToast(error.message)}
+  finally{event.target.value=''}
+});
+
+$('#facultyPhotoRemove').addEventListener('click',async()=>{
+  if(!profile.photo)return;
+  profile.photo='';
+  renderDashboard();
+  await saveProfile();
+  $('#facultyPhotoStatus').textContent='Photograph removed. Add a photo before submitting your profile.';
 });
 
 $('#passwordForm').addEventListener('submit', async (event) => {

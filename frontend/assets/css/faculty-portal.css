@@ -250,3 +250,8 @@ a { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+body.password-change-required .portal-panel:not(#settingsPanel),
+body.password-change-required [data-panel-target]:not([data-panel-target="settingsPanel"]),
+body.password-change-required #publishButton,
+body.password-change-required #previewButton { display: none !important; }

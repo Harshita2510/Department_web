@@ -25,6 +25,8 @@ The following public-facing features are built:
 - Notice workflow with homepage short descriptions, full archive details, official PDF attachments and administrator publishing.
 - Granular notice permission that administrators can grant to selected faculty; faculty submissions remain private drafts until reviewed.
 - Public approved-faculty profile page.
+- Faculty onboarding with employee ID and a temporary password only. The faculty member must change that password before profile editing is unlocked.
+- Faculty-owned profile photographs stored in Cloudinary; administrators receive a read-only review and approval action.
 - Responsive layouts for desktop, tablet and mobile screens.
 
 ### Administrator portal
@@ -304,7 +306,7 @@ All API routes use the `/api` prefix.
 |---|---|
 | `/api/health` | Service and database health |
 | `/api/auth` | Login, logout, current user, password changes and faculty-account creation |
-| `/api/faculty` | Own-profile editing, submission, administrator review and public profiles |
+| `/api/faculty` | Faculty-owned profile editing, submission, read-only administrator approval and public profiles |
 | `/api/content` | Public content and administrator content management |
 | `/api/placements` | Public placement archive and administrator placement management |
 | `/api/academic-documents` | Syllabus, timetable and calendar records |

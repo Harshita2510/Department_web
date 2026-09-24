@@ -1,3 +1,4 @@
+import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, escapeHtml, initials } from './shared/dom.js';
 import { safeHttpsUrl as safeLink } from './shared/security.js';
 import { facultyService } from './services/faculty.service.js';
@@ -5,6 +6,8 @@ import { facultyService } from './services/faculty.service.js';
 const params = new URLSearchParams(window.location.search);
 const facultyId = (params.get('facultyId') || '').trim().toUpperCase();
 const preview = params.get('preview') === '1';
+const facultySession=JSON.parse(sessionStorage.getItem('sgsitsFacultySession')||'null');
+const ownPreview=preview&&facultySession?.role==='faculty'&&(!facultyId||facultyId===facultySession.facultyId?.toUpperCase());
 let profile = null;
 
 const listItems = (value = '', separator = /\r?\n/) => (Array.isArray(value)?value:String(value).split(separator)).map((item) => item.trim()).filter(Boolean);
@@ -16,7 +19,7 @@ function renderProfile() {
   }
 
   $('#profileContent').hidden = false;
-  $('#previewBar').hidden = !preview;
+  $('#previewBar').hidden = !ownPreview;
   const fullDisplayName = `${profile.title || ''} ${profile.fullName || 'Faculty Member'}`.trim();
   document.title = `${fullDisplayName} — SGSITS Faculty`;
   $('#publicName').textContent = fullDisplayName;
@@ -25,7 +28,7 @@ function renderProfile() {
   $('#publicDepartment').textContent = profile.department || 'SGSITS Indore';
   $('#publicBio').textContent = profile.bio || 'Biography has not been added yet.';
   if (profile.photoUrl) {
-    $('#publicAvatar').style.backgroundImage = `url("${profile.photoUrl}")`;
+    $('#publicAvatar').style.backgroundImage = `url("${facultyPhotoUrl(profile.photoUrl,380)}")`;
     $('#publicInitials').style.visibility = 'hidden';
   }
 
@@ -45,12 +48,16 @@ function renderProfile() {
   $('#contactDetails').innerHTML = contact.join('');
 
   const qualifications = listItems(profile.qualifications);
+  $('#highestQualificationWrap').hidden = !profile.highestQualification;
+  $('#publicHighestQualification').textContent = profile.highestQualification || '';
+  $('#specialisationWrap').hidden = !profile.areaOfSpecialisation;
+  $('#publicSpecialisation').textContent = profile.areaOfSpecialisation || '';
   $('#qualificationList').innerHTML = qualifications.length ? qualifications.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>Qualifications not added.</li>';
   const interests = listItems(profile.researchInterests, ',');
   $('#interestList').innerHTML = interests.length ? interests.map((item) => `<span>${escapeHtml(item)}</span>`).join('') : '<span>Research interests not added</span>';
   const courses = listItems(profile.coursesTaught, ',');
   $('#courseList').innerHTML = courses.length ? courses.map((item) => `<span>${escapeHtml(item)}</span>`).join('') : '<span>Courses not added</span>';
-  $('#experienceValue').textContent = profile.experienceYears || '—';
+  $('#experienceValue').textContent = profile.experienceYears ?? '—';
   $('#scholarsValue').textContent = profile.scholarsSupervised || '—';
   $('#researchSummaryWrap').hidden = !profile.researchSummary;
   $('#publicResearchSummary').textContent = profile.researchSummary || '';
@@ -69,6 +76,16 @@ function renderProfile() {
 
 $('#publicYear').textContent = new Date().getFullYear();
 async function loadProfile(){
-  try{const record=preview?await facultyService.getOwn():await facultyService.getPublic(facultyId);profile=preview?record.draft:record.approvedSnapshot;renderProfile()}catch{$('#profileEmpty').hidden=false}
+  if(!facultyId&&!ownPreview){
+    $('#profileEmptyMessage').textContent='No faculty employee ID was included in this link. Open the profile from the faculty directory.';
+    $('#profileEmpty').hidden=false;
+    return;
+  }
+  try{
+    const record=ownPreview?await facultyService.getOwn():await facultyService.getPublic(facultyId);
+    if(!ownPreview&&record.facultyId?.toUpperCase()!==facultyId)throw new Error('The requested faculty profile did not match the returned record.');
+    profile=ownPreview?record.draft:record.approvedSnapshot;
+    renderProfile();
+  }catch(error){$('#profileEmptyMessage').textContent=error.message||'The profile is not published or could not be loaded.';$('#profileEmpty').hidden=false}
 }
 loadProfile();

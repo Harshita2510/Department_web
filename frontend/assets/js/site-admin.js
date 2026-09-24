@@ -1,3 +1,4 @@
+import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, $$, escapeHtml, initials } from './shared/dom.js';
 import { formatDate } from './shared/format.js';
 import { authService } from './services/auth.service.js';
@@ -46,7 +47,6 @@ let currentType = 'notices';
 let selectedIds = new Set();
 let pendingFile = null;
 let pendingPlacementPdf=null;
-let editingFacultyPhoto = '';
 let toastTimer;
 let facultyProfiles=[];
 let facultyAccounts=[];
@@ -84,9 +84,18 @@ function getFacultyAccounts() {
   return facultyAccounts;
 }
 
+function hasCompleteApprovedFacultyProfile(profile){
+  const approved=profile||{};
+  return Boolean(
+    approved.fullName?.trim()&&approved.designation?.trim()&&approved.email?.trim()&&
+    approved.highestQualification?.trim()&&approved.areaOfSpecialisation?.trim()&&
+    approved.photoUrl?.trim()&&Number.isFinite(approved.experienceYears)&&approved.experienceYears>=0
+  );
+}
+
 function flattenFaculty(record){
   const draft=record.draft||{};
-  return {...draft,id:record._id,facultyId:record.facultyId,photo:draft.photoUrl||'',reviewStatus:record.reviewStatus,isPublished:Boolean(record.approvedSnapshot),submittedAt:record.submittedAt,updatedAt:record.updatedAt};
+  return {...draft,id:record._id,facultyId:record.facultyId,photo:draft.photoUrl||'',reviewStatus:record.reviewStatus,isPublished:hasCompleteApprovedFacultyProfile(record.approvedSnapshot),hasApprovedSnapshot:Boolean(record.approvedSnapshot),submittedAt:record.submittedAt,updatedAt:record.updatedAt};
 }
 
 function flattenContent(item){
@@ -102,7 +111,7 @@ async function hydrateMongoData(){
     const collectionKeys={notice:'notices',news:'news',event:'events',document:'documents',media:'media'};
     content.forEach((item)=>{const key=collectionKeys[item.type];if(key)store[key].push(flattenContent(item))});
     store.placements=placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '–')}`,category:item.sourceType==='pdf'?'Placement PDF':'Placement sheet',summary:`Open the placement ${item.sourceType==='pdf'?'PDF':'sheet'} for academic year ${item.academicYear.replace('-', '–')}.`,file:item.document?{...item.document,type:item.document.mimeType,data:item.document.url}:null}));
-    updateCounts();updateDashboard();renderUserAccounts();if(currentType==='placements')renderCollection();
+    updateCounts();updateDashboard();renderUserAccounts();renderFaculty();if(currentType==='placements')renderCollection();
   }catch(error){showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?adminLogin=required'),900)}
 }
 
@@ -373,48 +382,58 @@ async function bulkSet(status) {
 
 function renderFaculty() {
   const profiles = getFacultyProfiles();
-  $('#facultyGrid').innerHTML = profiles.map((profile) => `<article class="faculty-card"><div class="faculty-card-top"><div class="faculty-photo" style="${profile.photo ? `background-image:url('${profile.photo}')` : ''}">${profile.photo ? '' : initials(profile.fullName || profile.facultyId)}</div><span class="faculty-state ${profile.isPublished ? 'published' : ''}">${profile.reviewStatus === 'submitted' ? 'Review needed' : profile.isPublished ? 'Published' : 'Profile incomplete'}</span></div><h3>${escapeHtml(profile.fullName || 'Profile not completed')}</h3><p>${escapeHtml(profile.designation || `Faculty ID: ${profile.facultyId}`)}</p><span>${escapeHtml(profile.department || profile.email || 'Waiting for faculty details')}</span><footer><small>Updated ${formatDate(profile.updatedAt)}</small><button type="button" data-edit-faculty="${encodeURIComponent(profile.facultyId)}">Review &amp; edit →</button></footer></article>`).join('');
+  $('#facultyGrid').innerHTML = profiles.map((profile) => `<article class="faculty-card"><div class="faculty-card-top"><div class="faculty-photo" style="${profile.photo ? `background-image:url('${facultyPhotoUrl(profile.photo,134)}')` : ''}">${profile.photo ? '' : initials(profile.fullName || profile.facultyId)}</div><span class="faculty-state ${profile.isPublished ? 'published' : ''}">${profile.reviewStatus === 'submitted' ? 'Review needed' : profile.isPublished ? 'Published' : 'Profile incomplete'}</span></div><h3>${escapeHtml(profile.fullName || 'Profile not completed')}</h3><p>${escapeHtml(profile.designation || `Faculty ID: ${profile.facultyId}`)}</p><span>${escapeHtml(profile.department || profile.email || 'Waiting for faculty details')}</span><footer><small>Updated ${formatDate(profile.updatedAt)}</small><div class="faculty-card-actions"><button type="button" data-edit-faculty="${encodeURIComponent(profile.facultyId)}">Review</button>${profile.isPublished?`<a href="faculty-profile.html?facultyId=${encodeURIComponent(profile.facultyId)}" target="_blank" rel="noopener">View published ↗</a>`:''}</div></footer></article>`).join('');
   $('#facultyEmpty').classList.toggle('show', profiles.length === 0);
   $$('[data-edit-faculty]').forEach((button) => button.addEventListener('click', () => openFacultyDrawer(decodeURIComponent(button.dataset.editFaculty))));
 }
 
 function openFacultyDrawer(facultyId = '') {
-  if (!requireAdministrator('manage faculty profiles')) return;
+  if (!requireAdministrator('review faculty profiles')) return;
   const profile = facultyProfiles.find((item)=>item.facultyId===facultyId.toUpperCase())||{};
   $('#facultyEmailKey').value = profile.id||'';
   $('#facultyIdReview').value = profile.facultyId || facultyId;
-  $('#facultyEmail').value = profile.email || '';
-  $('#facultyName').value = profile.fullName || '';
-  $('#facultyDesignation').value = profile.designation || '';
-  $('#facultyDepartment').value = profile.department || '';
-  $('#facultyBio').value = profile.bio || '';
-  editingFacultyPhoto = profile.photo || '';
-  $('#deleteFaculty').hidden = !profile.id;
-  $('#facultySubmissionData').innerHTML = profile.reviewStatus === 'submitted' ? `<strong>Teacher submission waiting</strong><br>Submitted ${formatDate(profile.submittedAt, true)}. Review the information and publish when approved.` : 'No pending teacher submission. Admin changes can still be saved as a draft or published.';
-  renderAdminFacultyPhoto();
+  $('#adminReviewName').textContent=profile.fullName||'Faculty member';
+  $('#adminReviewEmployeeNumber').textContent=profile.facultyId||'—';
+  $('#adminReviewDesignation').textContent=profile.designation||'—';
+  $('#adminReviewEmail').textContent=profile.email||'—';
+  $('#adminReviewPhone').textContent=profile.phone||'Not provided';
+  $('#adminReviewExperience').textContent=profile.experienceYears===''||profile.experienceYears==null?'—':`${profile.experienceYears} years`;
+  $('#adminReviewQualification').textContent=profile.highestQualification||'—';
+  $('#adminReviewSpecialisation').textContent=profile.areaOfSpecialisation||'—';
+  const photo=$('#adminFacultyPhoto');photo.style.backgroundImage=profile.photo?`url("${facultyPhotoUrl(profile.photo,184)}")`:'';
+  $('#adminFacultyInitials').textContent=initials(profile.fullName||profile.facultyId);$('#adminFacultyInitials').style.visibility=profile.photo?'hidden':'';
+  $('#facultySubmissionData').innerHTML = profile.reviewStatus === 'submitted' ? `<strong>Faculty submission waiting</strong><br>Submitted ${formatDate(profile.submittedAt, true)}. Confirm the details, then approve and publish.` : profile.reviewStatus==='approved'&&profile.isPublished?'This profile is already approved and published.':profile.hasApprovedSnapshot?'<strong>Legacy profile is incomplete.</strong><br>The faculty member must complete all required fields, upload a photo, and submit it for approval again.':'Waiting for the faculty member to complete and submit this profile.';
+  $('#approveFacultyProfile').disabled=profile.reviewStatus!=='submitted';
   $('#facultyDrawer').classList.add('open'); $('#facultyDrawer').setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll');
 }
 
-function renderAdminFacultyPhoto() {
-  const photo = $('#adminFacultyPhoto');
-  photo.style.backgroundImage = editingFacultyPhoto ? `url("${editingFacultyPhoto}")` : '';
-  $('#adminFacultyInitials').textContent = initials($('#facultyName').value);
-  $('#adminFacultyInitials').style.visibility = editingFacultyPhoto ? 'hidden' : '';
-}
-
 function closeFacultyDrawer() {
-  $('#facultyDrawer').classList.remove('open'); $('#facultyDrawer').setAttribute('aria-hidden', 'true'); document.body.classList.remove('no-scroll'); editingFacultyPhoto = '';
+  $('#facultyDrawer').classList.remove('open'); $('#facultyDrawer').setAttribute('aria-hidden', 'true'); document.body.classList.remove('no-scroll');
 }
 
-async function saveFaculty(publish) {
-  if (!requireAdministrator(`${publish ? 'publish' : 'edit'} faculty profiles`)) return;
-  if (!$('#facultyAdminForm').reportValidity()) return;
+async function approveFacultyProfile() {
+  if (!requireAdministrator('approve faculty profiles')) return;
   const profileId = $('#facultyEmailKey').value;
-  const facultyId = $('#facultyIdReview').value.trim().toUpperCase();
-  const email = $('#facultyEmail').value.trim().toLowerCase();
-  if (email && !email.endsWith('@sgsits.ac.in')) { showToast('Faculty email must use the @sgsits.ac.in domain.'); return; }
-  const draft={email,fullName:$('#facultyName').value.trim(),designation:$('#facultyDesignation').value.trim(),department:$('#facultyDepartment').value.trim(),bio:$('#facultyBio').value.trim()};
-  try{let record=await facultyService.updateByAdmin(profileId,draft);if(publish)record=await facultyService.approve(profileId);const index=facultyProfiles.findIndex((item)=>item.id===profileId);if(index>=0)facultyProfiles[index]=flattenFaculty(record);closeFacultyDrawer();renderFaculty();renderUserAccounts();updateDashboard();updateCounts();showToast(publish?'Faculty profile approved and published.':'Faculty profile saved as draft.')}catch(error){showToast(error.message)}
+  if(!profileId)return;
+  try{const record=await facultyService.approve(profileId);const index=facultyProfiles.findIndex((item)=>item.id===profileId);if(index>=0)facultyProfiles[index]=flattenFaculty(record);closeFacultyDrawer();renderFaculty();renderUserAccounts();updateDashboard();updateCounts();showToast('Faculty profile approved and published.')}catch(error){showToast(error.message)}
+}
+
+async function deleteFacultyProfile(){
+  if(!requireAdministrator('delete faculty profiles'))return;
+  const profileId=$('#facultyEmailKey').value;
+  const facultyId=$('#facultyIdReview').value;
+  if(!profileId)return;
+  if(!confirm(`Permanently delete faculty ${facultyId}? This will also delete the faculty login account and cannot be undone.`))return;
+  const button=$('#deleteFacultyProfile');
+  button.disabled=true;
+  try{
+    await facultyService.remove(profileId);
+    facultyProfiles=facultyProfiles.filter((profile)=>profile.id!==profileId);
+    facultyAccounts=facultyAccounts.filter((account)=>account.facultyId!==facultyId);
+    closeFacultyDrawer();renderFaculty();renderUserAccounts();updateDashboard();updateCounts();
+    showToast(`Faculty ${facultyId} and its login account were deleted.`);
+  }catch(error){showToast(error.message)}
+  finally{button.disabled=false}
 }
 
 function setupHomepage() {
@@ -456,6 +475,7 @@ async function setFacultyNoticeAccess(facultyId,allowed){
 function openFacultyAccountModal() {
   if (!requireAdministrator('create faculty accounts')) return;
   $('#facultyAccountForm').reset();
+  clearRegistrationErrors();
   $('#newFacultyPassword').type = 'password';
   $('#toggleFacultyPassword').textContent = 'Show';
   $('#facultyAccountModal').classList.add('open');
@@ -465,6 +485,7 @@ function openFacultyAccountModal() {
 }
 
 function closeFacultyAccountModal() {
+  if ($('#facultyAccountForm button[type="submit"]').disabled) return;
   $('#facultyAccountModal').classList.remove('open');
   $('#facultyAccountModal').setAttribute('aria-hidden', 'true');
   document.body.classList.remove('no-scroll');
@@ -503,12 +524,51 @@ async function resetFacultyPassword(){
   }catch(error){showToast(error.message)}
 }
 
+function clearRegistrationErrors() {
+  const form=$('#facultyAccountForm');
+  form.querySelectorAll('[data-registration-error]').forEach((node)=>{node.textContent=''});
+  form.querySelectorAll('input').forEach((input)=>{input.removeAttribute('aria-invalid')});
+  $('#facultyRegistrationError').textContent='';
+}
+
 async function createFacultyAccount() {
-  if (!requireAdministrator('create faculty accounts') || !$('#facultyAccountForm').reportValidity()) return;
-  const facultyId = $('#newFacultyId').value.trim().toUpperCase();
-  const password = $('#newFacultyPassword').value;
-  if (!/^[A-Z0-9-]+$/.test(facultyId)) { showToast('Faculty ID may contain only letters, numbers and hyphens.'); return; }
-  try{await authService.createFaculty(facultyId,password);[facultyProfiles,facultyAccounts]=await Promise.all([facultyService.list().then((items)=>items.map(flattenFaculty)),authService.listFacultyAccounts()]);window.dispatchEvent(new CustomEvent('faculty-account-created',{detail:{facultyId}}));closeFacultyAccountModal();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast(`Faculty profile ${facultyId} created in MongoDB. Give the temporary password privately to the faculty member.`)}catch(error){showToast(error.message)}
+  const form=$('#facultyAccountForm');
+  const submit=form.querySelector('button[type="submit"]');
+  if (submit.disabled || !requireAdministrator('create faculty accounts')) return;
+  clearRegistrationErrors();
+  let firstInvalid;
+  const fields={};
+  form.querySelectorAll('input[name]').forEach((input)=>{
+    if(input.name!=='temporaryPassword')input.value=input.value.trim();
+    fields[input.name]=input.value;
+    if(!input.checkValidity()){
+      input.setAttribute('aria-invalid','true');
+      form.querySelector(`[data-registration-error="${input.name}"]`).textContent=input.validationMessage;
+      firstInvalid ||= input;
+    }
+  });
+  if(firstInvalid){firstInvalid.focus();return}
+  fields.facultyId=fields.facultyId.toUpperCase();
+  const label=submit.textContent;
+  submit.disabled=true;submit.textContent='Creating login…';
+  let created=false;
+  try{
+    await authService.createFaculty(fields);
+    created=true;
+  }catch(error){
+    const details=error.details?.fieldErrors?.body||[];
+    $('#facultyRegistrationError').textContent=[error.message,...details].join(' ');
+  }finally{submit.disabled=false;submit.textContent=label}
+  if(!created)return;
+  closeFacultyAccountModal();
+  form.reset();
+  showToast(`Faculty login ${fields.facultyId} created. Share the temporary password privately.`);
+  window.dispatchEvent(new CustomEvent('faculty-account-created',{detail:{facultyId:fields.facultyId}}));
+  // A refresh failure must not invite a second registration of an already-created account.
+  try{
+    [facultyProfiles,facultyAccounts]=await Promise.all([facultyService.list().then((items)=>items.map(flattenFaculty)),authService.listFacultyAccounts()]);
+    renderFaculty();renderUserAccounts();updateCounts();updateDashboard();
+  }catch{showToast('Faculty login created. Reload the page to refresh the faculty list.')}
 }
 
 function exportData() {
@@ -539,9 +599,9 @@ $$('[data-close-drawer]').forEach((button)=>button.addEventListener('click',clos
 $$('input[name="placementSource"]').forEach((input)=>input.addEventListener('change',()=>setPlacementSource(input.value)));
 $('#placementPdfInput').addEventListener('change',(event)=>{const file=event.target.files[0];if(!file)return;if(file.type!=='application/pdf'){showToast('Placement documents must be PDF files.');event.target.value='';return}if(file.size>10*1024*1024){showToast('Placement PDFs must be 10 MB or smaller.');event.target.value='';return}pendingPlacementPdf={name:file.name,type:file.type,size:file.size,raw:file};renderPlacementPdf()});
 $('#contentForm').addEventListener('submit',(event)=>{event.preventDefault();saveContent('published')}); $('#saveDraft').addEventListener('click',()=>saveContent('draft')); $('#deleteCurrent').addEventListener('click',async()=>{const id=$('#editingId').value;if(!id||!confirm('Delete this content permanently?'))return;try{if(currentType==='placements')await placementService.remove(id);else await contentService.remove(id);store[currentType]=store[currentType].filter((item)=>item.id!==id);closeContentDrawer();showView(currentType);showToast('Content deleted.')}catch(error){showToast(error.message)}});
-$('#addFaculty').addEventListener('click',openFacultyAccountModal); $('#facultyEmptyAdd').addEventListener('click',openFacultyAccountModal); $$('[data-close-faculty]').forEach((button)=>button.addEventListener('click',closeFacultyDrawer)); $('#facultyName').addEventListener('input',renderAdminFacultyPhoto);
-$('#adminPhotoInput').addEventListener('change',(event)=>readUpload(event.target.files[0],(file)=>{if(!file.type.startsWith('image/')){showToast('Faculty photographs must be image files.');return}editingFacultyPhoto=file.data;renderAdminFacultyPhoto()})); $('#adminPhotoRemove').addEventListener('click',()=>{editingFacultyPhoto='';renderAdminFacultyPhoto()});
-$('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();saveFaculty(true)}); $('#saveFacultyDraft').addEventListener('click',()=>saveFaculty(false)); $('#deleteFaculty').addEventListener('click',async()=>{const id=$('#facultyEmailKey').value;if(!id||!confirm('Delete this faculty profile and its login?'))return;try{const facultyId=$('#facultyIdReview').value;await facultyService.remove(id);facultyProfiles=facultyProfiles.filter((profile)=>profile.id!==id);facultyAccounts=facultyAccounts.filter((account)=>account.facultyId!==facultyId);closeFacultyDrawer();renderFaculty();renderUserAccounts();updateCounts();updateDashboard();showToast('Faculty profile and login deleted.')}catch(error){showToast(error.message)}});
+$('#addFaculty').addEventListener('click',openFacultyAccountModal); $('#facultyEmptyAdd').addEventListener('click',openFacultyAccountModal); $$('[data-close-faculty]').forEach((button)=>button.addEventListener('click',closeFacultyDrawer));
+$('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();approveFacultyProfile()});
+$('#deleteFacultyProfile').addEventListener('click',deleteFacultyProfile);
 $('#saveHomepage').addEventListener('click',saveHomepage); $('#saveSettings').addEventListener('click',()=>{localStorage.setItem(SETTINGS_KEY,JSON.stringify({name:$('#settingName').value,email:$('#settingEmail').value,phone:$('#settingPhone').value,address:$('#settingAddress').value}));showToast('Website settings saved.')}); $('#exportData').addEventListener('click',exportData);
 $('#inviteUser').addEventListener('click',openFacultyAccountModal); $('#facultyAccountForm').addEventListener('submit',async(event)=>{event.preventDefault();await createFacultyAccount()}); $$('[data-close-account]').forEach((button)=>button.addEventListener('click',closeFacultyAccountModal)); $('#toggleFacultyPassword').addEventListener('click',()=>{const input=$('#newFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleFacultyPassword').textContent=input.type==='password'?'Show':'Hide'}); $('#openSidebar').addEventListener('click',openSidebar); $('#closeSidebar').addEventListener('click',closeSidebar); $('#sidebarShade').addEventListener('click',closeSidebar);
 $('#facultyAccountRows').addEventListener('click',(event)=>{

@@ -7,8 +7,10 @@ export const facultyDraftSchema = z.object({ body: z.object({
   office: z.string().max(150).optional(), officeHours: z.string().max(150).optional(), bio: z.string().max(5000).optional(),
   scholarUrl: optionalHttpsUrl, orcidUrl: optionalHttpsUrl, linkedinUrl: optionalHttpsUrl, websiteUrl: optionalHttpsUrl,
   qualifications: z.array(z.string().max(300)).max(30).optional(), researchInterests: z.array(z.string().max(120)).max(50).optional(),
-  coursesTaught: z.array(z.string().max(120)).max(50).optional(), experienceYears: z.number().int().min(0).max(80).optional(),
+  coursesTaught: z.array(z.string().max(120)).max(50).optional(), experienceYears: z.number().finite().min(0).optional(),
+  highestQualification: z.string().trim().max(300).optional(), areaOfSpecialisation: z.string().trim().max(500).optional(),
   scholarsSupervised: z.number().int().min(0).max(999).optional(), researchSummary: z.string().max(5000).optional(),
+  photoUrl: optionalHttpsUrl,
   publications: z.array(z.object({ title:z.string().max(500), year:z.number().int().min(1900).max(2200).optional(), type:z.string().max(80).optional(), venue:z.string().max(300).optional(), url:optionalHttpsUrl })).max(200).optional(),
   achievements: z.array(z.object({ title:z.string().max(500), year:z.number().int().min(1900).max(2200).optional(), category:z.string().max(80).optional(), description:z.string().max(1000).optional() })).max(200).optional()
 }).strict() });
