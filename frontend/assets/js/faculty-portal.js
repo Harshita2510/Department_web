@@ -1,3 +1,4 @@
+import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, $$ } from './shared/dom.js';
 import { authService } from './services/auth.service.js';
 import { facultyService } from './services/faculty.service.js';
@@ -27,6 +28,8 @@ const defaultProfile = {
   linkedinUrl: '',
   websiteUrl: '',
   qualifications: '',
+  highestQualification: '',
+  areaOfSpecialisation: '',
   researchInterests: '',
   coursesTaught: '',
   experienceYears: '',
@@ -48,7 +51,7 @@ let toastTimer;
 const editableFields = [
   'title', 'fullName', 'designation', 'department', 'phone', 'office', 'officeHours', 'bio',
   'scholarUrl', 'orcidUrl', 'linkedinUrl', 'websiteUrl', 'qualifications', 'researchInterests',
-  'coursesTaught', 'experienceYears', 'scholarsSupervised', 'researchSummary'
+  'coursesTaught', 'experienceYears', 'scholarsSupervised', 'researchSummary', 'highestQualification', 'areaOfSpecialisation'
 ];
 
 function initials(name = '') {
@@ -118,6 +121,7 @@ function apiDraft() {
     phone:profile.phone,office:profile.office,officeHours:profile.officeHours,bio:profile.bio,scholarUrl:profile.scholarUrl,orcidUrl:profile.orcidUrl,
     linkedinUrl:profile.linkedinUrl,websiteUrl:profile.websiteUrl,qualifications:list(profile.qualifications),researchInterests:list(profile.researchInterests),
     coursesTaught:list(profile.coursesTaught),experienceYears:number(profile.experienceYears),scholarsSupervised:number(profile.scholarsSupervised),researchSummary:profile.researchSummary,
+    highestQualification:profile.highestQualification,areaOfSpecialisation:profile.areaOfSpecialisation,
     publications:profile.publications.map((item)=>({...item,year:number(item.year)})),achievements:profile.achievements.map((item)=>({...item,year:number(item.year)}))
   };
 }
@@ -142,9 +146,9 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3600);
 }
 
-function setAvatar(element, includeFallback = true) {
+function setAvatar(element, includeFallback = true, width = 156) {
   if (profile.photo) {
-    element.style.backgroundImage = `url("${profile.photo}")`;
+    element.style.backgroundImage = `url("${facultyPhotoUrl(profile.photo,width)}")`;
     if (!includeFallback) element.style.color = 'transparent';
     if (includeFallback) {
       const fallback = $('[data-profile-initials]', element);
@@ -175,8 +179,8 @@ function renderDashboard() {
   $$('[data-profile-initials]').forEach((element) => element.textContent = profileInitials);
 
   setAvatar($('.summary-avatar'));
-  setAvatar($('.sidebar-avatar'), false);
-  setAvatar($('#photoPreview'));
+  setAvatar($('.sidebar-avatar'), false, 74);
+  setAvatar($('#photoPreview'), true, 216);
 
   $('#completionRing').style.setProperty('--progress', completion);
   $('#completionValue').textContent = `${completion}%`;

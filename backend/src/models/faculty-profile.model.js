@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 
 const profileFields = {
   title: String, fullName: String, designation: String, department: String, email: String,
-  phone: String, office: String, officeHours: String, bio: String, photoUrl: String,
+  phone: String, office: String, officeHours: String, bio: String, photoUrl: String, photoPublicId: String,
+  highestQualification: String, areaOfSpecialisation: String,
   scholarUrl: String, orcidUrl: String, linkedinUrl: String, websiteUrl: String,
   qualifications: [String], researchInterests: [String], coursesTaught: [String],
   experienceYears: Number, scholarsSupervised: Number, researchSummary: String,

@@ -80,7 +80,7 @@ export async function deleteFaculty(request,response){
 }
 
 export async function getPublicFaculty(request, response) {
-  const profile = await FacultyProfile.findOne({ facultyId:request.params.facultyId.toUpperCase(), reviewStatus:'approved' }).select('facultyId approvedSnapshot publishedAt');
+  const profile = await FacultyProfile.findOne({ facultyId:request.params.facultyId.toUpperCase(), approvedSnapshot:{$ne:null}, publishedAt:{$ne:null} }).select('facultyId approvedSnapshot publishedAt');
   if (!profile) throw new AppError(404, 'Published faculty profile not found');
   response.json({ success:true, data:profile });
 }
@@ -88,7 +88,7 @@ export async function getPublicFaculty(request, response) {
 export async function listPublicFaculty(request, response) {
   const limit=Math.min(50,Math.max(1,Number(request.query.limit)||12));
   const query=String(request.query.q||'').trim().slice(0,80);
-  const filter={reviewStatus:'approved',approvedSnapshot:{$ne:null}};
+  const filter={approvedSnapshot:{$ne:null},publishedAt:{$ne:null}};
   if(query){
     const escaped=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
     const match=new RegExp(escaped,'i');
