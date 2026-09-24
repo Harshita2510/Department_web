@@ -36,7 +36,7 @@ export async function changePassword(request, response) {
 }
 
 export async function createFaculty(request, response) {
-  const user = await createFacultyAccount(request.body, request.file, request);
+  const user = await createFacultyAccount(request.body, request);
   response.status(201).json({ success: true, data: { id:user.id, facultyId:user.facultyId, role:user.role, mustChangePassword:true } });
 }
 

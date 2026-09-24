@@ -18,3 +18,8 @@ export const authorize = (...roles) => (request, _response, next) => {
   if (!roles.includes(request.user.role)) return next(new AppError(403, 'You do not have permission for this action'));
   next();
 };
+
+export const requirePasswordChanged = (request, _response, next) => {
+  if (request.user.mustChangePassword) return next(new AppError(403, 'Change the temporary password before editing your profile'));
+  next();
+};

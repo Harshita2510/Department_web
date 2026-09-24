@@ -6,6 +6,8 @@ import { facultyService } from './services/faculty.service.js';
 const params = new URLSearchParams(window.location.search);
 const facultyId = (params.get('facultyId') || '').trim().toUpperCase();
 const preview = params.get('preview') === '1';
+const facultySession=JSON.parse(sessionStorage.getItem('sgsitsFacultySession')||'null');
+const ownPreview=preview&&facultySession?.role==='faculty'&&(!facultyId||facultyId===facultySession.facultyId?.toUpperCase());
 let profile = null;
 
 const listItems = (value = '', separator = /\r?\n/) => (Array.isArray(value)?value:String(value).split(separator)).map((item) => item.trim()).filter(Boolean);
@@ -17,7 +19,7 @@ function renderProfile() {
   }
 
   $('#profileContent').hidden = false;
-  $('#previewBar').hidden = !preview;
+  $('#previewBar').hidden = !ownPreview;
   const fullDisplayName = `${profile.title || ''} ${profile.fullName || 'Faculty Member'}`.trim();
   document.title = `${fullDisplayName} — SGSITS Faculty`;
   $('#publicName').textContent = fullDisplayName;
@@ -74,6 +76,16 @@ function renderProfile() {
 
 $('#publicYear').textContent = new Date().getFullYear();
 async function loadProfile(){
-  try{const record=preview?await facultyService.getOwn():await facultyService.getPublic(facultyId);profile=preview?record.draft:record.approvedSnapshot;renderProfile()}catch{$('#profileEmpty').hidden=false}
+  if(!facultyId&&!ownPreview){
+    $('#profileEmptyMessage').textContent='No faculty employee ID was included in this link. Open the profile from the faculty directory.';
+    $('#profileEmpty').hidden=false;
+    return;
+  }
+  try{
+    const record=ownPreview?await facultyService.getOwn():await facultyService.getPublic(facultyId);
+    if(!ownPreview&&record.facultyId?.toUpperCase()!==facultyId)throw new Error('The requested faculty profile did not match the returned record.');
+    profile=ownPreview?record.draft:record.approvedSnapshot;
+    renderProfile();
+  }catch(error){$('#profileEmptyMessage').textContent=error.message||'The profile is not published or could not be loaded.';$('#profileEmpty').hidden=false}
 }
 loadProfile();

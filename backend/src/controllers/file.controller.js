@@ -41,6 +41,18 @@ export async function uploadPublicImage(request,response){
   response.status(201).json({success:true,data});
 }
 
+export async function uploadFacultyPhoto(request,response){
+  if(!request.file)throw new AppError(400,'Choose a faculty photograph');
+  const result=await uploadCloudinaryImage(request.file,'faculty');
+  const data={
+    provider:'cloudinary',key:result.public_id,publicId:result.public_id,
+    url:result.secure_url,originalUrl:result.secure_url,name:request.file.originalname,
+    mimeType:`image/${result.format}`,size:result.bytes,width:result.width,height:result.height,format:result.format
+  };
+  await recordAudit(request,'FACULTY_PHOTO_UPLOADED','Cloudinary',result.public_id,{name:data.name,size:data.size});
+  response.status(201).json({success:true,data});
+}
+
 export async function downloadFile(request,response){
   if(!mongoose.isValidObjectId(request.params.id))throw new AppError(404,'File not found');
   const id=new mongoose.Types.ObjectId(request.params.id);const files=await bucket().find({_id:id}).limit(1).toArray();const file=files[0];

@@ -3,17 +3,13 @@ import test from 'node:test';
 import { createFacultySchema } from '../src/validators/auth.validator.js';
 import { facultyDraftSchema } from '../src/validators/faculty.validator.js';
 
-const valid = { fullName:' Test Teacher ', designation:' Professor ', facultyId:' emp-001 ', experienceYears:'3.5', highestQualification:' PhD ', areaOfSpecialisation:' AI ', email:' Teacher@Example.org ', temporaryPassword:'Temporary123' };
+const valid = { facultyId:' emp-001 ', temporaryPassword:'Temporary123' };
 
-test('registration normalizes identifiers and email, accepts decimals and optional contact', () => {
+test('registration accepts only a normalized employee number and temporary password', () => {
   const { body } = createFacultySchema.parse({ body:valid });
   assert.equal(body.facultyId, 'EMP-001');
-  assert.equal(body.email, 'teacher@example.org');
-  assert.equal(body.experienceYears, 3.5);
-  assert.equal(body.fullName, 'Test Teacher');
-  assert.equal(body.highestQualification, 'PhD');
-  assert.equal(body.areaOfSpecialisation, 'AI');
-  assert.equal(body.phone, undefined);
+  assert.equal(body.temporaryPassword, 'Temporary123');
+  assert.deepEqual(Object.keys(body).sort(),['facultyId','temporaryPassword']);
 });
 
 for (const field of Object.keys(valid)) {
@@ -23,17 +19,8 @@ for (const field of Object.keys(valid)) {
   });
 }
 
-for (const value of ['', ' ', 'no experience', -1, '-0.5', null, true, Infinity]) {
-  test(`registration rejects invalid experience ${JSON.stringify(value)}`, () => {
-    assert.equal(createFacultySchema.safeParse({ body:{ ...valid, experienceYears:value } }).success, false);
-  });
-}
-
-test('invalid email and whitespace-only required profile fields are rejected', () => {
-  assert.equal(createFacultySchema.safeParse({ body:{ ...valid, email:'invalid' } }).success, false);
-  for (const field of ['fullName','designation','highestQualification','areaOfSpecialisation']) {
-    assert.equal(createFacultySchema.safeParse({ body:{ ...valid, [field]:'  ' } }).success, false);
-  }
+test('registration rejects profile fields because faculty owns profile editing', () => {
+  assert.equal(createFacultySchema.safeParse({ body:{ ...valid, fullName:'Admin edit' } }).success, false);
 });
 
 test('later profile edits accept decimal experience and explicit academic fields', () => {

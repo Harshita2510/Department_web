@@ -7,7 +7,8 @@ import { facultyPhotoUrl } from '../../frontend/assets/js/shared/faculty-photo.j
 const source = (file) => readFile(new URL(`../../frontend/${file}`,import.meta.url),'utf8');
 
 // Execute the actual page scripts against a small DOM test double; no browser dependency.
-function pageContext(record, { preview=false, admin=false }={}) {
+function pageContext(record, { preview=false, admin=false, missingId=false }={}) {
+  let requestedFacultyId='';
   const nodes=new Map();
   const allNodes=new Map();
   function node(selector){
@@ -28,7 +29,7 @@ function pageContext(record, { preview=false, admin=false }={}) {
   const document={querySelector:select,querySelectorAll:selectAll,body:node('body'),addEventListener(){}};
   const context={
     document,console,URLSearchParams,URL,Intl,Date,FormData,Blob,Set,Map,Promise,structuredClone,facultyPhotoUrl,
-    window:{location:{search:`?facultyId=EMP-001${preview?'&preview=1':''}`,replace(){},href:''},addEventListener(){},dispatchEvent(){},scrollTo(){},open(){}},
+    window:{location:{search:missingId?'':`?facultyId=EMP-001${preview?'&preview=1':''}`,pathname:'/pages/faculty-profile.html',replace(){},href:''},history:{replaceState(_state,_title,url){this.url=url}},addEventListener(){},dispatchEvent(){},scrollTo(){},open(){}},
     sessionStorage:{getItem:()=>JSON.stringify({facultyId:'EMP-001',role:admin?'admin':'faculty'}),removeItem(){}},
     localStorage:{getItem:()=>null,length:0},
     crypto:{randomUUID:()=> 'test-id'},
@@ -37,12 +38,12 @@ function pageContext(record, { preview=false, admin=false }={}) {
     escapeHtml:(value='')=>String(value).replace(/[&<>"']/g,'_'),
     initials:(value='')=>value.split(/\s+/).slice(0,2).map(word=>word[0]).join(''),
     safeLink:(value)=>value?.startsWith('https://')?value:'',formatDate:()=>'',
-    facultyService:{getPublic:async()=>record,getOwn:async()=>record,list:async()=>[],listAccessOptions:async()=>[]},
+    facultyService:{getPublic:async(id)=>{requestedFacultyId=id;return record},getOwn:async()=>record,listPublic:async()=>[record],list:async()=>[],listAccessOptions:async()=>[]},
     authService:{listFacultyAccounts:async()=>[]},placementService:{listAdmin:async()=>[]},contentService:{listAdmin:async()=>[]},uploadService:{},
     CustomEvent:class{constructor(type,options){this.type=type;this.detail=options?.detail}}
   };
   vm.createContext(context);
-  return {context,node,allNodes};
+  return {context,node,allNodes,requestedFacultyId:()=>requestedFacultyId};
 }
 
 async function loadScript(file,harness){
@@ -74,6 +75,22 @@ test('public profile uses approved content; preview uses own draft',async()=>{
   const previewPage=pageContext(changed,{preview:true});
   await loadScript('assets/js/faculty-profile.js',previewPage);
   assert.equal(previewPage.node('#publicName').textContent,'Changed Teacher');
+});
+
+test('generic faculty profile URL does not substitute another faculty member',async()=>{
+  const h=pageContext(record,{missingId:true,admin:true});
+  await loadScript('assets/js/faculty-profile.js',h);
+  assert.equal(h.node('#profileContent').hidden,false);
+  assert.equal(h.node('#profileEmpty').hidden,false);
+  assert.match(h.node('#profileEmptyMessage').textContent,/No faculty employee ID/);
+  assert.equal(h.requestedFacultyId(),'');
+});
+
+test('clicked faculty ID is passed unchanged to the public profile API',async()=>{
+  const h=pageContext(record);
+  await loadScript('assets/js/faculty-profile.js',h);
+  assert.equal(h.requestedFacultyId(),'EMP-001');
+  assert.equal(h.node('#publicName').textContent,'Test Teacher');
 });
 
 test('legacy public profile without new fields still renders its placeholder',async()=>{
@@ -115,37 +132,50 @@ test('public and portal photos hide initials when a photo is present',async()=>{
   assert.equal(portal.node('#photoPreview [data-profile-initials]').style.visibility,'hidden');
 });
 
-test('registration form preserves requested field order and optional photo/contact',async()=>{
+test('administrator registration form only requests employee number and temporary password',async()=>{
   const html=await source('pages/site-admin.html');
   const form=html.match(/<form id="facultyAccountForm"[\s\S]*?<\/form>/)[0];
   const ids=[...form.matchAll(/<input id="([^"]+)"/g)].map(match=>match[1]);
-  assert.deepEqual(ids,['newFacultyName','newFacultyDesignation','newFacultyId','newFacultyExperience','newFacultyQualification','newFacultySpecialisation','newFacultyEmail','newFacultyContact','newFacultyPhoto','newFacultyPassword']);
-  for(const id of ['newFacultyContact','newFacultyPhoto'])assert.doesNotMatch(form.match(new RegExp(`<input id="${id}"[^>]*>`))[0],/\brequired\b/);
-  assert.match(form,/Login credentials/);assert.match(form,/step="any"/);
+  assert.deepEqual(ids,['newFacultyId','newFacultyPassword']);
+  assert.match(form,/Login credentials/);assert.doesNotMatch(form,/newFacultyPhoto/);
 });
 
-test('registration API service sends fields and an optional photo as multipart',async()=>{
+test('faculty owns photo upload and administrator review is read-only',async()=>{
+  const [adminHtml,portalHtml]=await Promise.all([source('pages/site-admin.html'),source('pages/faculty-portal.html')]);
+  const review=adminHtml.match(/<form id="facultyAdminForm"[\s\S]*?<\/form>/)[0];
+  assert.match(review,/Approve &amp; publish/);
+  assert.match(review,/id="deleteFacultyProfile"[^>]*type="button"/);
+  assert.doesNotMatch(review,/type="file"|Save draft/);
+  assert.match(portalHtml,/id="facultyPhotoInput"[^>]*type="file"/);
+  assert.match(portalHtml,/administrator can approve the profile but cannot change this photo/i);
+});
+
+test('registration API service sends employee number and temporary password as JSON',async()=>{
   const code=(await source('assets/js/services/auth.service.js')).replace(/^import .*;\r?\n/gm,'').replace('export const authService','globalThis.authService');
   let captured;
-  const ctx=vm.createContext({FormData,Blob,apiRequest:(path,options)=>{captured={path,...options}}});
+  const ctx=vm.createContext({apiRequest:(path,options)=>{captured={path,...options}}});
   vm.runInContext(code,ctx);
-  ctx.authService.createFaculty({facultyId:'EMP-001',experienceYears:3.5});
-  assert.equal(captured.path,'/auth/faculty');assert.equal(captured.body.has('file'),false);
-  assert.equal(captured.body.get('experienceYears'),'3.5');
-  ctx.authService.createFaculty({facultyId:'EMP-001'},new Blob(['photo'],{type:'image/png'}));
-  assert.equal(captured.body.get('file').type,'image/png');
+  ctx.authService.createFaculty({facultyId:'EMP-001',temporaryPassword:'Temporary123'});
+  assert.equal(captured.path,'/auth/faculty');
+  assert.deepEqual(JSON.parse(captured.body),{facultyId:'EMP-001',temporaryPassword:'Temporary123'});
 });
 
 async function adminForm() {
   const h=pageContext(record,{admin:true});
   await loadScript('assets/js/site-admin.js',h);
-  const inputs=Object.entries({fullName:'Test Teacher',designation:'Professor',facultyId:'emp-001',experienceYears:'3.5',highestQualification:'PhD',areaOfSpecialisation:'AI',email:' Teacher@Example.org ',phone:'',temporaryPassword:'Temporary123'}).map(([name,value])=>{
+  const inputs=Object.entries({facultyId:'emp-001',temporaryPassword:'Temporary123'}).map(([name,value])=>{
     const input=h.node(`input-${name}`);input.name=name;input.value=value;return input;
   });
   h.allNodes.set('#facultyAccountForm input[name]',inputs);
   h.allNodes.set('#facultyAccountForm input',inputs);
   return {...h,inputs};
 }
+
+test('admin faculty list accepts new accounts without an approved snapshot',async()=>{
+  const h=await adminForm();
+  assert.equal(vm.runInContext('hasCompleteApprovedFacultyProfile(null)',h.context),false);
+  assert.doesNotThrow(()=>vm.runInContext("flattenFaculty({_id:'draft-id',facultyId:'NEW-001',draft:{},approvedSnapshot:null,reviewStatus:'draft'})",h.context));
+});
 
 test('registration disables duplicate submission and presents server errors inline',async()=>{
   const h=await adminForm();
@@ -161,17 +191,13 @@ test('registration disables duplicate submission and presents server errors inli
   assert.equal(h.node('#facultyRegistrationError').textContent,'Employee number is already registered');
 });
 
-test('invalid registration fields and oversized photos never submit',async()=>{
+test('invalid employee number never submits',async()=>{
   const h=await adminForm();let requests=0;
   h.context.authService.createFaculty=async()=>{requests++};
-  h.inputs[0].checkValidity=()=>false;h.inputs[0].validationMessage='Name is required';
+  h.inputs[0].checkValidity=()=>false;h.inputs[0].validationMessage='Employee number is required';
   await vm.runInContext('createFacultyAccount()',h.context);
   assert.equal(requests,0);assert.equal(h.inputs[0].attributes['aria-invalid'],'true');
-  assert.equal(h.node('#facultyAccountForm [data-registration-error="fullName"]').textContent,'Name is required');
-  h.inputs[0].checkValidity=()=>true;
-  h.node('#newFacultyPhoto').files=[{type:'image/png',name:'photo.png',size:5*1024*1024+1}];
-  await vm.runInContext('createFacultyAccount()',h.context);
-  assert.equal(requests,0);assert.match(h.node('#newFacultyPhotoError').textContent,/5 MB/);
+  assert.equal(h.node('#facultyAccountForm [data-registration-error="facultyId"]').textContent,'Employee number is required');
 });
 
 test('successful registration remains successful if list refresh fails',async()=>{
@@ -179,8 +205,8 @@ test('successful registration remains successful if list refresh fails',async()=
   h.context.authService.createFaculty=async(value)=>{fields=value};
   h.context.facultyService.list=async()=>{throw new Error('Refresh unavailable')};
   await vm.runInContext('createFacultyAccount()',h.context);
-  assert.equal(fields.facultyId,'EMP-001');assert.equal(fields.email,'teacher@example.org');
+  assert.equal(fields.facultyId,'EMP-001');assert.equal(fields.temporaryPassword,'Temporary123');
   assert.equal(h.node('#facultyAccountModal').attributes['aria-hidden'],'true');
-  assert.match(h.node('#cmsToast').textContent,/Faculty created and published/);
+  assert.match(h.node('#cmsToast').textContent,/Faculty login created/);
   assert.equal(h.node('#facultyRegistrationError').textContent,'');
 });
