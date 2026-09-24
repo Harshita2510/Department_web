@@ -11,6 +11,7 @@ export function uploadCloudinaryImage(file, requestedFolder = 'media') {
     const upload = cloudinary.uploader.upload_stream({
       folder: `sgsits/${folder}`,
       resource_type: 'image',
+      ...(folder === 'faculty' ? { transformation: [{ width:800, height:800, crop:'limit', quality:'auto' }] } : {}),
       unique_filename: true,
       overwrite: false
     }, (error, result) => {
@@ -23,7 +24,7 @@ export function uploadCloudinaryImage(file, requestedFolder = 'media') {
 
 export async function deleteCloudinaryImage(publicId) {
   if (!cloudinaryConfigured || !publicId) return;
-  await cloudinary.uploader.destroy(publicId, { resource_type:'image', invalidate:true });
+  return cloudinary.uploader.destroy(publicId, { resource_type:'image', invalidate:true });
 }
 
 export function uploadSyllabusAsset(file, folder) {

@@ -166,7 +166,7 @@
           <form class="editor-form" id="academicForm">
             <div class="form-card">
               <div class="form-card-title"><span>01</span><div><h3>Qualifications</h3><p>Enter one qualification per line, highest degree first.</p></div></div>
-              <label class="field"><span>Academic qualifications</span><textarea id="qualifications" rows="6" placeholder="Ph.D. in Computer Science, IIT …&#10;M.Tech. in …&#10;B.E. in …"></textarea></label>
+              <label class="field"><span>Highest qualification</span><input id="highestQualification" type="text" maxlength="300"></label><label class="field"><span>Area of specialisation</span><input id="areaOfSpecialisation" type="text" maxlength="500"></label><label class="field"><span>Academic qualifications</span><textarea id="qualifications" rows="6" placeholder="Ph.D. in Computer Science, IIT …&#10;M.Tech. in …&#10;B.E. in …"></textarea></label>
             </div>
             <div class="form-card">
               <div class="form-card-title"><span>02</span><div><h3>Areas of expertise</h3><p>Use commas to separate items.</p></div></div>
@@ -174,7 +174,7 @@
             </div>
             <div class="form-card">
               <div class="form-card-title"><span>03</span><div><h3>Experience &amp; supervision</h3><p>Summarise your current academic responsibilities.</p></div></div>
-              <div class="form-grid"><label class="field"><span>Teaching experience (years)</span><input id="experienceYears" type="number" min="0" max="60" placeholder="0"></label><label class="field"><span>Ph.D. scholars supervised</span><input id="scholarsSupervised" type="number" min="0" placeholder="0"></label><label class="field full-field"><span>Current research / lab summary</span><textarea id="researchSummary" rows="6" maxlength="900" placeholder="Describe your current projects, laboratory or research group…"></textarea></label></div>
+              <div class="form-grid"><label class="field"><span>Teaching experience (years)</span><input id="experienceYears" type="number" min="0" step="any" placeholder="0"></label><label class="field"><span>Ph.D. scholars supervised</span><input id="scholarsSupervised" type="number" min="0" placeholder="0"></label><label class="field full-field"><span>Current research / lab summary</span><textarea id="researchSummary" rows="6" maxlength="900" placeholder="Describe your current projects, laboratory or research group…"></textarea></label></div>
             </div>
           </form>
         </section>
@@ -223,7 +223,7 @@
         <section class="portal-panel" id="settingsPanel" data-title="Account settings">
           <div class="editor-heading"><div><span>Account &amp; security</span><h2>Settings</h2><p>Review your account details and profile visibility.</p></div></div>
           <div class="settings-grid">
-            <div class="form-card"><div class="form-card-title"><span>01</span><div><h3>Account information</h3><p>Your sign-in identity is managed by the administrator.</p></div></div><div class="account-row"><span>Faculty ID</span><strong id="settingsFacultyId">—</strong></div><div class="account-row"><span>Institute email</span><strong id="settingsEmail">Not added</strong></div><div class="account-row"><span>Account role</span><strong>Faculty member</strong></div><div class="account-row"><span>Profile status</span><strong id="settingsVisibility">Draft</strong></div></div>
+            <div class="form-card"><div class="form-card-title"><span>01</span><div><h3>Account information</h3><p>Your sign-in identity is managed by the administrator.</p></div></div><div class="account-row"><span>Employee number</span><strong id="settingsFacultyId">—</strong></div><div class="account-row"><span>Institute email</span><strong id="settingsEmail">Not added</strong></div><div class="account-row"><span>Account role</span><strong>Faculty member</strong></div><div class="account-row"><span>Profile status</span><strong id="settingsVisibility">Draft</strong></div></div>
             <div class="form-card"><div class="form-card-title"><span>02</span><div><h3>Change password</h3><p>Replace the temporary password given by the administrator.</p></div></div><form id="passwordForm" class="password-form"><label class="field"><span>Current password</span><input id="currentPassword" type="password" autocomplete="current-password" minlength="8" required></label><label class="field"><span>New password</span><input id="newPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><small>At least 10 characters.</small></label><label class="field"><span>Confirm new password</span><input id="confirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label><button class="secondary-action" type="submit">Update password</button><p class="password-feedback" id="passwordFeedback" role="status" aria-live="polite"></p></form></div>
           </div>
         </section>

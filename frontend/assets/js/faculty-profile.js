@@ -1,3 +1,4 @@
+import { facultyPhotoUrl } from './shared/faculty-photo.js';
 import { $, escapeHtml, initials } from './shared/dom.js';
 import { safeHttpsUrl as safeLink } from './shared/security.js';
 import { facultyService } from './services/faculty.service.js';
@@ -25,7 +26,7 @@ function renderProfile() {
   $('#publicDepartment').textContent = profile.department || 'SGSITS Indore';
   $('#publicBio').textContent = profile.bio || 'Biography has not been added yet.';
   if (profile.photoUrl) {
-    $('#publicAvatar').style.backgroundImage = `url("${profile.photoUrl}")`;
+    $('#publicAvatar').style.backgroundImage = `url("${facultyPhotoUrl(profile.photoUrl,380)}")`;
     $('#publicInitials').style.visibility = 'hidden';
   }
 
@@ -45,12 +46,16 @@ function renderProfile() {
   $('#contactDetails').innerHTML = contact.join('');
 
   const qualifications = listItems(profile.qualifications);
+  $('#highestQualificationWrap').hidden = !profile.highestQualification;
+  $('#publicHighestQualification').textContent = profile.highestQualification || '';
+  $('#specialisationWrap').hidden = !profile.areaOfSpecialisation;
+  $('#publicSpecialisation').textContent = profile.areaOfSpecialisation || '';
   $('#qualificationList').innerHTML = qualifications.length ? qualifications.map((item) => `<li>${escapeHtml(item)}</li>`).join('') : '<li>Qualifications not added.</li>';
   const interests = listItems(profile.researchInterests, ',');
   $('#interestList').innerHTML = interests.length ? interests.map((item) => `<span>${escapeHtml(item)}</span>`).join('') : '<span>Research interests not added</span>';
   const courses = listItems(profile.coursesTaught, ',');
   $('#courseList').innerHTML = courses.length ? courses.map((item) => `<span>${escapeHtml(item)}</span>`).join('') : '<span>Courses not added</span>';
-  $('#experienceValue').textContent = profile.experienceYears || '—';
+  $('#experienceValue').textContent = profile.experienceYears ?? '—';
   $('#scholarsValue').textContent = profile.scholarsSupervised || '—';
   $('#researchSummaryWrap').hidden = !profile.researchSummary;
   $('#publicResearchSummary').textContent = profile.researchSummary || '';

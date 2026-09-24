@@ -6,7 +6,12 @@ export const authService={
   logout:()=>apiRequest('/auth/logout',{method:'POST'}),
   changePassword:(currentPassword,newPassword)=>apiRequest('/auth/password',{method:'PATCH',body:JSON.stringify({currentPassword,newPassword})}),
   listFacultyAccounts:()=>apiRequest('/auth/faculty'),
-  createFaculty:(facultyId,temporaryPassword)=>apiRequest('/auth/faculty',{method:'POST',body:JSON.stringify({facultyId,temporaryPassword})}),
+  createFaculty:(fields,photo)=>{
+    const body=new FormData();
+    Object.entries(fields).forEach(([key,value])=>body.append(key,value));
+    if(photo)body.append('file',photo);
+    return apiRequest('/auth/faculty',{method:'POST',body});
+  },
   resetFacultyPassword:(facultyId,temporaryPassword)=>apiRequest(`/auth/faculty/${encodeURIComponent(facultyId)}/password`,{method:'PATCH',body:JSON.stringify({temporaryPassword})}),
   setFacultyNoticePermission:(facultyId,allowed)=>apiRequest(`/auth/faculty/${encodeURIComponent(facultyId)}/notice-permission`,{method:'PATCH',body:JSON.stringify({allowed})})
 };
