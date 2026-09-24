@@ -3,7 +3,7 @@ import { academicDocumentService } from './services/academic-document.service.js
 import { facultyService } from './services/faculty.service.js';
 
 const $=(selector)=>document.querySelector(selector);
-const slots={classTable:'Class timetable',mst1:'MST 1',mst2:'MST 2',mst3:'MST 3',endSemester:'End Semester'};
+const slots={classTable:'Class timetable',quiz:'Quiz timetable',mst1:'MST 1',mst2:'MST 2',mst3:'MST 3',endSemester:'End Semester'};
 let records=[];
 let faculty=[];
 let uploadTarget=null;

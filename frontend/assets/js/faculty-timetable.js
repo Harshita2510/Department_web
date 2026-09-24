@@ -2,7 +2,7 @@ import { escapeHtml } from './shared/dom.js';
 import { academicDocumentService } from './services/academic-document.service.js';
 
 const $=(selector)=>document.querySelector(selector);
-const slots={classTable:'Class timetable',mst1:'MST 1',mst2:'MST 2',mst3:'MST 3',endSemester:'End Semester'};
+const slots={classTable:'Class timetable',quiz:'Quiz timetable',mst1:'MST 1',mst2:'MST 2',mst3:'MST 3',endSemester:'End Semester'};
 let records=[];let target=null;let timer;
 function notify(message){const toast=$('#portalToast');toast.textContent=message;toast.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove('show'),3600)}
 function render(){

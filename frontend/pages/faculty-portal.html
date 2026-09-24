@@ -142,7 +142,7 @@
                 <label class="field"><span>Designation <b>*</b></span><input id="designation" name="designation" type="text" placeholder="e.g. Associate Professor" required></label>
                 <label class="field"><span>Employee number</span><input type="text" data-faculty-id readonly></label>
                 <label class="field"><span>Department</span><input id="department" name="department" value="Computer Science &amp; Engineering" readonly></label>
-                <label class="field"><span>Email ID <b>*</b></span><input id="instituteEmail" name="email" type="email" placeholder="name@sgsits.ac.in" required></label>
+                <label class="field"><span>Email ID <b>*</b></span><input id="instituteEmail" name="email" type="text" inputmode="email" autocomplete="email" maxlength="254" placeholder="Faculty email or contact ID" required><small>Any email provider or institutional format is accepted.</small></label>
                 <label class="field"><span>Contact number <small>(optional)</small></span><input id="phone" name="phone" type="tel" placeholder="+91 00000 00000"></label>
                 <label class="field"><span>Office / room</span><input id="office" name="office" type="text" placeholder="e.g. CE-204, Main Building"></label>
                 <label class="field"><span>Consultation hours</span><input id="officeHours" name="officeHours" type="text" placeholder="e.g. Mon–Wed, 2:00–4:00 PM"></label>
@@ -200,7 +200,7 @@
         </section>
 
         <section class="portal-panel" id="timetableUploadPanel" data-title="Timetable uploads">
-          <div class="editor-heading"><div><span>Assigned access</span><h2>Class &amp; exam timetable uploads</h2><p>Upload a PDF or image only for programme semesters assigned to you by the administrator.</p></div></div>
+          <div class="editor-heading"><div><span>Assigned access</span><h2>Class, quiz &amp; exam timetable uploads</h2><p>Upload a PDF or image only for programme semesters assigned to you by the administrator.</p></div></div>
           <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Uploads are submitted for review and remain private until an administrator publishes them.</p></div>
           <div class="faculty-timetable-list" id="facultyTimetableList"></div><div class="empty-state" id="facultyTimetableEmpty"><div>▥</div><h3>No timetable semesters assigned</h3><p>Ask the administrator to grant timetable upload access.</p></div>
           <input id="facultyTimetableFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
@@ -238,7 +238,7 @@
   </div>
 
   <div class="portal-toast" id="portalToast" role="status" aria-live="polite"></div>
-  <script type="module" src="../assets/js/faculty-portal.js"></script>
+  <script type="module" src="../assets/js/faculty-portal.js?v=20260924-5"></script>
   <script type="module" src="../assets/js/faculty-syllabus.js"></script>
   <script type="module" src="../assets/js/faculty-timetable.js"></script>
   <script type="module" src="../assets/js/faculty-notices.js"></script>

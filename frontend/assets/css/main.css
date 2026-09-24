@@ -124,7 +124,7 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .ticker-control { width: 38px; height: 34px; border: 0; border-left: 1px solid rgba(7,27,52,.22); background: transparent; cursor: pointer; font-size: 11px; }
 @keyframes ticker { to { transform: translateX(-50%); } }
 
-.section-heading h2, .section-title-row h2, .department-intro h2, .research-copy h2, .people-copy h2, .admissions-inner h2, .campus-copy h2 { margin: 17px 0 0; font: 700 clamp(38px, 4.3vw, 60px)/1.04 var(--font-display); letter-spacing: -.055em; }
+.section-heading h2, .section-title-row h2, .department-intro h2, .research-copy h2, .admissions-inner h2, .campus-copy h2 { margin: 17px 0 0; font: 700 clamp(38px, 4.3vw, 60px)/1.04 var(--font-display); letter-spacing: -.055em; }
 .intro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 120px; align-items: start; }
 .intro-copy { padding-top: 31px; }
 .intro-copy p { color: var(--muted); font-size: 15px; line-height: 1.8; }
@@ -200,7 +200,7 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .event-card .tag { position: static; display: inline-block; padding: 4px 7px; }
 .event-card h3 { margin: 9px 0 5px; font: 700 16px/1.35 var(--font-display); }
 .event-card p { margin: 0; color: var(--muted); font-size: 10px; }
-.event-card > button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
+.event-card > button,.event-card > a { width: 34px; height: 34px; display:grid;place-items:center;border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
 
 .notice-centre { background: #edf0f1; }
 .notice-layout { display: grid; grid-template-columns: 1.25fr .75fr; gap: 24px; }
@@ -257,40 +257,6 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .recruiter-row { display: grid; grid-template-columns: repeat(6, 1fr); margin-top: 1px; background: white; border: 1px solid #dfdfda; }
 .recruiter-row span { min-height: 72px; display: grid; place-items: center; border-right: 1px solid #e2e2de; color: #7a8288; font: 700 11px var(--font-display); }
 .recruiter-row span:last-child { border: 0; }
-
-.people-section { padding-bottom: 0; }
-.people-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 590px; }
-.people-visual { position: relative; min-height: 590px; overflow: hidden; }
-.people-visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(5,20,37,.9)); }
-.people-visual img { width: 100%; height: 100%; object-fit: cover; }
-.people-visual > div { position: absolute; z-index: 2; left: 45px; right: 45px; bottom: 38px; display: flex; align-items: end; justify-content: space-between; color: white; }
-.people-visual strong { font: 700 32px/1.1 var(--font-display); }
-.people-visual span { color: #ced7df; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
-.people-copy { padding: 68px 0 60px 80px; align-self: center; }
-.people-copy p { color: var(--muted); line-height: 1.75; }
-.people-search { display: flex; margin-top: 33px; border-bottom: 1px solid var(--ink); }
-.people-search input { flex: 1; min-width: 0; padding: 14px 0; border: 0; outline: 0; background: transparent; }
-.people-search button { border: 0; background: transparent; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-.people-search button span { margin-left: 15px; color: #95640d; }
-.people-result { min-height: 24px; margin-top: 10px; color: #8e620f; font-size: 11px; }
-.faculty-directory { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:24px; padding:20px 0 90px; }
-.faculty-directory-card { min-width:0; background:#fff; box-shadow:0 12px 32px rgba(7,27,52,.09); transition:transform .25s ease,box-shadow .25s ease; }
-.faculty-directory-card:hover,.faculty-directory-card:focus-within { transform:translateY(-6px); box-shadow:0 20px 42px rgba(7,27,52,.16); }
-.faculty-directory-card>a { display:block; height:100%; }
-.faculty-card-photo { position:relative; aspect-ratio:4/4.35; display:grid; place-items:center; overflow:hidden; background:#e9edf0; color:var(--navy); }
-.faculty-card-photo>img { width:100%; height:100%; object-fit:cover; transition:transform .45s ease; }
-.faculty-card-photo>span { font:800 44px var(--font-display); }
-.faculty-directory-card:hover .faculty-card-photo>img,.faculty-directory-card:focus-within .faculty-card-photo>img { transform:scale(1.045); }
-.faculty-card-overlay { position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center; gap:12px; padding:24px; background:linear-gradient(180deg,transparent 28%,rgba(5,21,41,.9)); color:#fff; opacity:0; transition:opacity .25s ease; }
-.faculty-directory-card:hover .faculty-card-overlay,.faculty-directory-card:focus-within .faculty-card-overlay { opacity:1; }
-.faculty-card-overlay b { min-width:138px; padding:13px 18px; background:var(--blue); font-size:11px; text-align:center; text-transform:uppercase; letter-spacing:.06em; }
-.faculty-card-overlay i { font-style:normal; font-size:20px; }
-.faculty-card-copy { min-height:128px; padding:21px 20px; }
-.faculty-card-copy h3 { margin:0; font:700 19px/1.25 var(--font-display); }
-.faculty-card-copy p { margin:8px 0 6px; color:var(--ink); font-size:11px; }
-.faculty-card-copy small { display:block; color:var(--muted); font-size:9px; line-height:1.5; }
-.faculty-directory-empty { grid-column:1/-1; display:flex; flex-direction:column; align-items:center; gap:7px; padding:55px 20px; border:1px solid var(--line); color:var(--muted); text-align:center; }
-.faculty-directory-empty strong { color:var(--ink); font:700 18px var(--font-display); }
 
 .admissions-band { background: var(--green); color: white; }
 .admissions-inner { display: grid; grid-template-columns: 1.1fr .9fr; gap: 120px; align-items: end; }
@@ -380,7 +346,6 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 .delay-1 { transition-delay: .1s; }.delay-2 { transition-delay: .2s; }.delay-3 { transition-delay: .3s; }
 
 @media (max-width: 1050px) {
-  .faculty-directory { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .desktop-action { display: none; }
   .menu-toggle { display: block; }
   .main-nav { position: fixed; top: 138px; left: 0; right: 0; bottom: 0; overflow-y: auto; background: white; transform: translateX(100%); transition: .3s; }
@@ -396,7 +361,6 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   .since-card { right: 0; }
   .programme-grid { grid-template-columns: repeat(2, 1fr); }
   .department-layout, .research-layout { gap: 50px; }
-  .people-copy { padding-left: 45px; }
 }
 
 @media (max-width: 760px) {
@@ -430,7 +394,7 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   .notice-strip-inner { grid-template-columns: 82px 1fr 35px; }
   .notice-label { font-size: 9px; padding-right: 8px; }
   .ticker a { margin-right: 35px; }
-  .intro-grid, .section-title-row, .department-layout, .story-grid, .notice-layout, .research-layout, .people-layout, .admissions-inner, .campus-grid, .campus-map-heading, .campus-map-layout { grid-template-columns: 1fr; gap: 40px; }
+  .intro-grid, .section-title-row, .department-layout, .story-grid, .notice-layout, .research-layout, .admissions-inner, .campus-grid, .campus-map-heading, .campus-map-layout { grid-template-columns: 1fr; gap: 40px; }
   .intro-copy { padding-top: 0; }
   .fact-rail { grid-template-columns: 1fr; }
   .fact-rail article, .fact-rail article:first-child { min-height: auto; padding: 25px 0; border-right: 0; border-bottom: 1px solid var(--line); }
@@ -457,11 +421,6 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
   .placement-slide { padding: 40px 35px; }
   .recruiter-row { grid-template-columns: repeat(2, 1fr); }
   .recruiter-row span:nth-child(even) { border-right: 0; }
-  .people-visual { min-height: 440px; }
-  .people-copy { padding: 20px 0 70px; }
-  .faculty-directory { grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; padding-bottom:70px; }
-  .faculty-card-copy { min-height:115px; padding:16px 14px; }
-  .faculty-card-copy h3 { font-size:16px; }
   .admissions-inner { gap: 28px; }
   .campus-photo { height: 380px; }
   .photo-label { right: -4px; }
@@ -482,16 +441,6 @@ h1 em, h2 em { color: var(--gold); font-family: Georgia, serif; font-weight: 400
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
-}
-
-@media (hover:none) {
-  .faculty-card-overlay { align-items:flex-end; justify-content:flex-end; padding:12px; background:linear-gradient(180deg,transparent 55%,rgba(5,21,41,.82)); opacity:1; }
-  .faculty-card-overlay b { min-width:0; padding:9px 11px; font-size:8px; }
-  .faculty-card-overlay i { display:none; }
-}
-
-@media (max-width:460px) {
-  .faculty-directory { grid-template-columns:1fr; }
 }
 
 .placement-archive-preview { min-height: 510px; padding: clamp(28px, 5vw, 64px); background: #f3f0e9; display: flex; flex-direction: column; justify-content: center; gap: 14px; }

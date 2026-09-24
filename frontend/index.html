@@ -57,7 +57,8 @@
           <div class="dropdown">
             <a href="#about">About CSE <small>Department overview</small></a>
             <a href="#departments">Vision &amp; mission <small>Our academic purpose</small></a>
-            <a href="#people">Faculty &amp; staff <small>Meet the department</small></a>
+            <a href="pages/faculty.html">Faculty &amp; staff <small>Meet the department</small></a>
+            <a href="#phd-scholars">PhD scholars <small>Doctoral research community</small></a>
             <a href="#campus">Facilities <small>Labs and learning spaces</small></a>
           </div>
         </div>
@@ -96,20 +97,13 @@
             <a href="#campus">Laboratories</a>
           </div>
         </div>
-        <div class="nav-group">
-          <button type="button" aria-expanded="false">People <span>⌄</span></button>
-          <div class="dropdown">
-            <a href="#people">Faculty &amp; staff</a>
-            <a href="#research">Ph.D. scholars</a>
-            <a href="#placements">Alumni &amp; outcomes</a>
-          </div>
-        </div>
+        <a href="pages/events.html">Events</a>
         <a href="pages/placements.html">Placements</a>
         <div class="nav-group nav-last">
           <button type="button" aria-expanded="false">Student life <span>⌄</span></button>
           <div class="dropdown dropdown-right">
             <a href="#campus">Clubs &amp; chapters</a>
-            <a href="#events">Events &amp; workshops</a>
+            <a href="pages/events.html">Events &amp; workshops</a>
             <a href="#campus">Campus facilities</a>
             <a href="#campus-map">Campus map</a>
           </div>
@@ -159,6 +153,26 @@
           </div>
         </div>
         <button type="button" class="ticker-control" id="tickerControl" aria-label="Pause announcements">Ⅱ</button>
+      </div>
+    </section>
+
+    <section class="section departments-section" id="departments">
+      <div class="shell department-layout">
+        <div class="department-intro reveal">
+          <span class="kicker light">Department vision &amp; mission</span>
+          <h2>Computing excellence.<br><em>Human purpose.</em></h2>
+          <p>Our vision is to grow as a centre of excellence that develops capable computer science professionals for changing industrial and societal needs.</p>
+          <button class="button button-light" type="button" id="departmentToggle">Read all mission commitments</button>
+        </div>
+        <div class="department-list reveal delay-1" id="departmentList">
+          <a href="#programmes"><span>M1</span> Combine sound theory with practical computing skills <b>01</b></a>
+          <a href="#research"><span>M2</span> Encourage innovation, research and analytical thinking <b>02</b></a>
+          <a href="pages/faculty.html"><span>M3</span> Build professional ethics and responsibility through quality education <b>03</b></a>
+          <a href="#campus"><span>M4</span> Create an industry-connected environment for continuous technological learning <b>04</b></a>
+          <a class="extra-department" href="#research"><span>M5</span> Apply computing knowledge to societal and environmental challenges <b>05</b></a>
+          <a class="extra-department" href="#programmes"><span>M6</span> Support lifelong learning and sustainable development <b>06</b></a>
+          <a class="extra-department official-mission-link" href="https://www.sgsits.ac.in/files/CS_Scheme_Syllabus_2017-18_Final_ME_PHD.pdf" target="_blank" rel="noreferrer"><span>PDF</span> Read the official department vision and mission <b>↗</b></a>
+        </div>
       </div>
     </section>
 
@@ -219,31 +233,11 @@
       </div>
     </section>
 
-    <section class="section departments-section" id="departments">
-      <div class="shell department-layout">
-        <div class="department-intro reveal">
-          <span class="kicker light">Vision &amp; mission</span>
-          <h2>Computing excellence.<br><em>Human purpose.</em></h2>
-          <p>Our vision is to grow as a centre of excellence that develops capable computer science professionals for changing industrial and societal needs.</p>
-          <button class="button button-light" type="button" id="departmentToggle">Read all mission commitments</button>
-        </div>
-        <div class="department-list reveal delay-1" id="departmentList">
-          <a href="#programmes"><span>M1</span> Combine sound theory with practical computing skills <b>01</b></a>
-          <a href="#research"><span>M2</span> Encourage innovation, research and analytical thinking <b>02</b></a>
-          <a href="#people"><span>M3</span> Build professional ethics and responsibility through quality education <b>03</b></a>
-          <a href="#campus"><span>M4</span> Create an industry-connected environment for continuous technological learning <b>04</b></a>
-          <a class="extra-department" href="#research"><span>M5</span> Apply computing knowledge to societal and environmental challenges <b>05</b></a>
-          <a class="extra-department" href="#programmes"><span>M6</span> Support lifelong learning and sustainable development <b>06</b></a>
-          <a class="extra-department official-mission-link" href="https://www.sgsits.ac.in/files/CS_Scheme_Syllabus_2017-18_Final_ME_PHD.pdf" target="_blank" rel="noreferrer"><span>PDF</span> Read the official department vision and mission <b>↗</b></a>
-        </div>
-      </div>
-    </section>
-
     <section class="section news-events" id="events">
       <div class="shell">
         <div class="section-title-row compact reveal">
           <div><span class="kicker">Department pulse</span><h2>Ideas, events &amp;<br><em>what’s next.</em></h2></div>
-          <a class="arrow-link" href="#notices">View notice centre <span>→</span></a>
+          <a class="arrow-link" href="pages/events.html">View all events <span>→</span></a>
         </div>
         <div class="story-grid">
           <article class="feature-story reveal">
@@ -251,9 +245,9 @@
             <div class="story-copy"><time datetime="2026-08-18">18 August 2026</time><h3>A department where computing moves from theory to working systems</h3><p>Explore laboratories, technical activities, research work and the people shaping the CSE community.</p><a href="#campus">Explore the department <span>↗</span></a></div>
           </article>
           <div class="event-stack">
-            <article class="event-card reveal delay-1"><div class="event-date"><strong>24</strong><span>SEP<br>2026</span></div><div><span class="tag">Workshop</span><h3>Hands-on innovation and prototyping workshop</h3><p>Advanced Technology Centre · 10:00 AM</p></div><button type="button" aria-label="Open event" data-toast="Event details can be connected to the institute event feed.">↗</button></article>
-            <article class="event-card reveal delay-2"><div class="event-date"><strong>08</strong><span>OCT<br>2026</span></div><div><span class="tag">Seminar</span><h3>Research conversations across disciplines</h3><p>Golden Jubilee Auditorium · 11:30 AM</p></div><button type="button" aria-label="Open event" data-toast="Event details can be connected to the institute event feed.">↗</button></article>
-            <article class="event-card reveal delay-3"><div class="event-date"><strong>15</strong><span>OCT<br>2026</span></div><div><span class="tag">Students</span><h3>Clubs and chapters open house</h3><p>Central Lawn · 4:00 PM</p></div><button type="button" aria-label="Open event" data-toast="Event details can be connected to the institute event feed.">↗</button></article>
+            <article class="event-card reveal delay-1"><div class="event-date"><strong>24</strong><span>SEP<br>2026</span></div><div><span class="tag">Workshop</span><h3>Hands-on innovation and prototyping workshop</h3><p>Advanced Technology Centre · 10:00 AM</p></div><a href="pages/events.html" aria-label="Open events page">↗</a></article>
+            <article class="event-card reveal delay-2"><div class="event-date"><strong>08</strong><span>OCT<br>2026</span></div><div><span class="tag">Seminar</span><h3>Research conversations across disciplines</h3><p>Golden Jubilee Auditorium · 11:30 AM</p></div><a href="pages/events.html" aria-label="Open events page">↗</a></article>
+            <article class="event-card reveal delay-3"><div class="event-date"><strong>15</strong><span>OCT<br>2026</span></div><div><span class="tag">Students</span><h3>Clubs and chapters open house</h3><p>Central Lawn · 4:00 PM</p></div><a href="pages/events.html" aria-label="Open events page">↗</a></article>
           </div>
         </div>
       </div>
@@ -287,10 +281,10 @@
     <section class="section research-section" id="research">
       <div class="shell research-layout">
         <div class="research-copy reveal">
-          <span class="kicker">Research in computing</span>
+          <span class="kicker" id="phd-scholars">Research &amp; PhD scholars</span>
           <h2>Questions become<br><em>working knowledge.</em></h2>
           <p>Discover department supervisors, scholars, publications, projects and consultancy across systems, software, networks, data and intelligent computing.</p>
-          <a class="button button-dark" href="#people">Find a researcher</a>
+          <a class="button button-dark" href="pages/faculty.html">Find a researcher</a>
         </div>
         <div class="research-cards reveal delay-1">
           <a href="#research"><span>R / 01</span><h3>AI, data &amp;<br>intelligent systems</h3><p>Research and projects that turn data into useful, responsible computing systems.</p><b>→</b></a>
@@ -322,16 +316,6 @@
       </div>
     </section>
 
-    <section class="section people-section" id="people">
-      <div class="shell">
-        <div class="people-layout">
-          <div class="people-visual reveal"><img src="assets/images/campus-life.jpg" alt="Students and academic life at SGSITS"><div><strong>People power<br>the department.</strong><span>Faculty · Staff · Scholars · Alumni</span></div></div>
-          <div class="people-copy reveal delay-1"><span class="kicker">Meet the CSE community</span><h2>Find expertise.<br><em>Start a conversation.</em></h2><p>Searchable faculty profiles help students, collaborators and visitors discover teaching interests, research areas, publications and professional experience.</p><form class="people-search" id="peopleSearch"><label class="sr-only" for="peopleQuery">Search people</label><input id="peopleQuery" type="search" placeholder="Try “machine learning” or a faculty name"><button type="submit">Search <span>→</span></button></form><div id="peopleSearchResult" class="people-result" aria-live="polite">Loading published faculty profiles…</div></div>
-        </div>
-        <div class="faculty-directory" id="facultyDirectory" aria-live="polite"></div>
-      </div>
-    </section>
-
     <section class="section admissions-band" id="admissions">
       <div class="shell admissions-inner reveal">
         <div><span class="kicker light">Study at SGSITS CSE</span><h2>Bring your questions.<br><em>Build your direction.</em></h2></div>
@@ -341,7 +325,7 @@
 
     <section class="section campus-section" id="campus">
       <div class="shell campus-grid">
-        <div class="campus-copy reveal"><span class="kicker">Department facilities</span><h2>Spaces to code.<br><em>Room to collaborate.</em></h2><p>Department learning extends through computing laboratories, project work, seminars and student-led technical activities on the SGSITS campus.</p><div class="campus-links"><a href="#events">Events &amp; workshops <span>↗</span></a><a href="#research">Research &amp; projects <span>↗</span></a><a href="#campus-map">Visit the department <span>↗</span></a></div></div>
+        <div class="campus-copy reveal"><span class="kicker">Department facilities</span><h2>Spaces to code.<br><em>Room to collaborate.</em></h2><p>Department learning extends through computing laboratories, project work, seminars and student-led technical activities on the SGSITS campus.</p><div class="campus-links"><a href="pages/events.html">Events &amp; workshops <span>↗</span></a><a href="#research">Research &amp; projects <span>↗</span></a><a href="#campus-map">Visit the department <span>↗</span></a></div></div>
         <div class="campus-photo reveal delay-1"><img src="assets/images/sgsits-computer-engineering-department.jpg" alt="Department of Computer Engineering at SGSITS Indore"><div class="photo-label">Department of Computer Engineering<br><strong>SGSITS, Indore</strong></div></div>
       </div>
     </section>
@@ -379,7 +363,7 @@
   <footer class="site-footer" id="contact">
     <div class="shell footer-top">
       <div class="footer-brand"><img src="assets/images/sgsits-logo.png" alt="" width="84" height="84"><h2>CSE<small>SGSITS Indore</small></h2><p>Computing foundations.<br>Engineering with purpose.</p></div>
-      <div class="footer-nav"><div><h3>Department</h3><a href="#about">About CSE</a><a href="#departments">Vision &amp; mission</a><a href="#people">Faculty</a><a href="#research">Research</a></div><div><h3>Students</h3><a href="pages/syllabus.html">Syllabus</a><a href="pages/timetable.html">Timetable</a><a href="pages/academic-calendar.html">Academic calendar</a><a href="pages/placements.html">Placements</a></div><div><h3>Quick links</h3><a href="#notices">Notices</a><a href="#events">Events</a><a href="#campus">Facilities</a><a href="#campus-map">Campus map</a><a href="#contact">Contact</a><button type="button" data-modal-open="adminModal">Faculty &amp; admin portals</button></div></div>
+      <div class="footer-nav"><div><h3>Department</h3><a href="#about">About CSE</a><a href="#departments">Vision &amp; mission</a><a href="pages/faculty.html">Faculty</a><a href="#research">Research</a></div><div><h3>Students</h3><a href="pages/syllabus.html">Syllabus</a><a href="pages/timetable.html">Timetable</a><a href="pages/academic-calendar.html">Academic calendar</a><a href="pages/placements.html">Placements</a></div><div><h3>Quick links</h3><a href="pages/notices.html">Notices</a><a href="pages/events.html">Events</a><a href="#campus">Facilities</a><a href="#campus-map">Campus map</a><a href="#contact">Contact</a><button type="button" data-modal-open="adminModal">Faculty &amp; admin portals</button></div></div>
       <div class="footer-contact"><h3>Department contact</h3><p>Department of Computer Engineering<br>23, Sir M. Visvesvaraya Marg<br>Indore, Madhya Pradesh 452003</p><a href="tel:+919425032185">+91 94250 32185</a><a href="mailto:hodcse@sgsits.ac.in">hodcse@sgsits.ac.in</a><a class="map-link" href="#campus-map">View campus map ↗</a></div>
     </div>
     <div class="shell footer-bottom"><p>© <span id="year"></span> SGSITS website concept. Institutional information sourced from the official SGSITS website.</p><div><a href="#reports">Privacy</a><a href="#reports">Accessibility</a><a href="#top">Back to top ↑</a></div></div>
@@ -396,6 +380,6 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="assets/js/main.js?v=20260924-2"></script>
+  <script type="module" src="assets/js/main.js?v=20260924-4"></script>
 </body>
 </html>

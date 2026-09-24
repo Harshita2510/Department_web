@@ -10,7 +10,7 @@ const timetableSlotSchema=new mongoose.Schema({
   uploadedBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'},approvedBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'},submittedAt:Date,publishedAt:Date
 },{_id:false});
 const timetableFilesSchema=new mongoose.Schema({
-  classTable:{type:timetableSlotSchema,default:()=>({})},mst1:{type:timetableSlotSchema,default:()=>({})},mst2:{type:timetableSlotSchema,default:()=>({})},mst3:{type:timetableSlotSchema,default:()=>({})},endSemester:{type:timetableSlotSchema,default:()=>({})}
+  classTable:{type:timetableSlotSchema,default:()=>({})},quiz:{type:timetableSlotSchema,default:()=>({})},mst1:{type:timetableSlotSchema,default:()=>({})},mst2:{type:timetableSlotSchema,default:()=>({})},mst3:{type:timetableSlotSchema,default:()=>({})},endSemester:{type:timetableSlotSchema,default:()=>({})}
 },{_id:false});
 
 const academicDocumentSchema = new mongoose.Schema({
