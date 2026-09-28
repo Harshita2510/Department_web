@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { z } from 'zod';
 
-config({ path:new URL('../../.env',import.meta.url), quiet:true });
+config({ path:new URL('../../../.env',import.meta.url), quiet:true });
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

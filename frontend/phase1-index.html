@@ -1,0 +1,1216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official department portal for Computer Science and Engineering at Shri G. S. Institute of Technology and Science, Indore.">
+  <meta name="theme-color" content="#071b34">
+  <title>Computer Science &amp; Engineering — SGSITS Indore</title>
+  <link rel="icon" type="image/png" href="assets/images/sgsits-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/homepage.css">
+
+
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="utility-bar">
+    <div class="shell utility-inner">
+      <p>Department of Computer Science &amp; Engineering · SGSITS Indore</p>
+      <div class="utility-links" aria-label="Utility links">
+        <a href="#notices">Notices</a>
+        <a href="#contact">Contact</a>
+        <button class="text-button" type="button" id="accessibilityToggle" aria-label="Increase text size">A+</button>
+        <button class="text-button" type="button" id="languageToggle" aria-label="Switch language">हिंदी</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header" id="top">
+    <div class="shell brand-row">
+      <a class="brand" href="phase1-index.html" aria-label="SGSITS Computer Science and Engineering home">
+        <img src="assets/images/sgsits-logo.png" alt="SGSITS emblem" width="78" height="78">
+        <span class="brand-copy">
+          <strong>CSE</strong>
+          <span>Department of Computer Science &amp; Engineering</span>
+          <small>SGSITS · Indore</small>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <button class="icon-button" id="searchOpen" type="button" aria-label="Open site search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-4-4"></path>
+          </svg>
+        </button>
+
+        <button class="button button-outline desktop-action" type="button" data-modal-open="adminModal">
+          Faculty &amp; admin
+        </button>
+
+        <a class="button button-gold desktop-action" href="pages/syllabus.html">
+          Explore programmes
+        </a>
+
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <div class="shell nav-inner">
+
+        <a class="nav-home" href="phase1-index.html">Home</a>
+
+        <!-- Department -->
+        <div class="nav-group">
+          <button type="button" aria-expanded="false">
+            Department <span>⌄</span>
+          </button>
+          <div class="dropdown">
+            <a href="phase1-index.html#about">
+              About CSE
+              <small>Department overview</small>
+            </a>
+            <a href="phase1-index.html#departments">
+              Vision &amp; mission
+              <small>Our academic purpose</small>
+            </a>
+            <a href="pages/faculty.html">
+              Faculty &amp; staff
+              <small>Meet the department</small>
+            </a>
+            <a href="pages/research.html#research-facilities">
+              Facilities
+              <small>Labs and learning spaces</small>
+            </a>
+          </div>
+        </div>
+
+        <!-- Academics -->
+        <div class="nav-group">
+          <button type="button" aria-expanded="false">
+            Academics <span>⌄</span>
+          </button>
+          <div class="dropdown">
+            <a href="pages/syllabus.html">
+              Syllabus &amp; curriculum
+              <small>Academic programmes and courses</small>
+            </a>
+            <a href="pages/timetable.html">
+              Timetable
+              <small>Class schedules</small>
+            </a>
+            <a href="pages/academic-calendar.html">
+              Academic calendar
+              <small>Academic dates and events</small>
+            </a>
+          </div>
+        </div>
+
+        <!-- Admission -->
+        <div class="nav-group">
+          <button type="button" aria-expanded="false">
+            Admission <span>⌄</span>
+          </button>
+          <div class="dropdown">
+            <a href="pages/admissions.html">
+              Undergraduate
+              <small>B.Tech programmes</small>
+            </a>
+            <a href="pages/admissions.html">
+              Postgraduate
+              <small>M.Tech programmes</small>
+            </a>
+            <a href="pages/admissions.html">
+              Doctoral
+              <small>PhD admissions</small>
+            </a>
+            <a
+              href="https://www.sgsits.ac.in/academics-1"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Official admissions
+              <small>Institute admission information</small>
+            </a>
+          </div>
+        </div>
+
+        <!-- Research -->
+        <div class="nav-group">
+          <button type="button" aria-expanded="false">
+            Research <span>⌄</span>
+          </button>
+          <div class="dropdown">
+            <a href="pages/research.html">
+              Research areas
+              <small>Research themes and focus areas</small>
+            </a>
+            <a href="pages/research.html">
+              Publications &amp; papers
+              <small>Research outputs</small>
+            </a>
+            <a href="pages/research.html">
+              Patents &amp; projects
+              <small>Projects and intellectual property</small>
+            </a>
+            <a href="pages/research.html">
+              Laboratories
+              <small>Research and learning spaces</small>
+            </a>
+          </div>
+        </div>
+
+        <!-- Direct pages -->
+        <a href="pages/events.html">Events</a>
+        <a href="pages/placements.html">Placements</a>
+
+        <!-- Student Life -->
+        <div class="nav-group nav-last">
+          <button type="button" aria-expanded="false">
+            Student life <span>⌄</span>
+          </button>
+          <div class="dropdown dropdown-right">
+            <a href="#">
+              Clubs &amp; chapters
+            </a>
+            <a href="pages/events.html">
+              Events &amp; workshops
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </nav>
+  </header>
+
+
+  <main id="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-noise" aria-hidden="true"></div>
+
+      <div class="shell hero-grid">
+
+        <div class="hero-copy reveal">
+
+          <div class="eyebrow">
+            <span></span>
+            Computer Science &amp; Engineering · SGSITS
+          </div>
+
+          <h1>
+            Think in systems.<br>
+            <em>Build with purpose.</em><br>
+            Shape what’s next.
+          </h1>
+
+          <p>
+            A department for rigorous computer science, hands-on engineering,
+            meaningful research and technology that responds to industry and society.
+          </p>
+
+          <div class="hero-actions">
+
+            <a class="button button-gold" href="pages/syllabus.html">
+              Explore CSE programmes <span>↗</span>
+            </a>
+
+            <a class="play-link" href="#departments">
+              <span class="play-icon">↓</span>
+              Vision &amp; mission
+            </a>
+
+          </div>
+
+          <div class="hero-badges" aria-label="Department highlights">
+            <div>
+              <strong>8</strong>
+              <span>UG semesters</span>
+            </div>
+
+            <div>
+              <strong>4</strong>
+              <span>PG semesters</span>
+            </div>
+
+            <div>
+              <strong>28</strong>
+              <span>Faculty members</span>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="hero-media reveal delay-1">
+
+          <div class="hero-image-wrap">
+            <img
+              src="assets/images/sgsits-computer-engineering-department.jpg"
+              alt="Entrance of the Department of Computer Engineering at SGSITS Indore"
+            >
+
+            <div class="image-shade"></div>
+
+            <div class="image-caption">
+              <span>CE</span>
+
+              <p>
+                Computer Engineering Department<br>
+                <small>SGSITS, Indore · Official photograph</small>
+              </p>
+            </div>
+          </div>
+
+          <div class="since-card">
+            <strong>&lt;/&gt;</strong>
+            <span>
+              learn<br>
+              build<br>
+              research
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="hero-scroll">
+        <span></span>
+        Scroll to explore
+      </div>
+    </section>
+
+
+    <!-- NOTICE TICKER -->
+    <section class="notice-strip" aria-label="Important announcements">
+
+      <div class="shell notice-strip-inner">
+
+        <div class="notice-label">
+          <span class="pulse-dot"></span>
+          Latest
+        </div>
+
+        <div class="ticker-window">
+
+          <div class="ticker" id="noticeTicker">
+
+            <a href="#notices">
+              <time>20 AUG</time>
+              Academic registration information is available in the notice centre
+            </a>
+
+            <a href="pages/events.html">
+              <time>18 AUG</time>
+              Student induction and orientation schedule
+            </a>
+
+            <a
+              href="https://www.sgsits.ac.in/academics-1"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <time>14 AUG</time>
+              Admissions information for UG and PG programmes
+            </a>
+
+          </div>
+
+        </div>
+
+        <button
+          type="button"
+          class="ticker-control"
+          id="tickerControl"
+          aria-label="Pause announcements"
+        >
+          Ⅱ
+        </button>
+
+      </div>
+    </section>
+
+
+    <!-- VISION & MISSION -->
+    <section class="section departments-section" id="departments">
+
+      <div class="shell department-layout">
+
+        <div class="department-intro reveal">
+
+          <span class="kicker light">
+            Department vision &amp; mission
+          </span>
+
+          <h2>
+            Computing excellence.<br>
+            <em>Human purpose.</em>
+          </h2>
+
+          <p>
+            Our vision is to grow as a centre of excellence that develops
+            capable computer science professionals for changing industrial
+            and societal needs.
+          </p>
+
+          <button
+            class="button button-light"
+            type="button"
+            id="departmentToggle"
+          >
+            Read all mission commitments
+          </button>
+
+        </div>
+
+
+        <div
+          class="department-list reveal delay-1"
+          id="departmentList"
+        >
+
+          <a>
+            <span>M1</span>
+            Combine sound theory with practical computing skills
+            <b>01</b>
+          </a>
+
+          <a>
+            <span>M2</span>
+            Encourage innovation, research and analytical thinking
+            <b>02</b>
+          </a>
+
+          <a>
+            <span>M3</span>
+            Build professional ethics and responsibility through quality education
+            <b>03</b>
+          </a>
+
+          <a>
+            <span>M4</span>
+            Create an industry-connected environment for continuous technological learning
+            <b>04</b>
+          </a>
+
+          <a class="extra-department">
+            <span>M5</span>
+            Apply computing knowledge to societal and environmental challenges
+            <b>05</b>
+          </a>
+
+          <a class="extra-department">
+            <span>M6</span>
+            Support lifelong learning and sustainable development
+            <b>06</b>
+          </a>
+
+          <a
+            class="extra-department official-mission-link"
+            href="https://www.sgsits.ac.in/files/CS_Scheme_Syllabus_2017-18_Final_ME_PHD.pdf"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span>PDF</span>
+            Read the official department vision and mission
+            <b>↗</b>
+          </a>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ABOUT -->
+    <section class="section intro-section" id="about">
+
+      <span class="sr-only" id="leadership">
+        Department leadership
+      </span>
+
+      <div class="shell intro-grid">
+
+        <div class="section-heading reveal">
+
+          <span class="kicker">
+            About the department
+          </span>
+
+          <h2>
+            Strong foundations.<br>
+            <em>Future-facing computing.</em>
+          </h2>
+
+        </div>
+
+
+        <div class="intro-copy reveal delay-1">
+
+          <p class="lead"><strong>
+            The Department of Computer Engineering at SGSITS develops
+            computing professionals through theory, practical work,
+            research and responsible problem-solving.</strong>
+          </p>
+
+          <p>
+            Students move from algorithms and systems fundamentals to
+            contemporary areas of software, networks, data and intelligent
+            computing, supported by faculty mentorship and laboratory learning.
+          </p>
+
+          <a class="arrow-link" href="pages/syllabus.html">
+            Explore academics <span>→</span>
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <div class="shell fact-rail reveal">
+
+        <article>
+          <span>01</span>
+          <strong>Computing fundamentals</strong>
+          <p>
+            Algorithms, architecture, operating systems, databases
+            and software engineering.
+          </p>
+        </article>
+
+        <article>
+          <span>02</span>
+          <strong>Learn by building</strong>
+          <p>
+            Laboratory work, projects and technical communities
+            turn concepts into systems.
+          </p>
+        </article>
+
+        <article>
+          <span>03</span>
+          <strong>Responsible innovation</strong>
+          <p>
+            Research and engineering shaped by ethics, social needs
+            and sustainable development.
+          </p>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- NOTICE BOARD -->
+    <section class="section notice-centre" id="notices">
+
+      <div class="shell notice-layout">
+
+        <div class="notice-panel reveal">
+
+          <div class="panel-head">
+
+            <div>
+              <span class="kicker">
+                Stay informed
+              </span>
+
+              <h2>
+                Notice centre
+              </h2>
+            </div>
+
+            <div class="notice-tabs" role="tablist">
+
+              <button
+                type="button"
+                class="active"
+                data-notice-filter="all"
+              >
+                All
+              </button>
+
+              <button
+                type="button"
+                data-notice-filter="academic"
+              >
+                Academic
+              </button>
+
+              <button
+                type="button"
+                data-notice-filter="student"
+              >
+                Student
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="notice-list" id="noticeList">
+
+            <a
+              href="#notices"
+              data-category="academic"
+            >
+              <time>
+                <strong>20</strong>
+                AUG
+              </time>
+
+              <span>
+                <b>
+                  Academic registration and semester commencement information
+                </b>
+                <small>
+                  Academic · PDF notice
+                </small>
+              </span>
+
+              <i>↗</i>
+            </a>
+
+
+            <a
+              href="#notices"
+              data-category="student"
+            >
+              <time>
+                <strong>18</strong>
+                AUG
+              </time>
+
+              <span>
+                <b>
+                  Orientation schedule for newly admitted students
+                </b>
+                <small>
+                  Student affairs · Schedule
+                </small>
+              </span>
+
+              <i>↗</i>
+            </a>
+
+
+            <a
+              href="#notices"
+              data-category="academic"
+            >
+              <time>
+                <strong>14</strong>
+                AUG
+              </time>
+
+              <span>
+                <b>
+                  Applications invited for institute research support
+                </b>
+                <small>
+                  Research · Circular
+                </small>
+              </span>
+
+              <i>↗</i>
+            </a>
+
+
+            <a
+              href="#notices"
+              data-category="student"
+            >
+              <time>
+                <strong>10</strong>
+                AUG
+              </time>
+
+              <span>
+                <b>
+                  Student clubs registration and activity calendar
+                </b>
+                <small>
+                  Student life · Form
+                </small>
+              </span>
+
+              <i>↗</i>
+            </a>
+
+          </div>
+
+          <a
+            class="button button-dark"
+            href="pages/notices.html"
+          >
+            View all notices
+          </a>
+
+        </div>
+
+
+        <aside
+          class="quick-panel reveal delay-1"
+          id="resources"
+        >
+
+          <span class="kicker light">
+            Student quick access
+          </span>
+
+          <h2>
+            Everything you need,<br>
+            close at hand.
+          </h2>
+
+          <div class="quick-links">
+
+            <a href="pages/syllabus.html">
+              <span>01</span>
+              Syllabus &amp; curriculum
+              <b>↗</b>
+            </a>
+
+            <a href="pages/timetable.html">
+              <span>02</span>
+              Time tables
+              <b>↗</b>
+            </a>
+
+            <a href="pages/academic-calendar.html">
+              <span>03</span>
+              Academic calendar
+              <b>↗</b>
+            </a>
+
+            <a href="pages/notices.html">
+              <span>04</span>
+              Forms &amp; downloads
+              <b>↗</b>
+            </a>
+
+            <a href="#campus-map">
+              <span>05</span>
+              Campus map
+              <b>↗</b>
+            </a>
+
+          </div>
+
+        </aside>
+
+      </div>
+    </section>
+
+
+    <!-- CAMPUS MAP -->
+    <section
+      class="section campus-map-section"
+      id="campus-map"
+      aria-labelledby="campusMapTitle"
+    >
+
+      <div class="shell campus-map-heading reveal">
+
+        <div>
+
+          <span class="kicker">
+            Find us on campus
+          </span>
+
+          <h2 id="campusMapTitle">
+            Campus map.<br>
+            <em>Your route to CSE.</em>
+          </h2>
+
+        </div>
+
+        <p>
+          The Computer Science &amp; Engineering department is located
+          inside the SGSITS campus in central Indore. Use the interactive
+          map for directions to the institute.
+        </p>
+
+      </div>
+
+
+      <div class="shell campus-map-layout reveal delay-1">
+
+        <div class="campus-map-frame">
+
+          <iframe
+            title="Map showing SGSITS campus in Indore"
+            src="https://www.google.com/maps?q=SGSITS%20Indore%2C%20Madhya%20Pradesh&amp;output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+
+        </div>
+
+
+        <aside class="campus-map-card">
+
+          <span>
+            Department destination
+          </span>
+
+          <h3>
+            Computer Science &amp; Engineering
+          </h3>
+
+          <address>
+            Shri G. S. Institute of Technology &amp; Science<br>
+            23, Sir M. Visvesvaraya Marg<br>
+            Indore, Madhya Pradesh 452003
+          </address>
+
+          <div class="campus-map-actions">
+
+            <a
+              class="button button-gold"
+              href="https://www.google.com/maps/dir/?api=1&amp;destination=SGSITS%20Indore%2C%20Madhya%20Pradesh"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Get directions <span>↗</span>
+            </a>
+
+            <a href="tel:+919425032185">
+              Call department <span>↗</span>
+            </a>
+
+            <a href="mailto:hodcse@sgsits.ac.in">
+              Email department <span>↗</span>
+            </a>
+
+          </div>
+
+          <small>
+            The embedded map is provided by Google Maps.
+            Opening directions leaves this website.
+          </small>
+
+        </aside>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="site-footer" id="contact">
+
+    <div class="shell footer-top">
+
+      <div class="footer-brand">
+
+        <img
+          src="assets/images/sgsits-logo.png"
+          alt=""
+          width="84"
+          height="84"
+        >
+
+        <h2>
+          CSE
+          <small>SGSITS Indore</small>
+        </h2>
+
+        <p>
+          Computing foundations.<br>
+          Engineering with purpose.
+        </p>
+
+      </div>
+
+
+      <div class="footer-nav">
+
+        <div>
+
+          <h3>
+            Department
+          </h3>
+
+          <a href="#about">
+            About CSE
+          </a>
+
+          <a href="#departments">
+            Vision &amp; mission
+          </a>
+
+          <a href="pages/faculty.html">
+            Faculty
+          </a>
+
+          <a href="pages/faculty.html">
+            Research
+          </a>
+
+        </div>
+
+
+        <div>
+
+          <h3>
+            Students
+          </h3>
+
+          <a href="pages/syllabus.html">
+            Syllabus
+          </a>
+
+          <a href="pages/timetable.html">
+            Timetable
+          </a>
+
+          <a href="pages/academic-calendar.html">
+            Academic calendar
+          </a>
+
+          <a href="pages/placements.html">
+            Placements
+          </a>
+
+        </div>
+
+
+        <div>
+
+          <h3>
+            Quick links
+          </h3>
+
+          <a href="pages/notices.html">
+            Notices
+          </a>
+
+          <a href="pages/events.html">
+            Events
+          </a>
+
+          <a href="#campus-map">
+            Facilities
+          </a>
+
+          <a href="#campus-map">
+            Campus map
+          </a>
+
+          <a href="#contact">
+            Contact
+          </a>
+
+          <button
+            type="button"
+            data-modal-open="adminModal"
+          >
+            Faculty &amp; admin portals
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="footer-contact">
+
+        <h3>
+          Department contact
+        </h3>
+
+        <p>
+          Department of Computer Engineering<br>
+          23, Sir M. Visvesvaraya Marg<br>
+          Indore, Madhya Pradesh 452003
+        </p>
+
+        <a href="tel:+919425032185">
+          +91 94250 32185
+        </a>
+
+        <a href="mailto:hodcse@sgsits.ac.in">
+          hodcse@sgsits.ac.in
+        </a>
+
+        <a
+          class="map-link"
+          href="#campus-map"
+        >
+          View campus map ↗
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <div class="shell footer-bottom">
+
+      <p>
+        © <span id="year"></span>
+        SGSITS website concept.
+        Institutional information sourced from the official SGSITS website.
+      </p>
+
+      <div>
+        <a href="#contact">
+          Privacy
+        </a>
+
+        <a href="#contact">
+          Accessibility
+        </a>
+
+        <a href="#top">
+          Back to top ↑
+        </a>
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <!-- SEARCH -->
+  <div
+    class="search-overlay"
+    id="searchOverlay"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Site search"
+  >
+
+    <button
+      class="search-close"
+      id="searchClose"
+      type="button"
+      aria-label="Close search"
+    >
+      ×
+    </button>
+
+    <div class="search-box">
+
+      <span class="kicker light">
+        Search SGSITS
+      </span>
+
+      <label for="siteSearch">
+        What are you looking for?
+      </label>
+
+      <div class="search-input-wrap">
+
+        <input
+          id="siteSearch"
+          type="search"
+          autocomplete="off"
+          placeholder="Programmes, notices, faculty, research…"
+        >
+
+        <span>⌕</span>
+
+      </div>
+
+      <div
+        class="search-suggestions"
+        id="searchResults"
+      >
+
+        <p>
+          Popular
+        </p>
+
+        <button data-search-term="admissions">
+          Admissions
+        </button>
+
+        <button data-search-term="academic calendar">
+          Academic calendar
+        </button>
+
+        <button data-search-term="faculty">
+          Faculty
+        </button>
+
+        <button data-search-term="placements">
+          Placements
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ADMIN MODAL -->
+  <div
+    class="modal"
+    id="adminModal"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="adminTitle"
+  >
+
+    <div
+      class="modal-backdrop"
+      data-modal-close
+    ></div>
+
+    <div class="modal-card">
+
+      <button
+        class="modal-close"
+        type="button"
+        data-modal-close
+        aria-label="Close portal login"
+      >
+        ×
+      </button>
+
+      <span
+        class="kicker"
+        id="loginKicker"
+      >
+        Faculty self-service
+      </span>
+
+      <h2 id="adminTitle">
+        Welcome back.
+      </h2>
+
+      <div
+        class="login-role-tabs"
+        role="tablist"
+        aria-label="Choose portal"
+      >
+
+        <button
+          class="active"
+          id="facultyLoginTab"
+          type="button"
+          data-login-role="faculty"
+          role="tab"
+          aria-selected="true"
+        >
+          Faculty member
+        </button>
+
+        <button
+          id="websiteAdminLoginTab"
+          type="button"
+          data-login-role="admin"
+          role="tab"
+          aria-selected="false"
+        >
+          Website administrator
+        </button>
+
+      </div>
+
+      <p id="loginDescription">
+        Use the Employee number and temporary password provided by the administrator.
+      </p>
+
+      <form id="adminForm">
+
+        <input
+          id="loginRole"
+          type="hidden"
+          value="faculty"
+        >
+
+        <label
+          for="adminEmail"
+          id="loginIdentifierLabel"
+        >
+          Employee number
+        </label>
+
+        <input
+          id="adminEmail"
+          type="text"
+          autocomplete="username"
+          placeholder="e.g. FAC-001"
+          aria-describedby="adminHint adminError"
+          required
+        >
+
+        <label for="adminPassword">
+          Password
+        </label>
+
+        <input
+          id="adminPassword"
+          type="password"
+          autocomplete="current-password"
+          minlength="8"
+          placeholder="••••••••"
+          required
+        >
+
+        <p
+          class="form-error"
+          id="adminError"
+          role="alert"
+        ></p>
+
+        <button
+          class="button button-dark"
+          id="portalSubmitButton"
+          type="submit"
+        >
+          Open faculty workspace
+        </button>
+
+      </form>
+
+      <small id="adminHint">
+        <strong>No self-registration:</strong>
+        a website administrator must create your Employee number first.
+      </small>
+
+    </div>
+
+  </div>
+
+
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <script
+    type="module"
+    src="assets/js/main.js?v=20260924-4"
+  ></script>
+  <script
+    type="module"
+    src="assets/js/homepage.js"
+  ></script>
+</body>
+</html>

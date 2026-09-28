@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Computer Science and Engineering academic pathways at SGSITS Indore.">
+  <meta name="theme-color" content="#071b34">
+  <title>Admissions — SGSITS CSE</title>
+
+  <link rel="icon" type="image/png" href="../assets/images/sgsits-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/main.css">
+
+  <style>
+
+:root{
+  --ad-navy:#071b34;
+  --ad-gold:#eaae35;
+  --ad-cream:#f7f5ef;
+  --ad-white:#ffffff;
+  --ad-muted:#60718a;
+  --ad-line:rgba(7,27,52,.16);
+}
+
+html{scroll-behavior:smooth;}
+
+body{
+  margin:0;
+  background:var(--ad-cream);
+  color:var(--ad-navy);
+}
+
+.admissions-page{
+  background:var(--ad-cream);
+  min-height:100vh;
+  padding:0 0 72px;
+}
+
+.admissions-shell{
+  width:min(1180px, calc(100% - 80px));
+  margin:0 auto;
+}
+
+/* ---------- TOP INTRO ---------- */
+
+.admissions-intro{
+  padding:64px 0 26px;
+}
+
+.admissions-intro-grid{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(280px, 390px);
+  gap:90px;
+  align-items:start;
+}
+
+.admissions-kicker{
+  display:block;
+  margin:0 0 24px;
+  color:#a56f12;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+}
+
+.admissions-intro h1{
+  margin:0;
+  max-width:720px;
+  color:var(--ad-navy);
+  font-family:"Manrope",sans-serif;
+  font-size:clamp(58px, 6.2vw, 88px);
+  line-height:.94;
+  letter-spacing:-.07em;
+  font-weight:800;
+}
+
+.admissions-intro h1 em{
+  display:block;
+  color:var(--ad-gold);
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:400;
+  font-style:italic;
+  letter-spacing:-.055em;
+}
+
+.admissions-intro-copy{
+  padding-top:80px;
+}
+
+.admissions-intro-copy p{
+  margin:0;
+  max-width:370px;
+  color:#536780;
+  font-size:15px;
+  line-height:1.75;
+}
+
+/* ---------- FILTER/TABS ---------- */
+
+.admissions-tabs{
+  display:flex;
+  gap:0;
+  align-items:flex-end;
+  border-bottom:1px solid rgba(7,27,52,.18);
+  margin-top:38px;
+  overflow-x:auto;
+}
+
+.admissions-tab{
+  flex:0 0 auto;
+  border:0;
+  background:transparent;
+  color:#60718a;
+  padding:0 26px 17px 16px;
+  font:700 11px "DM Sans",sans-serif;
+  cursor:default;
+  position:relative;
+  white-space:nowrap;
+}
+
+.admissions-tab:first-child{
+  padding-left:16px;
+  color:var(--ad-navy);
+}
+
+.admissions-tab:first-child::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:10px;
+  bottom:-1px;
+  height:2px;
+  background:var(--ad-gold);
+}
+
+/* ---------- CARDS ---------- */
+
+.admissions-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-top:26px;
+}
+
+.admission-card{
+  min-height:360px;
+  padding:28px 26px 25px;
+  box-sizing:border-box;
+  border:1px solid rgba(7,27,52,.12);
+  background:#fff;
+  color:var(--ad-navy);
+  display:flex;
+  flex-direction:column;
+  text-decoration:none;
+  transition:transform .28s ease, box-shadow .28s ease, background .28s ease, color .28s ease;
+}
+
+.admission-card:hover{
+  transform:translateY(-7px);
+  box-shadow:0 18px 38px rgba(7,27,52,.14);
+}
+
+.admission-card.dark{
+  background:var(--ad-navy);
+  color:#fff;
+  border-color:var(--ad-navy);
+}
+
+.admission-card.gold{
+  background:var(--ad-gold);
+  color:var(--ad-navy);
+  border-color:var(--ad-gold);
+}
+
+.admission-card-index{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  opacity:.72;
+}
+
+.admission-card-icon{
+  width:47px;
+  height:47px;
+  border:1px solid currentColor;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  margin:33px 0 27px;
+  font-size:21px;
+  font-weight:400;
+}
+
+.admission-card h2{
+  margin:0;
+  max-width:245px;
+  color:inherit;
+  font-family:"Manrope",sans-serif;
+  font-size:23px;
+  line-height:1.08;
+  letter-spacing:-.04em;
+  font-weight:800;
+}
+
+.admission-card p{
+  margin:15px 0 0;
+  max-width:250px;
+  color:inherit;
+  opacity:.72;
+  font-size:13px;
+  line-height:1.55;
+}
+
+.admission-card-action{
+  margin-top:auto;
+  padding-top:19px;
+  border-top:1px solid currentColor;
+  color:inherit;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.admission-card-action span{
+  font-size:16px;
+  transition:transform .2s ease;
+}
+
+.admission-card:hover .admission-card-action span{
+  transform:translate(3px,-3px);
+}
+
+/* ---------- SMALL FOOTNOTE ---------- */
+
+.admissions-note{
+  margin-top:28px;
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  align-items:flex-start;
+  color:#60718a;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.admissions-note strong{
+  color:var(--ad-navy);
+}
+
+@media (max-width:1000px){
+  .admissions-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .admissions-intro-grid{
+    gap:50px;
+  }
+}
+
+@media (max-width:720px){
+  .admissions-shell{
+    width:min(100% - 36px, 600px);
+  }
+
+  .admissions-intro{
+    padding-top:44px;
+  }
+
+  .admissions-intro-grid{
+    grid-template-columns:1fr;
+    gap:22px;
+  }
+
+  .admissions-intro-copy{
+    padding-top:0;
+  }
+
+  .admissions-grid{
+    grid-template-columns:1fr;
+  }
+
+  .admission-card{
+    min-height:330px;
+  }
+
+  .admissions-note{
+    flex-direction:column;
+  }
+}
+
+  </style>
+
+<style>
+.utility-bar{position:relative !important;top:auto !important;z-index:1000;}
+.site-header{position:sticky !important;top:0 !important;z-index:999;background:#fff;}
+.utility-bar + .site-header{box-shadow:0 1px 0 rgba(7,27,52,.08);}
+.shell,.admissions-shell,.nav-inner,.utility-inner,.brand-row{width:min(1320px,calc(100% - 64px));margin-left:auto;margin-right:auto;}
+@media (min-width:1500px){.shell,.admissions-shell,.nav-inner,.utility-inner,.brand-row{width:min(1360px,calc(100% - 80px));}}
+@media (max-width:1100px){.shell,.admissions-shell,.nav-inner,.utility-inner,.brand-row{width:min(calc(100% - 48px),900px);}}
+@media (max-width:720px){.shell,.admissions-shell,.nav-inner,.utility-inner,.brand-row{width:min(calc(100% - 32px),620px);}}
+</style>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="utility-bar">
+    <div class="shell utility-inner">
+      <p>Department of Computer Science &amp; Engineering · SGSITS Indore</p>
+      <div class="utility-links" aria-label="Utility links">
+        <a href="../phase1-index.html#notices">Notices</a>
+        <a href="#contact">Contact</a>
+        <button class="text-button" type="button" id="accessibilityToggle" aria-label="Increase text size">A+</button>
+        <button class="text-button" type="button" id="languageToggle" aria-label="Switch language">हिंदी</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header" id="top">
+    <div class="shell brand-row">
+      <a class="brand" href="../phase1-index.html" aria-label="SGSITS Computer Science and Engineering home">
+        <img src="../assets/images/sgsits-logo.png" alt="SGSITS emblem" width="78" height="78">
+        <span class="brand-copy">
+          <strong>CSE</strong>
+          <span>Department of Computer Science &amp; Engineering</span>
+          <small>SGSITS · Indore</small>
+        </span>
+      </a>
+
+      <div class="header-actions">
+        <button class="icon-button" id="searchOpen" type="button" aria-label="Open site search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        </button>
+        <button class="button button-outline desktop-action" type="button" data-modal-open="adminModal">Faculty &amp; admin</button>
+        <a class="button button-gold desktop-action" href="syllabus.html">Explore programmes</a>
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <div class="shell nav-inner">
+        <a class="nav-home" href="../phase1-index.html">Home</a>
+
+        <div class="nav-group">
+          <button type="button" aria-expanded="false">Department <span>⌄</span></button>
+          <div class="dropdown">
+            <a href="../phase1-index.html#about">About CSE <small>Department overview</small></a>
+            <a href="../phase1-index.html#departments">Vision &amp; mission <small>Our academic purpose</small></a>
+            <a href="faculty.html">Faculty &amp; staff <small>Meet the department</small></a>
+            <a href="research.html">Facilities <small>Labs and learning spaces</small></a>
+          </div>
+        </div>
+
+          <div class="nav-group">
+          <button type="button" aria-expanded="false">
+            Academics <span>⌄</span>
+          </button>
+          <div class="dropdown">
+            <a href="syllabus.html">
+              Syllabus &amp; curriculum
+              <small>Academic programmes and courses</small>
+            </a>
+            <a href="timetable.html">
+              Timetable
+              <small>Class schedules</small>
+            </a>
+            <a href="academic-calendar.html">
+              Academic calendar
+              <small>Academic dates and events</small>
+            </a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <button class="active" type="button" aria-expanded="false">Admission <span>⌄</span></button>
+          <div class="dropdown">
+            <a href="admissions.html">Undergraduate <small>B.Tech Computer Science &amp; Engineering</small></a>
+            <a href="admissions.html">Postgraduate <small>M.Tech Computer Engineering</small></a>
+            <a href="admissions.html">Doctoral <small>Research in computing</small></a>
+            <a href="https://www.sgsits.ac.in/academics-1" target="_blank" rel="noreferrer">Official Admissions <small>Institute admission information</small></a>
+          </div>
+        </div>
+
+<div class="nav-group">
+          <button type="button" aria-expanded="false">
+            Research <span>⌄</span>
+          </button>
+          <div class="dropdown">
+            <a href="research.html">
+              Research areas
+              <small>Research themes and focus areas</small>
+            </a>
+            <a href="publications.html">
+              Publications &amp; papers
+              <small>Research outputs</small>
+            </a>
+            <a href="projects-patents.html">
+              Patents &amp; projects
+              <small>Projects and intellectual property</small>
+            </a>
+            <a href="research.html#research-facilities">
+              Laboratories
+              <small>Research and learning spaces</small>
+            </a>
+          </div>
+        </div>
+
+        <a href="events.html">Events</a>
+        <a href="placements.html">Placements</a>
+
+        <div class="nav-group nav-last">
+          <button type="button" aria-expanded="false">Student life <span>⌄</span></button>
+          <div class="dropdown dropdown-right">
+            <a href="events.html">Clubs &amp; chapters</a>
+            <a href="events.html">Events &amp; workshops</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="admissions-page">
+    <section class="admissions-intro">
+      <div class="admissions-shell">
+        <div class="admissions-intro-grid">
+          <div>
+            <span class="admissions-kicker">Study Computer Science</span>
+            <h1>
+              One discipline.
+              <em>Many directions.</em>
+            </h1>
+          </div>
+
+          <div class="admissions-intro-copy">
+            <p>
+              Build depth through structured undergraduate,
+              postgraduate and doctoral study, with direct
+              access to semester-wise syllabi and timetables.
+            </p>
+          </div>
+        </div>
+
+        <div class="admissions-tabs" aria-label="Programme categories">
+          <span class="admissions-tab">All programmes</span>
+          <span class="admissions-tab">Undergraduate</span>
+          <span class="admissions-tab">Postgraduate</span>
+          <span class="admissions-tab">Doctoral</span>
+        </div>
+
+        <div class="admissions-grid">
+
+          <a class="admission-card dark" href="syllabus.html">
+            <span class="admission-card-index">01 · 8 semesters</span>
+            <span class="admission-card-icon" aria-hidden="true">⌘</span>
+
+            <h2>B.Tech Computer<br>Science &amp; Engineering</h2>
+
+            <p>
+              An undergraduate pathway from mathematical and programming
+              foundations to complete computing systems.
+            </p>
+
+            <span class="admission-card-action">
+              View syllabus
+              <span>↗</span>
+            </span>
+          </a>
+
+          <a class="admission-card" href="syllabus.html">
+            <span class="admission-card-index">02 · 4 semesters</span>
+            <span class="admission-card-icon" aria-hidden="true">◇</span>
+
+            <h2>M.Tech Computer<br>Engineering</h2>
+
+            <p>
+              Advanced coursework and research for deeper technical
+              specialisation and professional practice.
+            </p>
+
+            <span class="admission-card-action">
+              View syllabus
+              <span>↗</span>
+            </span>
+          </a>
+
+          <a class="admission-card" href="research.html">
+            <span class="admission-card-index">03 · Research</span>
+            <span class="admission-card-icon" aria-hidden="true">◎</span>
+
+            <h2>Ph.D. &amp; doctoral<br>research</h2>
+
+            <p>
+              Original research guided by department faculty across
+              contemporary computing domains.
+            </p>
+
+            <span class="admission-card-action">
+              Explore research
+              <span>↗</span>
+            </span>
+          </a>
+
+          <a class="admission-card gold" href="timetable.html">
+            <span class="admission-card-index">04 · Student desk</span>
+            <span class="admission-card-icon" aria-hidden="true">↗</span>
+
+            <h2>Curriculum &amp;<br>class resources</h2>
+
+            <p>
+              Open semester-wise syllabus, current timetable and the
+              latest academic resources.
+            </p>
+
+            <span class="admission-card-action">
+              Open resources
+              <span>↗</span>
+            </span>
+          </a>
+
+        </div>
+
+        <div class="admissions-note">
+          <span><strong>Explore your pathway.</strong> Programme details connect directly to the department's academic resources.</span>
+          <span>SGSITS · Computer Science &amp; Engineering</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="../assets/js/main.js?v=20260924-4"></script>
+</body>
+</html>
