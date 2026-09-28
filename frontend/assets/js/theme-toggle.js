@@ -10,7 +10,7 @@ function updateThemeButton(theme) {
   themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} mode`);
   themeButton.setAttribute('aria-pressed', String(dark));
   themeButton.title = `Switch to ${dark ? 'light' : 'dark'} mode`;
-  themeButton.innerHTML = `<span aria-hidden="true">${dark ? '☀' : '☾'}</span><b>${dark ? 'Light' : 'Dark'}</b>`;
+  themeButton.innerHTML = `<span aria-hidden="true">${dark ? '?' : '?'}</span><b>${dark ? 'Light' : 'Dark'}</b>`;
 }
 
 function applyTheme(theme, persist = false) {

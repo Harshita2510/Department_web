@@ -109,7 +109,7 @@ function createFacultyCard(record) {
             class="faculty-info-icon"
             aria-hidden="true"
           >
-            ◈
+            ?
           </span>
 
           <span class="faculty-info-label">
@@ -131,13 +131,13 @@ function createFacultyCard(record) {
         aria-label="View ${escapeHtml(name)}'s full faculty profile"
       >
         View Profile
-        <span aria-hidden="true">→</span>
+        <span aria-hidden="true">?</span>
       </a>
 
 
       <div class="faculty-card-footer">
         <span>CSE</span>
-        <span>SGSITS · INDORE</span>
+        <span>SGSITS � INDORE</span>
       </div>
 
     </article>
@@ -186,8 +186,8 @@ async function load(term = '') {
 
   result.textContent =
     term
-      ? `Searching faculty for “${term}”…`
-      : 'Loading published faculty profiles…';
+      ? `Searching faculty for �${term}��`
+      : 'Loading published faculty profiles�';
 
   try {
 
@@ -202,7 +202,7 @@ async function load(term = '') {
             records.length === 1
               ? 'profile matches'
               : 'profiles match'
-          } “${term}”.`
+          } �${term}�.`
 
         : `Showing ${records.length} published faculty ${
             records.length === 1

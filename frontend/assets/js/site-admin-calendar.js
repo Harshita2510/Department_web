@@ -13,7 +13,7 @@ function toast(message){const node=document.querySelector('#cmsToast');node.text
 function termLabel(term){return term==='odd'?'Odd semester':term==='even'?'Even semester':'Annual'}
 function render(){
   count.textContent=records.length;
-  list.innerHTML=records.map((item)=>`<article class="calendar-admin-card"><div><span>${item.isCurrent?'Current calendar':'Archive'} · ${escapeHtml(item.status)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.academicYear||'')} · ${termLabel(item.term)}</p></div><div class="calendar-admin-actions"><a href="${escapeHtml(item.documentUrl)}" target="_blank" rel="noopener noreferrer">Open PDF ↗</a><button type="button" data-edit-calendar="${item._id}">Edit / replace</button><button class="danger-link" type="button" data-delete-calendar="${item._id}">Delete</button></div></article>`).join('');
+  list.innerHTML=records.map((item)=>`<article class="calendar-admin-card"><div><span>${item.isCurrent?'Current calendar':'Archive'} � ${escapeHtml(item.status)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.academicYear||'')} � ${termLabel(item.term)}</p></div><div class="calendar-admin-actions"><a href="${escapeHtml(item.documentUrl)}" target="_blank" rel="noopener noreferrer">Open PDF ?</a><button type="button" data-edit-calendar="${item._id}">Edit / replace</button><button class="danger-link" type="button" data-delete-calendar="${item._id}">Delete</button></div></article>`).join('');
   empty.classList.toggle('show',records.length===0);
 }
 async function load(){try{records=await academicDocumentService.listAdmin('academic-calendar');render()}catch(error){toast(error.message)}}
@@ -27,7 +27,7 @@ function open(id=''){
   document.querySelector('#calendarCurrent').checked=item?.isCurrent??true;
   document.querySelector('#calendarPublished').checked=item?.status==='published';
   document.querySelector('#calendarPdf').required=!item;
-  document.querySelector('#calendarExisting').textContent=item?.documentUrl?'A PDF is already stored. Choose a file only to replace it.':'PDF only · Maximum 10 MB';
+  document.querySelector('#calendarExisting').textContent=item?.documentUrl?'A PDF is already stored. Choose a file only to replace it.':'PDF only � Maximum 10 MB';
   modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('no-scroll');
 }
 function close(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('no-scroll')}
@@ -36,7 +36,7 @@ async function save(event){
   const id=document.querySelector('#calendarId').value;const existing=records.find((item)=>item._id===id);const year=document.querySelector('#calendarYear').value.trim();
   const [start,end]=year.split('-').map(Number);if(!/^\d{4}-\d{2}$/.test(year)||end!==(start+1)%100){toast('Enter consecutive years such as 2026-27.');return}
   const file=document.querySelector('#calendarPdf').files[0];if(file&&(file.type!=='application/pdf'||file.size>10*1024*1024)){toast('Choose a PDF of 10 MB or less.');return}
-  const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving…';
+  const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving�';
   try{
     let documentUrl=existing?.documentUrl||'';if(file){const asset=await uploadService.upload(file);documentUrl=asset.url}
     const payload={resourceType:'academic-calendar',programme:'institute-wide',semester:null,academicYear:year,term:document.querySelector('#calendarTerm').value,title:document.querySelector('#calendarTitle').value.trim(),documentUrl,isCurrent:document.querySelector('#calendarCurrent').checked,status:document.querySelector('#calendarPublished').checked?'published':'draft'};

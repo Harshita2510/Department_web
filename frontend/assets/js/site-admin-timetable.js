@@ -28,7 +28,7 @@ function editorIds(record){
 function renderFacultyOptions(selected=[]){
   const chosen=new Set(selected);
   $('#timetableFacultyOptions').innerHTML=faculty.length
-    ?faculty.map((item)=>`<label><input type="checkbox" value="${escapeHtml(item.userId)}" ${chosen.has(item.userId)?'checked':''}><span>${escapeHtml(item.fullName||item.facultyId)}<small>${escapeHtml([item.facultyId,item.designation].filter(Boolean).join(' · '))}</small></span></label>`).join('')
+    ?faculty.map((item)=>`<label><input type="checkbox" value="${escapeHtml(item.userId)}" ${chosen.has(item.userId)?'checked':''}><span>${escapeHtml(item.fullName||item.facultyId)}<small>${escapeHtml([item.facultyId,item.designation].filter(Boolean).join(' � '))}</small></span></label>`).join('')
     :'<p>No active faculty accounts available.</p>';
 }
 
@@ -52,7 +52,7 @@ function render(){
   $('#timetableAdminEmpty').classList.toggle('show',!records.length);
   $('#timetableAdminList').innerHTML=records.map((record)=>`<article class="timetable-admin-card">
     <header class="timetable-admin-head">
-      <div><h3>${record.programme==='ug-cse'?'B.Tech CSE':'M.Tech CSE'} · Semester ${record.semester}</h3><p>${escapeHtml(record.academicYear||'Current')} · ${escapeHtml(record.term||'semester')} · ${(record.editors||[]).length} faculty uploader${(record.editors||[]).length===1?'':'s'}</p></div>
+      <div><h3>${record.programme==='ug-cse'?'B.Tech CSE':'M.Tech CSE'} � Semester ${record.semester}</h3><p>${escapeHtml(record.academicYear||'Current')} � ${escapeHtml(record.term||'semester')} � ${(record.editors||[]).length} faculty uploader${(record.editors||[]).length===1?'':'s'}</p></div>
       <div><button data-timetable-edit="${record._id}">Edit access</button><button class="delete-timetable" data-timetable-delete="${record._id}">Delete semester</button></div>
     </header>
     <div class="timetable-slots">${Object.entries(slots).map(([slot,label])=>slotMarkup(record,slot,label)).join('')}</div>
@@ -145,7 +145,7 @@ $('#timetableUploadInput').addEventListener('change',async(event)=>{
   if(!file||!uploadTarget)return;
   if(file.size>10*1024*1024){notify('Timetable files must be 10 MB or smaller.');return}
   if(!['application/pdf','image/jpeg','image/png','image/webp'].includes(file.type)){notify('Choose a PDF, JPG, PNG or WebP file.');return}
-  try{notify('Uploading timetable…');await academicDocumentService.uploadTimetable(uploadTarget.id,uploadTarget.slot,file);await reload();notify('Timetable uploaded as a draft. Publish it when ready.')}catch(error){notify(error.message)}
+  try{notify('Uploading timetable�');await academicDocumentService.uploadTimetable(uploadTarget.id,uploadTarget.slot,file);await reload();notify('Timetable uploaded as a draft. Publish it when ready.')}catch(error){notify(error.message)}
 });
 
 reload().catch((error)=>notify(error.message));

@@ -26,7 +26,7 @@ function safeCMSLink(value, fallback) {
 }
 
 function displayCMSDate(value) {
-  if (!value) return { day: '—', month: '', long: '' };
+  if (!value) return { day: '�', month: '', long: '' };
   const date = new Date(`${value}T12:00:00`);
   return {
     day: String(date.getDate()).padStart(2, '0'),
@@ -64,24 +64,24 @@ async function applyPublishedCMSContent() {
   const notices = (data.notices || []).filter((item) => item.status === 'published').sort((a,b) => (b.date || '').localeCompare(a.date || ''));
   if (notices.length) {
     $('#noticeTicker').innerHTML = notices.slice(0, 5).map((item) => { const date = displayCMSDate(item.date); return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}"><time>${date.day} ${date.month}</time> ${escapeCMS(item.summary||item.title)}</a>`; }).join('');
-    $('#noticeList').innerHTML = notices.slice(0, 6).map((item) => { const date = displayCMSDate(item.date); const category = ['Academic','Examination','Admission'].includes(item.category) ? 'academic' : 'student'; return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}" data-category="${category}"><time><strong>${date.day}</strong>${date.month}</time><span><b>${escapeCMS(item.title)}</b><small>${escapeCMS(item.summary||item.category||'Notice')}</small></span><i>↗</i></a>`; }).join('');
+    $('#noticeList').innerHTML = notices.slice(0, 6).map((item) => { const date = displayCMSDate(item.date); const category = ['Academic','Examination','Admission'].includes(item.category) ? 'academic' : 'student'; return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}" data-category="${category}"><time><strong>${date.day}</strong>${date.month}</time><span><b>${escapeCMS(item.title)}</b><small>${escapeCMS(item.summary||item.category||'Notice')}</small></span><i>?</i></a>`; }).join('');
   }
   const events = (data.events || []).filter((item) => item.status === 'published').sort((a,b) => (a.date || '').localeCompare(b.date || ''));
   if (events.length) {
     $('.event-stack').innerHTML = events.slice(0, 3).map((item, index) => {
       const date = displayCMSDate(item.date);
       const image = item.file?.type?.startsWith('image/') ? safeCMSLink(item.file.data, '') : '';
-      return `<article class="event-card ${image ? 'has-image' : ''} reveal visible delay-${Math.min(index+1,3)}"><div class="event-date"><strong>${date.day}</strong><span>${date.month}<br>${new Date(`${item.date}T12:00:00`).getFullYear()}</span></div>${image ? `<img class="event-thumbnail" src="${escapeCMS(image)}" alt="" loading="lazy">` : ''}<div><span class="tag">${escapeCMS(item.category)}</span><h3>${escapeCMS(item.title)}</h3><p>${escapeCMS(item.summary || 'View event details')}</p></div><a href="pages/events.html#event-${encodeURIComponent(item._id||item.id||'')}" aria-label="Open ${escapeCMS(item.title)} event details">↗</a></article>`;
+      return `<article class="event-card ${image ? 'has-image' : ''} reveal visible delay-${Math.min(index+1,3)}"><div class="event-date"><strong>${date.day}</strong><span>${date.month}<br>${new Date(`${item.date}T12:00:00`).getFullYear()}</span></div>${image ? `<img class="event-thumbnail" src="${escapeCMS(image)}" alt="" loading="lazy">` : ''}<div><span class="tag">${escapeCMS(item.category)}</span><h3>${escapeCMS(item.title)}</h3><p>${escapeCMS(item.summary || 'View event details')}</p></div><a href="pages/events.html#event-${encodeURIComponent(item._id||item.id||'')}" aria-label="Open ${escapeCMS(item.title)} event details">?</a></article>`;
     }).join('');
   }
   const stories = (data.news || []).filter((item) => item.status === 'published').sort((a,b) => (b.date || '').localeCompare(a.date || ''));
   if (stories.length) {
     const story = stories[0]; const date = displayCMSDate(story.date); const image = story.file?.type?.startsWith('image/') ? story.file.data : 'assets/images/campus-life.jpg';
-    $('.feature-story').innerHTML = `<div class="story-image"><img src="${image}" alt=""><span>${escapeCMS(story.category)}</span></div><div class="story-copy"><time>${date.long}</time><h3>${escapeCMS(story.title)}</h3><p>${escapeCMS(story.summary)}</p><a href="${story.file?.data || '#events'}">Read the story <span>↗</span></a></div>`;
+    $('.feature-story').innerHTML = `<div class="story-image"><img src="${image}" alt=""><span>${escapeCMS(story.category)}</span></div><div class="story-copy"><time>${date.long}</time><h3>${escapeCMS(story.title)}</h3><p>${escapeCMS(story.summary)}</p><a href="${story.file?.data || '#events'}">Read the story <span>?</span></a></div>`;
   }
   const placements = (data.placements || []).filter((item) => item.status === 'published' && safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, '')).sort((a,b) => (b.academicYear || '').localeCompare(a.academicYear || ''));
   if (placements.length) {
-    $('#placementArchivePreview').innerHTML = placements.slice(0, 3).map((item) => `<a class="placement-year-link" href="${escapeCMS(safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, 'pages/placements.html'))}" target="_blank" rel="noopener noreferrer"><span>${escapeCMS(item.title||`Placement ${(item.academicYear||'').replace('-', '–')}`)}</span><b>Open ${item.sourceType==='pdf'?'PDF':'sheet'} ↗</b></a>`).join('') + '<a class="placement-all-link" href="pages/placements.html">View complete archive →</a>';
+    $('#placementArchivePreview').innerHTML = placements.slice(0, 3).map((item) => `<a class="placement-year-link" href="${escapeCMS(safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, 'pages/placements.html'))}" target="_blank" rel="noopener noreferrer"><span>${escapeCMS(item.title||`Placement ${(item.academicYear||'').replace('-', '�')}`)}</span><b>Open ${item.sourceType==='pdf'?'PDF':'sheet'} ?</b></a>`).join('') + '<a class="placement-all-link" href="pages/placements.html">View complete archive ?</a>';
   }
 }
 
@@ -149,7 +149,7 @@ let tickerPaused = false;
 $('#tickerControl').addEventListener('click', (event) => {
   tickerPaused = !tickerPaused;
   ticker.classList.toggle('paused', tickerPaused);
-  event.currentTarget.textContent = tickerPaused ? '▶' : 'Ⅱ';
+  event.currentTarget.textContent = tickerPaused ? '?' : '?';
   event.currentTarget.setAttribute('aria-label', tickerPaused ? 'Play announcements' : 'Pause announcements');
 });
 
@@ -234,7 +234,7 @@ function renderSearch(query) {
   const terms = normalized.split(/\s+/);
   const matches = searchIndex.filter((item) => terms.every((term) => `${item.title} ${item.meta} ${item.keywords}`.toLowerCase().includes(term)));
   resultBox.innerHTML = matches.length
-    ? `<p>${matches.length} result${matches.length === 1 ? '' : 's'}</p>${matches.map((item) => `<a class="search-result-link" href="${item.target}"><span>${item.title}<small style="display:block;color:#7e90a2;margin-top:4px">${item.meta}</small></span><b>→</b></a>`).join('')}`
+    ? `<p>${matches.length} result${matches.length === 1 ? '' : 's'}</p>${matches.map((item) => `<a class="search-result-link" href="${item.target}"><span>${item.title}<small style="display:block;color:#7e90a2;margin-top:4px">${item.meta}</small></span><b>?</b></a>`).join('')}`
     : '<p>No matching result. Try a programme, department, notice or service.</p>';
   $$('.search-result-link', resultBox).forEach((link) => link.addEventListener('click', closeSearch));
 }
@@ -283,7 +283,7 @@ $('#adminForm').addEventListener('submit', async (event) => {
   error.textContent = '';
   const submitButton = $('button[type="submit"]', event.currentTarget);
   submitButton.disabled = true;
-  submitButton.textContent = 'Opening workspace…';
+  submitButton.textContent = 'Opening workspace�';
   try {
     const user=await authService.login(identifier,password);
     if(role==='admin'&&user.role!=='admin')throw new Error('This account does not have administrator access.');
