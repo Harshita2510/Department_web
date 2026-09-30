@@ -1,0 +1,233 @@
+/*
+  Homepage-specific styles for the SGSITS CSE Phase 1 homepage.
+  Shared site styles remain in main.css.
+*/
+
+/* =========================================================
+   PHASE 1 HOMEPAGE COLOUR THEME
+   ========================================================= */
+
+/* =========================================
+       PHASE 1 HOMEPAGE COLOUR THEME
+       ========================================= */
+
+    /* ---------- VISION & MISSION ---------- */
+
+    .departments-section {
+      background: #071b34;
+    }
+
+    .departments-section h2,
+    .departments-section p,
+    .departments-section .kicker {
+      color: #ffffff;
+    }
+
+    .departments-section .department-list a {
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .departments-section .department-list a span {
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    .departments-section .department-list a b {
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+
+    /* ---------- ABOUT ---------- */
+
+    .intro-section {
+      background: #f7f5ef;
+    }
+
+    .intro-section h2,
+    .intro-section p,
+    .intro-section .kicker,
+    .intro-section strong {
+      color: #071b34;
+    }
+
+    .intro-section .intro-copy p {
+      color: #071b34;
+    }
+
+    .intro-section .fact-rail article {
+      color: #071b34;
+    }
+
+    .intro-section .fact-rail article p {
+      color: rgba(7, 27, 52, 0.72);
+    }
+
+    .intro-section .fact-rail article span {
+      color: #b8862f;
+    }
+
+    .intro-section .arrow-link {
+      color: #071b34;
+    }
+
+
+    /* ---------- NOTICE BOARD ---------- */
+
+    .notice-centre {
+      background: #ffffff;
+    }
+
+
+    /* ---------- CAMPUS MAP ---------- */
+
+    .campus-map-section {
+      background: #f7f5ef;
+    }
+
+    .campus-map-section h2,
+    .campus-map-section p,
+    .campus-map-section .kicker {
+      color: #071b34;
+    }
+
+    .campus-map-card {
+      background: #ffffff;
+      color: #071b34;
+    }
+
+    .campus-map-card h3,
+    .campus-map-card address {
+      color: #071b34;
+    }
+
+    .campus-map-card span,
+    .campus-map-card small {
+      color: rgba(7, 27, 52, 0.7);
+    }
+
+
+    /* ---------- FOOTER ---------- */
+
+    .site-footer {
+      background: #071b34;
+    }
+
+    .site-footer h2,
+    .site-footer h3,
+    .site-footer p,
+    .site-footer a {
+      color: #ffffff;
+    }
+
+    .site-footer a {
+      opacity: 0.85;
+    }
+
+    .site-footer a:hover {
+      opacity: 1;
+    }
+    
+    /* ---------- ABOUT ---------- */
+
+    .intro-section {
+      background: #f7f5ef;
+    }
+
+    .intro-section h2,
+    .intro-section h3,
+    .intro-section p {
+      color: #071b34;
+    }
+
+    /* Heading LEFT, content RIGHT */
+    .intro-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Keep mobile layout natural */
+    @media (max-width: 800px) {
+      .intro-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+/*
+    Global homepage layout refinement:
+    More usable horizontal space on desktop while keeping
+    comfortable side margins and preserving the existing design.
+  */
+
+  .shell{
+    width:min(1320px, calc(100% - 64px));
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .hero-grid{
+    gap:58px;
+  }
+
+  .hero-image-wrap{
+    margin-left:0;
+  }
+
+  .section-title-row{
+    gap:64px;
+  }
+
+  .department-layout{
+    gap:72px;
+  }
+
+  .research-layout{
+    gap:64px;
+  }
+
+  .admissions-inner{
+    gap:72px;
+  }
+
+  .campus-grid{
+    gap:64px;
+  }
+
+  .campus-map-heading{
+    gap:72px;
+  }
+
+  .footer-top{
+    gap:64px;
+  }
+
+  /* Keep the layout from becoming overly stretched on very wide screens. */
+  @media (min-width:1500px){
+    .shell{
+      width:min(1360px, calc(100% - 80px));
+    }
+  }
+
+  @media (max-width:1100px){
+    .shell{
+      width:min(100% - 48px, 900px);
+    }
+  }
+
+  @media (max-width:720px){
+    .shell{
+      width:min(100% - 32px, 620px);
+    }
+  }
+
+/*
+    Homepage header:
+    The blue utility bar scrolls away normally.
+    The main white navigation header stays sticky at the top.
+  */
+  .site-header{
+    position:sticky !important;
+    top:0 !important;
+    z-index:999;
+    background:#fff;
+    box-shadow:0 1px 0 rgba(7,27,52,.08);
+  }
+

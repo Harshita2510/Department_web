@@ -19,7 +19,7 @@ function renderProfile() {
   $('#profileContent').hidden = false;
   $('#previewBar').hidden = !ownPreview;
   const fullDisplayName = `${profile.title || ''} ${profile.fullName || 'Faculty Member'}`.trim();
-  document.title = `${fullDisplayName} — SGSITS Faculty`;
+  document.title = `${fullDisplayName} � SGSITS Faculty`;
   $('#publicName').textContent = fullDisplayName;
   $('#publicInitials').textContent = initials(profile.fullName);
   $('#publicDesignation').textContent = profile.designation || 'Faculty member';
@@ -28,11 +28,11 @@ function renderProfile() {
     $('#publicInitials').style.visibility = 'hidden';
   }
 
-  $('#publicEmployeeNumber').textContent = employeeNumber || '—';
-  $('#experienceValue').textContent = profile.experienceYears ?? '—';
-  $('#publicHighestQualification').textContent = profile.highestQualification || '—';
-  $('#publicSpecialisation').textContent = profile.areaOfSpecialisation || '—';
-  $('#publicEmail').textContent = profile.email || '—';
+  $('#publicEmployeeNumber').textContent = employeeNumber || '�';
+  $('#experienceValue').textContent = profile.experienceYears ?? '�';
+  $('#publicHighestQualification').textContent = profile.highestQualification || '�';
+  $('#publicSpecialisation').textContent = profile.areaOfSpecialisation || '�';
+  $('#publicEmail').textContent = profile.email || '�';
   $('#contactWrap').hidden = !profile.phone;
   $('#publicContact').textContent = profile.phone || '';
 }

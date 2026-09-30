@@ -13,7 +13,7 @@ function safeAssetUrl(value){
 }
 function eventDate(value){
   const date=value?new Date(value):null;
-  if(!date||Number.isNaN(date.getTime()))return{day:'—',month:'Date',year:'TBA',long:'Date to be announced',sort:0};
+  if(!date||Number.isNaN(date.getTime()))return{day:'�',month:'Date',year:'TBA',long:'Date to be announced',sort:0};
   return{day:String(date.getDate()).padStart(2,'0'),month:date.toLocaleDateString('en-IN',{month:'short'}),year:String(date.getFullYear()),long:date.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}),sort:date.getTime()};
 }
 function openHashTarget(){
@@ -30,7 +30,7 @@ function render(){
     const assetUrl=safeAssetUrl(item.asset?.url);
     const isImage=item.asset?.mimeType?.startsWith('image/');
     const assetLabel=item.asset?.mimeType==='application/pdf'?'Open event document':'Open full image';
-    return `<details class="public-event" id="event-${escapeHtml(item._id)}">${isImage&&assetUrl?`<div class="event-image"><img src="${escapeHtml(assetUrl)}" alt="${escapeHtml(item.title)}" loading="lazy"></div>`:''}<summary><time class="event-date" datetime="${escapeHtml(item.displayDate||'')}"><strong>${date.day}</strong>${escapeHtml(date.month)}<br>${escapeHtml(date.year)}</time><span class="event-copy"><small>${escapeHtml(item.category||'Department event')} · ${escapeHtml(date.long)}</small><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary||'Open to read event details.')}</p></span><b class="event-toggle" aria-hidden="true">+</b></summary><div class="event-details"><p>${escapeHtml(item.body||item.summary||'Further details will be announced by the department.')}</p>${assetUrl?`<a href="${escapeHtml(assetUrl)}" target="_blank" rel="noopener noreferrer">${assetLabel} ↗</a>`:''}</div></details>`;
+    return `<details class="public-event" id="event-${escapeHtml(item._id)}">${isImage&&assetUrl?`<div class="event-image"><img src="${escapeHtml(assetUrl)}" alt="${escapeHtml(item.title)}" loading="lazy"></div>`:''}<summary><time class="event-date" datetime="${escapeHtml(item.displayDate||'')}"><strong>${date.day}</strong>${escapeHtml(date.month)}<br>${escapeHtml(date.year)}</time><span class="event-copy"><small>${escapeHtml(item.category||'Department event')} � ${escapeHtml(date.long)}</small><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary||'Open to read event details.')}</p></span><b class="event-toggle" aria-hidden="true">+</b></summary><div class="event-details"><p>${escapeHtml(item.body||item.summary||'Further details will be announced by the department.')}</p>${assetUrl?`<a href="${escapeHtml(assetUrl)}" target="_blank" rel="noopener noreferrer">${assetLabel} ?</a>`:''}</div></details>`;
   }).join('');
   empty.hidden=rows.length>0;
   result.textContent=`Showing ${rows.length} published event${rows.length===1?'':'s'}.`;

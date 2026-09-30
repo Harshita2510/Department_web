@@ -28,8 +28,8 @@ function message(text,error=false){
 
 function render(items){
   list.innerHTML=items.map((item)=>`<article class="faculty-notice-item">
-    <div><small>${escapeHtml(item.category||'General')} · ${item.displayDate?new Date(item.displayDate).toLocaleDateString('en-IN'):'No date'}</small><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary||'')}</p></div>
-    <div><span class="notice-draft-status">${escapeHtml(item.status)}</span>${item.asset?.url?`<a href="${escapeHtml(item.asset.url)}" target="_blank" rel="noopener noreferrer">Open PDF ↗</a>`:''}<button type="button" data-delete-notice="${item._id}">Delete draft</button></div>
+    <div><small>${escapeHtml(item.category||'General')} � ${item.displayDate?new Date(item.displayDate).toLocaleDateString('en-IN'):'No date'}</small><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary||'')}</p></div>
+    <div><span class="notice-draft-status">${escapeHtml(item.status)}</span>${item.asset?.url?`<a href="${escapeHtml(item.asset.url)}" target="_blank" rel="noopener noreferrer">Open PDF ?</a>`:''}<button type="button" data-delete-notice="${item._id}">Delete draft</button></div>
   </article>`).join('');
   empty.hidden=items.length>0;
 }
@@ -46,7 +46,7 @@ async function saveNotice(event){
   if(file.type!=='application/pdf'){message('Choose a PDF document.',true);return}
   if(file.size>10*1024*1024){message('The notice PDF must be 10 MB or smaller.',true);return}
   const button=form.querySelector('button[type="submit"]');
-  button.disabled=true;button.textContent='Uploading…';message('');
+  button.disabled=true;button.textContent='Uploading�';message('');
   try{
     const asset=await uploadService.uploadNoticePdf(file);
     await contentService.create({type:'notice',title:document.querySelector('#facultyNoticeTitle').value.trim(),category:document.querySelector('#facultyNoticeCategory').value,summary:document.querySelector('#facultyNoticeShort').value.trim(),body:document.querySelector('#facultyNoticeLong').value.trim(),displayDate:document.querySelector('#facultyNoticeDate').value||undefined,asset,status:'draft'});

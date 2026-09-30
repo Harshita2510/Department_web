@@ -12,7 +12,7 @@ function calendarLink(record, currentRecord = false) {
   const session=record.session||record.academicYear||'Current session';
   const term=record.title||({odd:'Odd semester',even:'Even semester',annual:'Annual calendar'}[record.term]||record.term||'Academic calendar');
   const published=record.publishedOn||(record.publishedAt?new Date(record.publishedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'');
-  const content = `<span class="calendar-icon" aria-hidden="true">${currentRecord ? 'NOW' : 'PDF'}</span><span><small>${escapeHtml(session)}</small><strong>${escapeHtml(term)}</strong>${published ? `<em>Published ${escapeHtml(published)}</em>` : '<em>Official PDF awaiting publication</em>'}</span><b>${url ? 'Open calendar ↗' : 'Not published'}</b>`;
+  const content = `<span class="calendar-icon" aria-hidden="true">${currentRecord ? 'NOW' : 'PDF'}</span><span><small>${escapeHtml(session)}</small><strong>${escapeHtml(term)}</strong>${published ? `<em>Published ${escapeHtml(published)}</em>` : '<em>Official PDF awaiting publication</em>'}</span><b>${url ? 'Open calendar ?' : 'Not published'}</b>`;
   return url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${content}</a>` : `<button type="button" data-unavailable="${escapeHtml(term)}">${content}</button>`;
 }
 

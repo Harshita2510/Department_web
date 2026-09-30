@@ -6,9 +6,9 @@ const romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 function documentMarkup(item, programme, documentName) {
   const url = safeHttpsUrl(item.documentUrl);
   const semester = romanNumerals[item.number - 1];
-  const unavailableLabel = `${programme.title} — Semester ${semester} ${documentName}`;
+  const unavailableLabel = `${programme.title} � Semester ${semester} ${documentName}`;
   if (url) {
-    return `<li><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><span class="document-icon" aria-hidden="true">PDF</span><span><strong>Semester ${semester}</strong><small>View official ${escapeHtml(documentName)}</small></span><b>Open ↗</b></a></li>`;
+    return `<li><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><span class="document-icon" aria-hidden="true">PDF</span><span><strong>Semester ${semester}</strong><small>View official ${escapeHtml(documentName)}</small></span><b>Open ?</b></a></li>`;
   }
   return `<li><button type="button" data-unavailable="${escapeHtml(unavailableLabel)}"><span class="document-icon" aria-hidden="true">PDF</span><span><strong>Semester ${semester}</strong><small>Document awaiting publication</small></span><b>Not published</b></button></li>`;
 }
@@ -16,7 +16,7 @@ function documentMarkup(item, programme, documentName) {
 function subjectMarkup(subject) {
   const url=safeHttpsUrl(subject.syllabus?.url);
   const type=subject.syllabus?.mimeType==='application/pdf'?'PDF':'IMAGE';
-  return `<li>${url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`:'<span class="subject-unavailable">'}<span class="document-icon" aria-hidden="true">${type}</span><span><strong>${escapeHtml(subject.subjectCode?`${subject.subjectCode} · ${subject.name}`:subject.name)}</strong><small>${url?'View official subject syllabus':'Syllabus awaiting publication'}</small></span><b>${url?'Open ↗':'Not published'}</b>${url?'</a>':'</span>'}</li>`;
+  return `<li>${url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`:'<span class="subject-unavailable">'}<span class="document-icon" aria-hidden="true">${type}</span><span><strong>${escapeHtml(subject.subjectCode?`${subject.subjectCode} � ${subject.name}`:subject.name)}</strong><small>${url?'View official subject syllabus':'Syllabus awaiting publication'}</small></span><b>${url?'Open ?':'Not published'}</b>${url?'</a>':'</span>'}</li>`;
 }
 
 function semesterMarkup(item, programme) {

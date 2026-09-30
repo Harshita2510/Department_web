@@ -28,7 +28,7 @@ async function loadPlacements() {
 
   count.textContent = `${placements.length} published ${placements.length === 1 ? 'sheet' : 's'}`;
   list.innerHTML = placements.length
-    ? placements.map((item) => `<a class="placement-row" href="${escapeHtml(placementUrl(item))}" target="_blank" rel="noopener noreferrer"><strong>${escapeHtml(item.title || `Placement ${item.academicYear}`)}</strong><span>Open official ${item.sourceType==='pdf'?'PDF':'sheet'} ↗</span></a>`).join('')
+    ? placements.map((item) => `<a class="placement-row" href="${escapeHtml(placementUrl(item))}" target="_blank" rel="noopener noreferrer"><strong>${escapeHtml(item.title || `Placement ${item.academicYear}`)}</strong><span>Open official ${item.sourceType==='pdf'?'PDF':'sheet'} ?</span></a>`).join('')
     : '<p class="empty-state">No placement sheets have been published yet.<br>Please check again after the Training &amp; Placement Office updates the archive.</p>';
 }
 

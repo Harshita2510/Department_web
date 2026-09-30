@@ -110,7 +110,7 @@ async function hydrateMongoData(){
     ['notices','news','events','documents','media'].forEach((key)=>{store[key]=[]});
     const collectionKeys={notice:'notices',news:'news',event:'events',document:'documents',media:'media'};
     content.forEach((item)=>{const key=collectionKeys[item.type];if(key)store[key].push(flattenContent(item))});
-    store.placements=placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '–')}`,category:item.sourceType==='pdf'?'Placement PDF':'Placement sheet',summary:`Open the placement ${item.sourceType==='pdf'?'PDF':'sheet'} for academic year ${item.academicYear.replace('-', '–')}.`,file:item.document?{...item.document,type:item.document.mimeType,data:item.document.url}:null}));
+    store.placements=placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '�')}`,category:item.sourceType==='pdf'?'Placement PDF':'Placement sheet',summary:`Open the placement ${item.sourceType==='pdf'?'PDF':'sheet'} for academic year ${item.academicYear.replace('-', '�')}.`,file:item.document?{...item.document,type:item.document.mimeType,data:item.document.url}:null}));
     updateCounts();updateDashboard();renderUserAccounts();renderFaculty();if(currentType==='placements')renderCollection();
   }catch(error){showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?adminLogin=required'),900)}
 }
@@ -141,7 +141,7 @@ function updateDashboard() {
   $('#submissionStat').textContent = faculty.filter((item) => item.reviewStatus === 'submitted').length;
   $('#mediaStat').textContent = store.media.length + content.filter((item) => item.file).length;
   const recent = content.sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 5);
-  $('#recentActivity').innerHTML = recent.length ? recent.map((item) => `<div class="activity-item"><span>${typeConfig[item.type]?.singular?.[0] || 'C'}</span><div><b>${escapeHtml(item.title)}</b><small>${escapeHtml(typeConfig[item.type].title)} · ${escapeHtml(item.status)}</small></div><time>${formatDate(item.updatedAt)}</time></div>`).join('') : '<div class="empty-mini">No content activity yet.</div>';
+  $('#recentActivity').innerHTML = recent.length ? recent.map((item) => `<div class="activity-item"><span>${typeConfig[item.type]?.singular?.[0] || 'C'}</span><div><b>${escapeHtml(item.title)}</b><small>${escapeHtml(typeConfig[item.type].title)} � ${escapeHtml(item.status)}</small></div><time>${formatDate(item.updatedAt)}</time></div>`).join('') : '<div class="empty-mini">No content activity yet.</div>';
   const submissions = faculty.filter((item) => item.reviewStatus === 'submitted').slice(0, 4);
   $('#submissionPreview').innerHTML = submissions.length ? submissions.map((item) => `<div class="submission-item"><span>${initials(item.fullName)}</span><div><b>${escapeHtml(item.fullName || item.email)}</b><small>${escapeHtml(item.department || 'Department not selected')}</small></div><span>Review</span></div>`).join('') : '<div class="empty-mini">No faculty submissions waiting for review.</div>';
   const bytes = storageSize();
@@ -193,9 +193,9 @@ function renderCollection() {
   $('#contentRows').innerHTML = items.map((item) => `<tr>
     <td><input type="checkbox" data-select-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(item.title)}"></td>
     <td class="content-title"><b>${escapeHtml(item.title)}</b><small>${item.file ? `Attachment: ${escapeHtml(item.file.name)}` : escapeHtml(item.summary || 'No summary')}</small></td>
-    <td>${escapeHtml(item.category || '—')}</td><td>${formatDate(item.updatedAt || item.date)}</td>
+    <td>${escapeHtml(item.category || '�')}</td><td>${formatDate(item.updatedAt || item.date)}</td>
     <td><span class="status-pill ${item.status === 'draft' ? 'draft' : ''}">${escapeHtml(item.status)}</span></td>
-    <td><div class="row-actions"><button type="button" data-edit-id="${item.id}" aria-label="Edit">✎</button><button type="button" data-toggle-id="${item.id}" aria-label="Toggle publish status">${item.status === 'published' ? '↓' : '↑'}</button></div></td>
+    <td><div class="row-actions"><button type="button" data-edit-id="${item.id}" aria-label="Edit">?</button><button type="button" data-toggle-id="${item.id}" aria-label="Toggle publish status">${item.status === 'published' ? '?' : '?'}</button></div></td>
   </tr>`).join('');
   $('#tableEmpty').classList.toggle('show', items.length === 0);
   $('.content-table').style.display = items.length ? 'table' : 'none';
@@ -230,7 +230,7 @@ function openContentDrawer(type, id = '') {
   $('#placementFields').hidden = !isPlacement;
   $('#contentTitle').required = !isPlacement;
   $('#placementYear').required = isPlacement;
-  $('#placementYear').value = item?.academicYear || (item?.title || '').replace(/^Placement\s+/i, '').replace(/–/g, '-');
+  $('#placementYear').value = item?.academicYear || (item?.title || '').replace(/^Placement\s+/i, '').replace(/�/g, '-');
   $('#placementSheetUrl').value = item?.sheetUrl || '';
   const placementSource=item?.sourceType||(item?.document?'pdf':'link');
   const sourceInput=document.querySelector(`input[name="placementSource"][value="${placementSource}"]`);
@@ -249,15 +249,15 @@ function openContentDrawer(type, id = '') {
   $('#contentSummary').maxLength = isNotice ? 240 : 400;
   $('#contentSummary').placeholder = isNotice ? 'Brief text shown in the homepage notice ticker' : 'Short summary for cards and search results';
   $('#contentBody').required = isNotice;
-  $('#contentBody').placeholder = isNotice ? 'Complete notice details shown in the notice archive' : 'Write the complete content here…';
+  $('#contentBody').placeholder = isNotice ? 'Complete notice details shown in the notice archive' : 'Write the complete content here�';
   $('#contentFeatured').checked = Boolean(item?.featured);
   pendingFile = item?.file || null;
   const uploadRules = {
-    notices: { accept: 'application/pdf', help: 'Official notice PDF · Maximum 10 MB' },
-    events: { accept: 'image/jpeg,image/png,image/webp,application/pdf', help: 'Event image or PDF · Maximum 2 MB in this prototype' },
-    documents: { accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv', help: 'PDF, Word, Excel or CSV · Maximum 2 MB' }
+    notices: { accept: 'application/pdf', help: 'Official notice PDF � Maximum 10 MB' },
+    events: { accept: 'image/jpeg,image/png,image/webp,application/pdf', help: 'Event image or PDF � Maximum 2 MB in this prototype' },
+    documents: { accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv', help: 'PDF, Word, Excel or CSV � Maximum 2 MB' }
   };
-  const uploadRule = uploadRules[type] || { accept: '', help: 'Click to choose a file · Maximum 2 MB in this prototype' };
+  const uploadRule = uploadRules[type] || { accept: '', help: 'Click to choose a file � Maximum 2 MB in this prototype' };
   $('#contentFile').accept = uploadRule.accept;
   $('#uploadHelp').textContent = uploadRule.help;
   $('#uploadPermissionText').textContent = isNotice ? 'The administrator and faculty granted Notice upload access can attach a PDF. Only the administrator can publish it.' : ADMIN_UPLOAD_COLLECTIONS.has(type) ? `Only the website administrator can upload ${config.title.toLowerCase()}.` : 'Only website administrators can upload this attachment.';
@@ -287,14 +287,14 @@ function setPlacementSource(source){
 function renderPlacementPdf(){
   const box=$('#placementPdfName');
   box.hidden=!pendingPlacementPdf;
-  box.innerHTML=pendingPlacementPdf?`<strong>${escapeHtml(pendingPlacementPdf.name)}</strong> · ${Math.ceil(pendingPlacementPdf.size/1024)} KB <button type="button" id="removePlacementPdf">Remove</button>`:'';
+  box.innerHTML=pendingPlacementPdf?`<strong>${escapeHtml(pendingPlacementPdf.name)}</strong> � ${Math.ceil(pendingPlacementPdf.size/1024)} KB <button type="button" id="removePlacementPdf">Remove</button>`:'';
   $('#removePlacementPdf')?.addEventListener('click',()=>{pendingPlacementPdf=null;$('#placementPdfInput').value='';renderPlacementPdf()});
 }
 
 function renderAttachedFile() {
   const box = $('#attachedFile');
   box.hidden = !pendingFile;
-  box.innerHTML = pendingFile ? `<strong>${escapeHtml(pendingFile.name)}</strong> · ${Math.ceil(pendingFile.size / 1024)} KB <button type="button" id="removeAttached">Remove</button>` : '';
+  box.innerHTML = pendingFile ? `<strong>${escapeHtml(pendingFile.name)}</strong> � ${Math.ceil(pendingFile.size / 1024)} KB <button type="button" id="removeAttached">Remove</button>` : '';
   $('#removeAttached')?.addEventListener('click', () => { pendingFile = null; renderAttachedFile(); });
 }
 
@@ -320,7 +320,7 @@ async function saveContent(status) {
   const existing = id ? store[currentType].find((entry) => entry.id === id) : null;
   let entry;
   if (currentType === 'placements') {
-    const academicYear = $('#placementYear').value.trim().replace(/[–—]/g, '-');
+    const academicYear = $('#placementYear').value.trim().replace(/[��]/g, '-');
     if (!/^\d{4}-\d{2}$/.test(academicYear)) { showToast('Enter the academic year in YYYY-YY format, for example 2025-26.'); $('#placementYear').focus(); return; }
     const [startYear, shortEndYear] = academicYear.split('-');
     if ((Number(startYear) + 1) % 100 !== Number(shortEndYear)) { showToast('The placement year must cover consecutive years, for example 2025-26.'); $('#placementYear').focus(); return; }
@@ -331,7 +331,7 @@ async function saveContent(status) {
       try { sheetUrl = new URL($('#placementSheetUrl').value.trim()).href; } catch { showToast('Enter a valid public sheet link.'); $('#placementSheetUrl').focus(); return; }
       if (!sheetUrl.startsWith('https://')) { showToast('The public sheet link must begin with https://.'); $('#placementSheetUrl').focus(); return; }
     }else if(!pendingPlacementPdf){showToast('Choose a placement PDF before saving.');return}
-    const displayYear = `${startYear}–${shortEndYear}`;
+    const displayYear = `${startYear}�${shortEndYear}`;
     entry = { id: id || crypto.randomUUID(), title: `Placement ${displayYear}`, academicYear, sourceType, sheetUrl, category: sourceType==='pdf'?'Placement PDF':'Placement sheet', date: '', summary: `Open the placement ${sourceType==='pdf'?'PDF':'sheet'} for academic year ${displayYear}.`, body: '', featured: false, file:sourceType==='pdf'?pendingPlacementPdf:null, status, updatedAt: new Date().toISOString() };
   } else {
     entry = {
@@ -382,7 +382,7 @@ async function bulkSet(status) {
 
 function renderFaculty() {
   const profiles = getFacultyProfiles();
-  $('#facultyGrid').innerHTML = profiles.map((profile) => `<article class="faculty-card"><div class="faculty-card-top"><div class="faculty-photo" style="${profile.photo ? `background-image:url('${facultyPhotoUrl(profile.photo,134)}')` : ''}">${profile.photo ? '' : initials(profile.fullName || profile.facultyId)}</div><span class="faculty-state ${profile.isPublished ? 'published' : ''}">${profile.reviewStatus === 'submitted' ? 'Review needed' : profile.isPublished ? 'Published' : 'Profile incomplete'}</span></div><h3>${escapeHtml(profile.fullName || 'Profile not completed')}</h3><p>${escapeHtml(profile.designation || `Faculty ID: ${profile.facultyId}`)}</p><span>${escapeHtml(profile.department || profile.email || 'Waiting for faculty details')}</span><footer><small>Updated ${formatDate(profile.updatedAt)}</small><div class="faculty-card-actions"><button type="button" data-edit-faculty="${encodeURIComponent(profile.facultyId)}">Review</button>${profile.isPublished?`<a href="faculty-profile?facultyId=${encodeURIComponent(profile.facultyId)}" target="_blank" rel="noopener">View published ↗</a>`:''}</div></footer></article>`).join('');
+  $('#facultyGrid').innerHTML = profiles.map((profile) => `<article class="faculty-card"><div class="faculty-card-top"><div class="faculty-photo" style="${profile.photo ? `background-image:url('${facultyPhotoUrl(profile.photo,134)}')` : ''}">${profile.photo ? '' : initials(profile.fullName || profile.facultyId)}</div><span class="faculty-state ${profile.isPublished ? 'published' : ''}">${profile.reviewStatus === 'submitted' ? 'Review needed' : profile.isPublished ? 'Published' : 'Profile incomplete'}</span></div><h3>${escapeHtml(profile.fullName || 'Profile not completed')}</h3><p>${escapeHtml(profile.designation || `Faculty ID: ${profile.facultyId}`)}</p><span>${escapeHtml(profile.department || profile.email || 'Waiting for faculty details')}</span><footer><small>Updated ${formatDate(profile.updatedAt)}</small><div class="faculty-card-actions"><button type="button" data-edit-faculty="${encodeURIComponent(profile.facultyId)}">Review</button>${profile.isPublished?`<a href="faculty-profile?facultyId=${encodeURIComponent(profile.facultyId)}" target="_blank" rel="noopener">View published ?</a>`:''}</div></footer></article>`).join('');
   $('#facultyEmpty').classList.toggle('show', profiles.length === 0);
   $$('[data-edit-faculty]').forEach((button) => button.addEventListener('click', () => openFacultyDrawer(decodeURIComponent(button.dataset.editFaculty))));
 }
@@ -393,13 +393,13 @@ function openFacultyDrawer(facultyId = '') {
   $('#facultyEmailKey').value = profile.id||'';
   $('#facultyIdReview').value = profile.facultyId || facultyId;
   $('#adminReviewName').textContent=profile.fullName||'Faculty member';
-  $('#adminReviewEmployeeNumber').textContent=profile.facultyId||'—';
-  $('#adminReviewDesignation').textContent=profile.designation||'—';
-  $('#adminReviewEmail').textContent=profile.email||'—';
+  $('#adminReviewEmployeeNumber').textContent=profile.facultyId||'�';
+  $('#adminReviewDesignation').textContent=profile.designation||'�';
+  $('#adminReviewEmail').textContent=profile.email||'�';
   $('#adminReviewPhone').textContent=profile.phone||'Not provided';
-  $('#adminReviewExperience').textContent=profile.experienceYears===''||profile.experienceYears==null?'—':`${profile.experienceYears} years`;
-  $('#adminReviewQualification').textContent=profile.highestQualification||'—';
-  $('#adminReviewSpecialisation').textContent=profile.areaOfSpecialisation||'—';
+  $('#adminReviewExperience').textContent=profile.experienceYears===''||profile.experienceYears==null?'�':`${profile.experienceYears} years`;
+  $('#adminReviewQualification').textContent=profile.highestQualification||'�';
+  $('#adminReviewSpecialisation').textContent=profile.areaOfSpecialisation||'�';
   const photo=$('#adminFacultyPhoto');photo.style.backgroundImage=profile.photo?`url("${facultyPhotoUrl(profile.photo,184)}")`:'';
   $('#adminFacultyInitials').textContent=initials(profile.fullName||profile.facultyId);$('#adminFacultyInitials').style.visibility=profile.photo?'hidden':'';
   $('#facultySubmissionData').innerHTML = profile.reviewStatus === 'submitted' ? `<strong>Faculty submission waiting</strong><br>Submitted ${formatDate(profile.submittedAt, true)}. Confirm the details, then approve and publish.` : profile.reviewStatus==='approved'&&profile.isPublished?'This profile is already approved and published.':profile.hasApprovedSnapshot?'<strong>Legacy profile is incomplete.</strong><br>The faculty member must complete all required fields, upload a photo, and submit it for approval again.':'Waiting for the faculty member to complete and submit this profile.';
@@ -437,7 +437,7 @@ async function deleteFacultyProfile(){
 }
 
 function setupHomepage() {
-  const defaults = { eyebrow:'Computer Science & Engineering · SGSITS', headline:'Think in systems. Build with purpose. Shape what’s next.', intro:'A department for rigorous computer science, hands-on engineering, meaningful research and technology that responds to industry and society.', button:'Explore CSE programmes', link:'#programmes', sections:{ about:true, programmes:true, departments:true, events:true, notices:true, research:true, placements:true, admissions:true, campus:true } };
+  const defaults = { eyebrow:'Computer Science & Engineering � SGSITS', headline:'Think in systems. Build with purpose. Shape what�s next.', intro:'A department for rigorous computer science, hands-on engineering, meaningful research and technology that responds to industry and society.', button:'Explore CSE programmes', link:'#programmes', sections:{ about:true, programmes:true, departments:true, events:true, notices:true, research:true, placements:true, admissions:true, campus:true } };
   const home = loadJson(HOME_KEY, defaults); home.sections = { ...defaults.sections, ...(home.sections || {}) };
   $('#heroEyebrow').value = home.eyebrow; $('#heroHeadline').value = home.headline; $('#heroIntro').value = home.intro; $('#heroButton').value = home.button; $('#heroLink').value = home.link;
   $('#sectionToggles').innerHTML = Object.entries(home.sections).map(([key,value]) => `<div class="toggle-row"><div><b>${key[0].toUpperCase()+key.slice(1)}</b><small>Show this section on the public homepage</small></div><label class="switch"><input type="checkbox" data-section="${key}" ${value ? 'checked' : ''}><span></span></label></div>`).join('');
@@ -459,7 +459,7 @@ function renderUserAccounts() {
   $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => {
     const canUploadNotices=account.permissions?.includes('notice_upload');
     return `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member${canUploadNotices?'<small>Notice uploader</small>':''}</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span class="user-access-actions"><button type="button" data-notice-access="${escapeHtml(account.facultyId)}" data-allowed="${!canUploadNotices}">${canUploadNotices?'Remove notice access':'Allow notices'}</button><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`;
-  }).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
+  }).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>�</span><span>�</span><span>�</span></div>';
 }
 
 async function setFacultyNoticeAccess(facultyId,allowed){
@@ -550,7 +550,7 @@ async function createFacultyAccount() {
   if(firstInvalid){firstInvalid.focus();return}
   fields.facultyId=fields.facultyId.toUpperCase();
   const label=submit.textContent;
-  submit.disabled=true;submit.textContent='Creating login…';
+  submit.disabled=true;submit.textContent='Creating login�';
   let created=false;
   try{
     await authService.createFaculty(fields);
@@ -616,7 +616,7 @@ $('#toggleResetFacultyPassword').addEventListener('click',()=>{const input=$('#r
 $('#adminLogout').addEventListener('click',async(event)=>{
   const button=event.currentTarget;
   button.disabled=true;
-  button.textContent='Signing out…';
+  button.textContent='Signing out�';
   try {
     await authService.logout();
   } catch {

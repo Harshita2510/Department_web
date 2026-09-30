@@ -11,7 +11,7 @@ function fileLink(slot,label){
   const url=safeHttpsUrl(slot?.asset?.url);
   const type=slot?.asset?.mimeType==='application/pdf'?'PDF':'IMAGE';
   if(!url)return '';
-  return `<a class="timetable-file" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><i>${type}</i><span><strong>${label}</strong><small>View official timetable</small></span><b>Open ↗</b></a>`;
+  return `<a class="timetable-file" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><i>${type}</i><span><strong>${label}</strong><small>View official timetable</small></span><b>Open ?</b></a>`;
 }
 
 function semesterMarkup(semester){
