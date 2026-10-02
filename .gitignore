@@ -5,3 +5,5 @@ coverage/
 dist/
 uploads/
 *.log
+backup.env
+backend/.backup/
