@@ -8,7 +8,12 @@
     "start": "node src/server.js",
     "seed:admin": "node scripts/seed-admin.js",
     "check": "node --check src/server.js && node --check src/app.js",
-    "test": "node --test"
+    "test": "node --test",
+    "backup": "node scripts/backup/run.js",
+    "backup:now": "node scripts/backup/run.js --force",
+    "backup:check": "node scripts/backup/check.js",
+    "backup:auth": "node scripts/backup/authorize.js",
+    "backup:decrypt": "node scripts/backup/decrypt.js"
   },
   "engines": {
     "node": ">=20"
