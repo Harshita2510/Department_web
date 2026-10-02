@@ -95,14 +95,14 @@ The firewall must allow outbound HTTPS to `oauth2.googleapis.com`, `www.googleap
    ```
 3. **Test restore** into a separate database first. This leaves the live data untouched:
    ```bash
-   mongorestore --uri="mongodb+srv://USER:PASS@cluster.example.mongodb.net/" \
+   mongorestore --uri="<Atlas connection string without the database name>" \
      --archive=sgsits-backup-2026-10-04T020001Z.archive.gz --gzip \
      --nsFrom='sgsits_website.*' --nsTo='sgsits_restore_test.*'
    ```
    Check the collection counts in Atlas against `npm run backup:check`, then drop `sgsits_restore_test`.
 4. **Real restore**: this replaces the live collections with the backup's contents. Stop the website first:
    ```bash
-   mongorestore --uri="mongodb+srv://USER:PASS@cluster.example.mongodb.net/" \
+   mongorestore --uri="<Atlas connection string without the database name>" \
      --archive=sgsits-backup-2026-10-04T020001Z.archive.gz --gzip \
      --nsInclude='sgsits_website.*' --drop
    ```

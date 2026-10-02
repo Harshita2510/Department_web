@@ -70,9 +70,9 @@ test('retention removes nothing while there are few backups', () => {
 });
 
 test('mongodump URI loses its database path but keeps options', () => {
-  assert.equal(stripDatabaseFromUri('mongodb+srv://u:p@cluster.mongodb.net/sgsits?retryWrites=true'), 'mongodb+srv://u:p@cluster.mongodb.net/?retryWrites=true');
-  assert.equal(stripDatabaseFromUri('mongodb://u:p@a:27017,b:27017/sgsits'), 'mongodb://u:p@a:27017,b:27017/');
-  assert.equal(stripDatabaseFromUri('mongodb+srv://u:p@cluster.mongodb.net'), 'mongodb+srv://u:p@cluster.mongodb.net');
+  assert.equal(stripDatabaseFromUri('mongodb+srv://cluster0.example.net/sgsits?retryWrites=true'), 'mongodb+srv://cluster0.example.net/?retryWrites=true');
+  assert.equal(stripDatabaseFromUri('mongodb://host-a:27017,host-b:27017/sgsits'), 'mongodb://host-a:27017,host-b:27017/');
+  assert.equal(stripDatabaseFromUri('mongodb+srv://cluster0.example.net'), 'mongodb+srv://cluster0.example.net');
 });
 
 test('encryption round-trips and rejects a wrong passphrase or tampering', async () => {
