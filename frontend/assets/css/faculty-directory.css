@@ -1,6 +1,6 @@
 /* =========================================================
    FACULTY DIRECTORY
-   SGSITS CSE FACULTY ID CARDS
+   SGSITS CE FACULTY ID CARDS
    ========================================================= */
 
 
@@ -99,7 +99,7 @@
 
 
 .faculty-card::after {
-  content: "CSE";
+  content: "CE";
 
   position: absolute;
 

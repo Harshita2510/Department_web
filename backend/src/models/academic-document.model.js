@@ -6,11 +6,14 @@ const academicAssetSchema=new mongoose.Schema({
   size:{type:Number,required:true},width:Number,height:Number,format:String
 },{_id:false});
 const timetableSlotSchema=new mongoose.Schema({
-  asset:{type:academicAssetSchema,default:null},status:{type:String,enum:['missing','draft','submitted','published','changes_requested'],default:'missing'},
+  asset:{type:academicAssetSchema,default:null},
+  // Last administrator-approved file; a new faculty upload cannot replace it publicly.
+  publishedAsset:{type:academicAssetSchema,default:null},
+  status:{type:String,enum:['missing','draft','submitted','published','changes_requested'],default:'missing'},
   uploadedBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'},approvedBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'},submittedAt:Date,publishedAt:Date
 },{_id:false});
 const timetableFilesSchema=new mongoose.Schema({
-  classTable:{type:timetableSlotSchema,default:()=>({})},quiz:{type:timetableSlotSchema,default:()=>({})},mst1:{type:timetableSlotSchema,default:()=>({})},mst2:{type:timetableSlotSchema,default:()=>({})},mst3:{type:timetableSlotSchema,default:()=>({})},endSemester:{type:timetableSlotSchema,default:()=>({})}
+  classTable:{type:timetableSlotSchema,default:()=>({})},quiz:{type:timetableSlotSchema,default:()=>({})},practical:{type:timetableSlotSchema,default:()=>({})},mst1:{type:timetableSlotSchema,default:()=>({})},mst2:{type:timetableSlotSchema,default:()=>({})},mst3:{type:timetableSlotSchema,default:()=>({})},endSemester:{type:timetableSlotSchema,default:()=>({})}
 },{_id:false});
 
 const academicDocumentSchema = new mongoose.Schema({
@@ -20,7 +23,10 @@ const academicDocumentSchema = new mongoose.Schema({
   academicYear: { type:String, match:/^\d{4}-\d{2}$/, default:null },
   term: { type:String, enum:['odd','even','annual'], default:null },
   title: { type:String, required:true, trim:true, maxlength:200 },
-  documentUrl: { type:String, default:'' },
+  documentUrl: { type:String, default:'', validate:{
+    validator(value){if(!value)return true;try{const url=new URL(value);return url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname))}catch{return false}},
+    message:'Document URL must use HTTPS (HTTP is allowed only on localhost)'
+  } },
   editors:[{type:mongoose.Schema.Types.ObjectId,ref:'User'}],
   timetableFiles:{type:timetableFilesSchema,default:()=>({})},
   status: { type:String, enum:['draft','published'], default:'draft', index:true },
@@ -32,11 +38,18 @@ const academicDocumentSchema = new mongoose.Schema({
 
 academicDocumentSchema.index({ resourceType:1, programme:1, semester:1, academicYear:1, term:1 }, { unique:true });
 academicDocumentSchema.index({ resourceType:1, status:1, isCurrent:-1, academicYear:-1, term:1 });
+// The database, not only application code, guarantees a single current calendar.
+academicDocumentSchema.index(
+  { resourceType:1, isCurrent:1 },
+  { unique:true, partialFilterExpression:{resourceType:'academic-calendar',isCurrent:true} }
+);
 
 academicDocumentSchema.pre('validate', function validateShape(next) {
   const isCalendar=this.resourceType==='academic-calendar';
   if(isCalendar&&(this.programme!=='institute-wide'||this.semester!==null))return next(new Error('Academic calendars must be institute-wide without a semester number'));
   if(!isCalendar&&(this.programme==='institute-wide'||!this.semester))return next(new Error('Syllabus and timetable records require a programme and semester'));
+  if(!isCalendar&&this.programme==='pg-cse'&&this.semester>4)return next(new Error('PG CE has only four semesters'));
+  if(this.resourceType!=='timetable'&&!this.documentUrl)return next(new Error('A document URL is required'));
   next();
 });
 

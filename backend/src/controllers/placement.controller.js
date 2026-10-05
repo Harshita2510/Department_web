@@ -2,6 +2,7 @@ import { Placement } from '../models/placement.model.js';
 import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { deleteCloudinaryImage,uploadPlacementPdfAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
+import { setPublicCache } from '../utils/public-cache.js';
 
 function verifyPdfSignature(file){return file?.buffer?.subarray(0,5).toString()==='%PDF-'}
 function placementSource(item){return item.sourceType||(item.document?'pdf':'link')}
@@ -20,12 +21,12 @@ export async function listPublicPlacements(_request, response) {
   const items = await Placement.find({ status:'published' })
     .sort({ academicYear:-1 })
     .select('academicYear sourceType sheetUrl document status publishedAt');
-  response.set('Cache-Control','no-store');
+  setPublicCache(response);
   response.json({ success:true, data:items });
 }
 
 export async function listAdminPlacements(request, response) {
-  const page = Math.max(1, Number(request.query.page)||1); const limit = Math.min(100,Math.max(1,Number(request.query.limit)||20));
+  const query=request.validatedQuery||request.query;const page=query.page||1;const limit=query.limit||20;
   const [items,total] = await Promise.all([Placement.find().sort({academicYear:-1}).skip((page-1)*limit).limit(limit),Placement.countDocuments()]);
   response.json({ success:true,data:items,pagination:{page,limit,total,pages:Math.ceil(total/limit)} });
 }

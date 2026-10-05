@@ -24,7 +24,9 @@ export function uploadCloudinaryImage(file, requestedFolder = 'media') {
 
 export async function deleteCloudinaryImage(publicId) {
   if (!cloudinaryConfigured || !publicId) return;
-  return cloudinary.uploader.destroy(publicId, { resource_type:'image', invalidate:true });
+  const result=await cloudinary.uploader.destroy(publicId,{resource_type:'image',invalidate:true});
+  if(!['ok','not found'].includes(result.result))throw new AppError(502,'Cloudinary image deletion failed');
+  return result;
 }
 
 export function uploadSyllabusAsset(file, folder) {
@@ -73,13 +75,26 @@ export function uploadTimetableAsset(file,folder){
   });
 }
 
+export function uploadQuestionPaperAsset(file,folder){
+  if(!cloudinaryConfigured)throw new AppError(503,'Question paper storage is not configured');
+  return new Promise((resolve,reject)=>{
+    const upload=cloudinary.uploader.upload_stream({
+      folder:`sgsits/question-papers/${folder}`,resource_type:'image',format:'pdf',unique_filename:true,overwrite:false
+    },(error,result)=>{
+      if(error)return reject(new AppError(502,'Cloudinary question paper upload failed'));
+      resolve(result);
+    });
+    upload.end(file.buffer);
+  });
+}
+
 export async function verifyCloudinaryFileDelivery(asset) {
   if(!asset?.url)throw new AppError(400,'Upload a file before publishing');
   let response;
   try{
     response=await fetch(asset.url,{method:'HEAD',signal:AbortSignal.timeout(8000)});
   }catch{
-    throw new AppError(502,'Could not verify the syllabus file with Cloudinary. Try publishing again.');
+    throw new AppError(502,'Could not verify the uploaded file with Cloudinary. Try publishing again.');
   }
   if(response.ok)return;
   const cloudinaryError=response.headers.get('x-cld-error')||'';

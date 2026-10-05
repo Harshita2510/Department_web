@@ -49,11 +49,11 @@ test('faculty account, password gate and approval workflow', { skip:!process.env
     const refreshed=await User.findById(faculty.id);
     assert.equal(refreshed.mustChangePassword,false);
     const facultyToken=signAccessToken(refreshed);
-    const details={fullName:'Test Teacher',designation:'Professor',department:'Other department',email:'teacher@sgsits.ac.in',experienceYears:3.5,highestQualification:'PhD',areaOfSpecialisation:'Computer vision',photoUrl:'https://res.cloudinary.com/demo/image/upload/faculty/photo.png'};
+    const details={fullName:'Test Teacher',designation:'Professor',department:'Other department',email:'teacher@sgsits.ac.in',experienceYears:3.5,highestQualification:'PhD',areaOfSpecialisation:'Computer vision',photoUrl:'https://res.cloudinary.com/test/image/upload/v123/sgsits/faculty/photo.png'};
     assert.equal((await call('/faculty/me',{method:'PATCH',auth:facultyToken,body:details})).status,200);
     assert.equal((await call('/faculty/me/submit',{method:'POST',auth:facultyToken})).status,200);
     const submitted=await FacultyProfile.findById(profile.id);
-    assert.equal(submitted.draft.department,'Computer Science & Engineering');
+    assert.equal(submitted.draft.department,'Computer Engineering');
     assert.equal(submitted.reviewStatus,'submitted');
     assert.equal((await call('/faculty/public/EMP-001',{auth:null})).status,404);
 

@@ -5,6 +5,6 @@ export const validate = (schema) => (request, _response, next) => {
   if (!result.success) return next(new AppError(400, 'Validation failed', result.error.flatten()));
   if (result.data.body) request.body = result.data.body;
   if (result.data.params) request.params = result.data.params;
-  if (result.data.query) request.query = result.data.query;
+  if (result.data.query) request.validatedQuery = result.data.query;
   next();
 };

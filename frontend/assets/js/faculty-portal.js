@@ -12,7 +12,7 @@ if (!session?.facultyId || session?.role !== 'faculty') {
 }
 
 const facultyId = (session?.facultyId || '').trim().toUpperCase();
-const CSE_DEPARTMENT='Computer Science & Engineering';
+const CSE_DEPARTMENT='Computer Engineering';
 const defaultProfile = {
   facultyId,
   title: 'Dr.',
@@ -95,7 +95,7 @@ function hasRequiredFields() {
 function markSaving(state = 'unsaved') {
   const saveState = $('#saveState');
   saveState.className = `save-state ${state}`;
-  saveState.innerHTML = `<i></i> ${state === 'saving' ? 'Saving changes�' : state === 'unsaved' ? 'Unsaved changes' : 'All changes saved'}`;
+  saveState.innerHTML = `<i></i> ${state === 'saving' ? 'Saving changes—' : state === 'unsaved' ? 'Unsaved changes' : 'All changes saved'}`;
 }
 
 function queueSave() {
@@ -148,8 +148,9 @@ function showToast(message) {
 }
 
 function setAvatar(element, includeFallback = true, width = 156) {
-  if (profile.photo) {
-    element.style.backgroundImage = `url("${facultyPhotoUrl(profile.photo,width)}")`;
+  const safePhoto=facultyPhotoUrl(profile.photo,width);
+  if (safePhoto) {
+    element.style.backgroundImage = `url("${safePhoto}")`;
     if (!includeFallback) element.style.color = 'transparent';
     if (includeFallback) {
       const fallback = $('[data-profile-initials]', element);
@@ -255,7 +256,7 @@ function publicationTemplate(item, index) {
       <label class="field"><span>Type</span><select data-publication-field="type"><option ${item.type === 'Journal article' ? 'selected' : ''}>Journal article</option><option ${item.type === 'Conference paper' ? 'selected' : ''}>Conference paper</option><option ${item.type === 'Book' ? 'selected' : ''}>Book</option><option ${item.type === 'Book chapter' ? 'selected' : ''}>Book chapter</option><option ${item.type === 'Other' ? 'selected' : ''}>Other</option></select></label>
       <label class="field"><span>Publication year</span><input data-publication-field="year" value="${escapeHtml(item.year)}" type="number" min="1952" max="2100" placeholder="2026"></label>
       <label class="field full-field"><span>Journal / conference / publisher</span><input data-publication-field="venue" value="${escapeHtml(item.venue)}" type="text" placeholder="Publication venue"></label>
-      <label class="field full-field"><span>DOI or public URL</span><input data-publication-field="url" value="${escapeHtml(item.url)}" type="url" placeholder="https://doi.org/�"></label>
+      <label class="field full-field"><span>DOI or public URL</span><input data-publication-field="url" value="${escapeHtml(item.url)}" type="url" placeholder="https://doi.org/—"></label>
     </div></div>
   </article>`;
 }
@@ -394,7 +395,7 @@ $('#confirmPublish').addEventListener('click', () => {
 
 $('#previewButton').addEventListener('click', () => {
   saveProfile();
-  window.open(`faculty-profile?facultyId=${encodeURIComponent(facultyId)}&preview=1`, '_blank', 'noopener');
+  window.open(`faculty-profile.html?facultyId=${encodeURIComponent(facultyId)}&preview=1`, '_blank', 'noopener');
 });
 
 $('#facultyPhotoInput').addEventListener('change',async(event)=>{
@@ -406,7 +407,7 @@ $('#facultyPhotoInput').addEventListener('change',async(event)=>{
     return;
   }
   const status=$('#facultyPhotoStatus');
-  status.textContent='Uploading photograph�';
+  status.textContent='Uploading photograph—';
   try{
     const asset=await uploadService.uploadFacultyPhoto(file);
     profile.photo=asset.url;
@@ -418,10 +419,14 @@ $('#facultyPhotoInput').addEventListener('change',async(event)=>{
 
 $('#facultyPhotoRemove').addEventListener('click',async()=>{
   if(!profile.photo)return;
-  profile.photo='';
-  renderDashboard();
-  await saveProfile();
-  $('#facultyPhotoStatus').textContent='Photograph removed. Add a photo before submitting your profile.';
+  try{
+    await uploadService.deleteFacultyPhoto();
+    profile.photo='';
+    profile.reviewStatus='draft';
+    renderDashboard();
+    $('#facultyPhotoStatus').textContent='Photograph removed. Add a photo before submitting your profile.';
+    showToast('Photograph removed.');
+  }catch(error){showToast(error.message)}
 });
 
 $('#passwordForm').addEventListener('submit', async (event) => {
@@ -451,13 +456,13 @@ $('#passwordForm').addEventListener('submit', async (event) => {
   }
 
   submit.disabled=true;
-  submit.textContent='Updating password�';
-  setFeedback('Securely updating your password�','pending');
+  submit.textContent='Updating password—';
+  setFeedback('Securely updating your password—','pending');
   try {
     await authService.changePassword(currentPassword,newPassword);
     sessionStorage.removeItem(sessionKey);
     form.reset();
-    setFeedback('Password updated. Redirecting you to sign in�','success');
+    setFeedback('Password updated. Redirecting you to sign in—','success');
     showToast('Password updated. Please sign in again.');
     setTimeout(()=>window.location.href='../index.html',1200);
   } catch(error) {

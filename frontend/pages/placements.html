@@ -11,7 +11,7 @@
 
   <meta name="theme-color" content="#071b34">
 
-  <title>Past Placements — SGSITS CSE</title>
+  <title>Past Placements — SGSITS CE</title>
 
   <link
     rel="icon"
@@ -542,6 +542,7 @@
     }
   </style>
 
+  <link rel="stylesheet" href="../assets/css/calm-theme.css?v=20261004-1">
 </head>
 
 
@@ -553,28 +554,28 @@
 
 
   <!-- =======================================================
-       SAME CSE HEADER AS HOMEPAGE
+       SAME CE HEADER AS HOMEPAGE
        ======================================================= -->
 
   <div class="utility-bar">
     <div class="shell utility-inner">
-      <p>Department of Computer Science &amp; Engineering · SGSITS Indore</p>
+      <p>Department of Computer Engineering · SGSITS Indore</p>
       <div class="utility-links" aria-label="Utility links">
         <a href="#notices">Notices</a>
         <a href="#contact">Contact</a>
         <button class="text-button" type="button" id="accessibilityToggle" aria-label="Increase text size">A+</button>
-        <button class="text-button" type="button" id="languageToggle" aria-label="Switch language">हिंदी</button>
+
       </div>
     </div>
   </div>
 
   <header class="site-header" id="top">
     <div class="shell brand-row">
-      <a class="brand" href="../index.html" aria-label="SGSITS Computer Science and Engineering home">
+      <a class="brand" href="../index.html" aria-label="SGSITS Computer Engineering home">
         <img src="../assets/images/sgsits-logo.png" alt="SGSITS emblem" width="78" height="78">
         <span class="brand-copy">
-          <strong>CSE</strong>
-          <span>Department of Computer Science &amp; Engineering</span>
+          <strong>CE</strong>
+          <span>Department of Computer Engineering</span>
           <small>SGSITS · Indore</small>
         </span>
       </a>
@@ -612,7 +613,7 @@
           </button>
           <div class="dropdown">
             <a href="../index.html#about">
-              About CSE
+              About CE
               <small>Department overview</small>
             </a>
             <a href="../index.html#departments">
@@ -627,6 +628,10 @@
               Facilities
               <small>Labs and learning spaces</small>
             </a>
+            <a href="events.html#clubs">
+              Clubs &amp; chapters
+              <small>Student technical communities</small>
+            </a>
           </div>
         </div>
 
@@ -639,9 +644,17 @@
               Syllabus &amp; curriculum
               <small>Academic programmes and courses</small>
             </a>
-            <a href="timetable.html">
-              Timetable
-              <small>Class schedules</small>
+            <a href="timetable.html#class-timetables">
+              Class timetable
+              <small>Semester class schedules</small>
+            </a>
+            <a href="timetable.html#exam-timetables">
+              Exam, quiz &amp; practical timetable
+              <small>All examination schedules</small>
+            </a>
+            <a href="question-papers.html">
+              Previous question papers
+              <small>Mid-Sem and End-Sem archive</small>
             </a>
             <a href="academic-calendar.html">
               Academic calendar
@@ -700,20 +713,6 @@
 
         <a href="events.html">Events</a>
         <a class="active" href="placements.html" aria-current="page">Placements</a>
-
-        <div class="nav-group nav-last">
-          <button type="button" aria-expanded="false">
-            Student life <span>⌄</span>
-          </button>
-          <div class="dropdown dropdown-right">
-            <a href="#">
-              Clubs &amp; chapters
-            </a>
-            <a href="events.html">
-              Events &amp; workshops
-            </a>
-          </div>
-        </div>
 
       </div>
     </nav>
@@ -780,7 +779,7 @@
         <div class="placement-intro">
 
           <span class="kicker">
-            CSE outcomes
+            CE outcomes
           </span>
 
           <h2>
@@ -834,7 +833,7 @@
 
             <p class="empty-state">
               JavaScript is required to load the placement
-              archive in this frontend prototype.
+              archive.
             </p>
 
           </noscript>
@@ -873,6 +872,7 @@
     type="module"
     src="../assets/js/placements.js"
   ></script>
+  <script type="module" src="../assets/js/pages/page-settings.js"></script>
 
 </body>
 </html>

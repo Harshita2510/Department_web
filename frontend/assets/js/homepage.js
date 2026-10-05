@@ -1,5 +1,5 @@
 /*
-  Homepage-specific JavaScript for the SGSITS CSE Phase 1 homepage.
+  Homepage-specific JavaScript for the SGSITS CE Phase 1 homepage.
 
   Shared site behaviour remains in main.js.
 */

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { health } from '../controllers/health.controller.js';
+import { health, live, ready } from '../controllers/health.controller.js';
 import { academicDocumentRouter } from './academic-document.routes.js';
 import { academicSubjectRouter } from './academic-subject.routes.js';
 import { authRouter } from './auth.routes.js';
@@ -7,13 +7,21 @@ import { contentRouter } from './content.routes.js';
 import { facultyRouter } from './faculty.routes.js';
 import { fileRouter } from './file.routes.js';
 import { placementRouter } from './placement.routes.js';
+import { questionPaperRouter } from './question-paper.routes.js';
+import { homepageSettingsRouter } from './homepage-settings.routes.js';
+import { pageSettingsRouter } from './page-settings.routes.js';
 
 export const apiRouter = Router();
 apiRouter.get('/health', health);
+apiRouter.get('/health/live', live);
+apiRouter.get('/health/ready', ready);
 apiRouter.use('/academic-documents', academicDocumentRouter);
 apiRouter.use('/academic-subjects', academicSubjectRouter);
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/content', contentRouter);
 apiRouter.use('/faculty', facultyRouter);
+apiRouter.use('/homepage',homepageSettingsRouter);
+apiRouter.use('/page-settings',pageSettingsRouter);
 apiRouter.use('/files', fileRouter);
 apiRouter.use('/placements', placementRouter);
+apiRouter.use('/question-papers', questionPaperRouter);

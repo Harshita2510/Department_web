@@ -1,6 +1,15 @@
 import { z } from 'zod';
+import { env } from '../config/env.js';
+import { isCloudinaryFacultyPhotoUrl } from '../utils/cloudinary-faculty-photo.js';
 
 const optionalHttpsUrl = z.union([z.literal(''), z.url().refine((value) => new URL(value).protocol === 'https:')]).optional();
+const optionalFacultyPhotoUrl = z.union([
+  z.literal(''),
+  z.string().trim().refine(
+    (value) => isCloudinaryFacultyPhotoUrl(value, env.CLOUDINARY_CLOUD_NAME),
+    'Faculty photos must be uploaded through this website'
+  )
+]).optional();
 export const facultyDraftSchema = z.object({ body: z.object({
   title: z.string().max(20).optional(), fullName: z.string().max(120).optional(), designation: z.string().max(120).optional(),
   department: z.string().max(150).optional(), email: z.string().trim().max(254).optional(), phone: z.string().max(30).optional(),
@@ -10,7 +19,7 @@ export const facultyDraftSchema = z.object({ body: z.object({
   coursesTaught: z.array(z.string().max(120)).max(50).optional(), experienceYears: z.number().finite().min(0).optional(),
   highestQualification: z.string().trim().max(300).optional(), areaOfSpecialisation: z.string().trim().max(500).optional(),
   scholarsSupervised: z.number().int().min(0).max(999).optional(), researchSummary: z.string().max(5000).optional(),
-  photoUrl: optionalHttpsUrl,
+  photoUrl: optionalFacultyPhotoUrl,
   publications: z.array(z.object({ title:z.string().max(500), year:z.number().int().min(1900).max(2200).optional(), type:z.string().max(80).optional(), venue:z.string().max(300).optional(), url:optionalHttpsUrl })).max(200).optional(),
   achievements: z.array(z.object({ title:z.string().max(500), year:z.number().int().min(1900).max(2200).optional(), category:z.string().max(80).optional(), description:z.string().max(1000).optional() })).max(200).optional()
 }).strict() });

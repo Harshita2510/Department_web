@@ -8,7 +8,7 @@ const subjectFields=z.object({
   active:z.boolean().optional().default(true)
 });
 const subjectBody=subjectFields.superRefine((value,context)=>{
-  if(value.programme==='pg-cse'&&value.semester>4)context.addIssue({code:'custom',path:['semester'],message:'PG CSE has only four semesters'});
+  if(value.programme==='pg-cse'&&value.semester>4)context.addIssue({code:'custom',path:['semester'],message:'PG CE has only four semesters'});
 });
 
 export const createAcademicSubjectSchema=z.object({body:subjectBody});

@@ -3,8 +3,20 @@ import { User } from '../models/user.model.js';
 import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { deleteCloudinaryImage } from '../services/cloudinary.service.js';
+import { setPublicCache } from '../utils/public-cache.js';
+import { AcademicSubject } from '../models/academic-subject.model.js';
+import { AcademicDocument } from '../models/academic-document.model.js';
+import { env } from '../config/env.js';
+import { cloudinaryFacultyPhotoPublicId } from '../utils/cloudinary-faculty-photo.js';
 
-const CSE_DEPARTMENT='Computer Science & Engineering';
+const CSE_DEPARTMENT='Computer Engineering';
+
+function withCurrentDepartment(profile){
+  const value=profile?.toObject?profile.toObject():{...profile};
+  if(value?.draft)value.draft={...value.draft,department:CSE_DEPARTMENT};
+  if(value?.approvedSnapshot)value.approvedSnapshot={...value.approvedSnapshot,department:CSE_DEPARTMENT};
+  return value;
+}
 
 // Profiles created by the older flow may have been published with only a name
 // and designation. Do not advertise those as complete public profiles.
@@ -35,14 +47,14 @@ function requireCompleteDraft(draft){
 export async function getOwnProfile(request, response) {
   const profile = await FacultyProfile.findOne({ user:request.user.id });
   if (!profile) throw new AppError(404, 'Faculty profile not found');
-  response.json({ success:true, data:profile });
+  response.json({ success:true, data:withCurrentDepartment(profile) });
 }
 
 export async function updateOwnProfile(request, response) {
   const fields=Object.fromEntries(Object.entries({...request.body,department:CSE_DEPARTMENT}).map(([key,value])=>[`draft.${key}`,value]));
   const profile = await FacultyProfile.findOneAndUpdate({ user:request.user.id }, { $set:{ ...fields, reviewStatus:'draft' }, $unset:{ submittedAt:1 } }, { new:true, runValidators:true });
   if (!profile) throw new AppError(404, 'Faculty profile not found');
-  response.json({ success:true, data:profile });
+  response.json({ success:true, data:withCurrentDepartment(profile) });
 }
 
 export async function submitOwnProfile(request, response) {
@@ -51,14 +63,14 @@ export async function submitOwnProfile(request, response) {
   requireCompleteDraft(existing.draft);
   const profile=await FacultyProfile.findByIdAndUpdate(existing.id,{reviewStatus:'submitted',submittedAt:new Date()},{new:true});
   await recordAudit(request, 'FACULTY_PROFILE_SUBMITTED', 'FacultyProfile', profile.id);
-  response.json({ success:true, data:profile });
+  response.json({ success:true, data:withCurrentDepartment(profile) });
 }
 
 export async function listFaculty(request, response) {
-  const page = Math.max(1, Number(request.query.page) || 1); const limit = Math.min(100, Math.max(1, Number(request.query.limit) || 20));
-  const filter = request.query.status ? { reviewStatus:request.query.status } : {};
+  const query=request.validatedQuery||request.query;const page=query.page||1;const limit=query.limit||20;
+  const filter = query.status ? { reviewStatus:query.status } : {};
   const [items,total] = await Promise.all([FacultyProfile.find(filter).sort({ updatedAt:-1 }).skip((page-1)*limit).limit(limit), FacultyProfile.countDocuments(filter)]);
-  response.json({ success:true, data:items, pagination:{ page,limit,total,pages:Math.ceil(total/limit) } });
+  response.json({ success:true, data:items.map(withCurrentDepartment), pagination:{ page,limit,total,pages:Math.ceil(total/limit) } });
 }
 
 export async function listFacultyAccessOptions(_request, response) {
@@ -89,11 +101,16 @@ export async function approveFaculty(request, response) {
   if (!profile) throw new AppError(404, 'Faculty profile not found');
   if(profile.reviewStatus!=='submitted')throw new AppError(409,'The faculty member must submit the profile before it can be approved');
   requireCompleteDraft(profile.draft);
+  const previousApprovedPhotoId=profile.approvedSnapshot?.photoPublicId||cloudinaryFacultyPhotoPublicId(profile.approvedSnapshot?.photoUrl,env.CLOUDINARY_CLOUD_NAME);
   profile.approvedSnapshot = profile.draft.toObject?.() || profile.draft;
   profile.reviewStatus = 'approved'; profile.reviewedBy = request.user.id; profile.reviewedAt = new Date(); profile.publishedAt = new Date();
   await profile.save();
+  const approvedPhotoId=profile.approvedSnapshot?.photoPublicId||cloudinaryFacultyPhotoPublicId(profile.approvedSnapshot?.photoUrl,env.CLOUDINARY_CLOUD_NAME);
+  if(previousApprovedPhotoId&&previousApprovedPhotoId!==approvedPhotoId&&previousApprovedPhotoId!==profile.draft?.photoPublicId){
+    await deleteCloudinaryImage(previousApprovedPhotoId);
+  }
   await recordAudit(request, 'FACULTY_PROFILE_APPROVED', 'FacultyProfile', profile.id);
-  response.json({ success:true, data:profile });
+  response.json({ success:true, data:withCurrentDepartment(profile) });
 }
 
 export async function deleteFaculty(request,response){
@@ -103,27 +120,36 @@ export async function deleteFaculty(request,response){
     await session.withTransaction(async()=>{
       profile=await FacultyProfile.findOneAndDelete({_id:request.params.id},{session});
       if(!profile)throw new AppError(404,'Faculty profile not found');
+      await Promise.all([
+        AcademicSubject.updateMany({editors:profile.user},{$pull:{editors:profile.user}},{session}),
+        AcademicDocument.updateMany({editors:profile.user},{$pull:{editors:profile.user}},{session})
+      ]);
       await User.deleteOne({_id:profile.user,role:'faculty'},{session});
     });
   }finally{
     await session.endSession();
   }
   await recordAudit(request,'FACULTY_PROFILE_DELETED','FacultyProfile',profile.id,{facultyId:profile.facultyId});
-  const photoIds=[profile.draft?.photoPublicId,profile.approvedSnapshot?.photoPublicId].filter(Boolean);
-  await Promise.allSettled([...new Set(photoIds)].map((publicId)=>deleteCloudinaryImage(publicId)));
+  const photoIds=[
+    profile.draft?.photoPublicId||cloudinaryFacultyPhotoPublicId(profile.draft?.photoUrl,env.CLOUDINARY_CLOUD_NAME),
+    profile.approvedSnapshot?.photoPublicId||cloudinaryFacultyPhotoPublicId(profile.approvedSnapshot?.photoUrl,env.CLOUDINARY_CLOUD_NAME)
+  ].filter(Boolean);
+  const deletionResults=await Promise.allSettled([...new Set(photoIds)].map((publicId)=>deleteCloudinaryImage(publicId)));
+  const failures=deletionResults.filter((result)=>result.status==='rejected');
+  if(failures.length)console.error('Faculty profile deleted, but Cloudinary cleanup failed',{facultyId:profile.facultyId,failures:failures.map((result)=>result.reason?.message||'Unknown Cloudinary error')});
   response.status(204).end();
 }
 
 export async function getPublicFaculty(request, response) {
   const profile = await FacultyProfile.findOne({ facultyId:request.params.facultyId.toUpperCase(), ...completeApprovedProfileFilter }).select('facultyId approvedSnapshot publishedAt');
   if (!profile) throw new AppError(404, 'Published faculty profile not found');
-  response.set('Cache-Control','no-store');
-  response.json({ success:true, data:profile });
+  setPublicCache(response);
+  response.json({ success:true, data:withCurrentDepartment(profile) });
 }
 
 export async function listPublicFaculty(request, response) {
-  const limit=Math.min(50,Math.max(1,Number(request.query.limit)||12));
-  const query=String(request.query.q||'').trim().slice(0,80);
+  const validated=request.validatedQuery||request.query;const limit=validated.limit||12;
+  const query=validated.q||'';
   const filter={...completeApprovedProfileFilter};
   if(query){
     const escaped=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -140,6 +166,6 @@ export async function listPublicFaculty(request, response) {
     .limit(limit)
     .select('facultyId approvedSnapshot.title approvedSnapshot.fullName approvedSnapshot.designation approvedSnapshot.department approvedSnapshot.photoUrl approvedSnapshot.researchInterests publishedAt')
     .lean();
-  response.set('Cache-Control','no-store');
-  response.json({success:true,data:items});
+  setPublicCache(response);
+  response.json({success:true,data:items.map(withCurrentDepartment)});
 }

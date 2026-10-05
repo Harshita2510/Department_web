@@ -19,20 +19,24 @@ function renderProfile() {
   $('#profileContent').hidden = false;
   $('#previewBar').hidden = !ownPreview;
   const fullDisplayName = `${profile.title || ''} ${profile.fullName || 'Faculty Member'}`.trim();
-  document.title = `${fullDisplayName} � SGSITS Faculty`;
+  document.title = `${fullDisplayName} — SGSITS Faculty`;
   $('#publicName').textContent = fullDisplayName;
   $('#publicInitials').textContent = initials(profile.fullName);
   $('#publicDesignation').textContent = profile.designation || 'Faculty member';
-  if (profile.photoUrl) {
-    $('#publicAvatar').style.backgroundImage = `url("${facultyPhotoUrl(profile.photoUrl,380)}")`;
+  const safePhoto = facultyPhotoUrl(profile.photoUrl,380);
+  if (safePhoto) {
+    $('#publicAvatar').style.backgroundImage = `url("${safePhoto}")`;
     $('#publicInitials').style.visibility = 'hidden';
+  } else {
+    $('#publicAvatar').style.backgroundImage = '';
+    $('#publicInitials').style.visibility = '';
   }
 
-  $('#publicEmployeeNumber').textContent = employeeNumber || '�';
-  $('#experienceValue').textContent = profile.experienceYears ?? '�';
-  $('#publicHighestQualification').textContent = profile.highestQualification || '�';
-  $('#publicSpecialisation').textContent = profile.areaOfSpecialisation || '�';
-  $('#publicEmail').textContent = profile.email || '�';
+  $('#publicEmployeeNumber').textContent = employeeNumber || '—';
+  $('#experienceValue').textContent = profile.experienceYears ?? '—';
+  $('#publicHighestQualification').textContent = profile.highestQualification || '—';
+  $('#publicSpecialisation').textContent = profile.areaOfSpecialisation || '—';
+  $('#publicEmail').textContent = profile.email || '—';
   $('#contactWrap').hidden = !profile.phone;
   $('#publicContact').textContent = profile.phone || '';
 }

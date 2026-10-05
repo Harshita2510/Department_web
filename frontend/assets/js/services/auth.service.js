@@ -8,5 +8,6 @@ export const authService={
   listFacultyAccounts:()=>apiRequest('/auth/faculty'),
   createFaculty:(fields)=>apiRequest('/auth/faculty',{method:'POST',body:JSON.stringify(fields)}),
   resetFacultyPassword:(facultyId,temporaryPassword)=>apiRequest(`/auth/faculty/${encodeURIComponent(facultyId)}/password`,{method:'PATCH',body:JSON.stringify({temporaryPassword})}),
-  setFacultyNoticePermission:(facultyId,allowed)=>apiRequest(`/auth/faculty/${encodeURIComponent(facultyId)}/notice-permission`,{method:'PATCH',body:JSON.stringify({allowed})})
+  setFacultyNoticePermission:(facultyId,allowed)=>apiRequest(`/auth/faculty/${encodeURIComponent(facultyId)}/notice-permission`,{method:'PATCH',body:JSON.stringify({allowed})}),
+  setFacultyStatus:(facultyId,status)=>apiRequest(`/auth/faculty/${encodeURIComponent(facultyId)}/status`,{method:'PATCH',body:JSON.stringify({status})})
 };

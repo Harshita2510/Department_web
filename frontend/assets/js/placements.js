@@ -1,9 +1,7 @@
 import { escapeHtml } from './shared/dom.js';
-import { readJson } from './shared/storage.js';
 import { safeHttpsUrl } from './shared/security.js';
 import { placementService } from './services/placement.service.js';
 
-const DATA_KEY = 'sgsitsAdminContent';
 const list = document.querySelector('#placementList');
 const count = document.querySelector('#placementCount');
 
@@ -14,15 +12,11 @@ function validPublicUrl(value) {
 function placementUrl(item){return validPublicUrl(item.sourceType==='pdf'?item.document?.url:item.sheetUrl)}
 
 async function loadPlacements() {
-  let records;
+  let records=[];
   try {
     records = await placementService.listPublic();
-  } catch {
-    records = readJson(localStorage, DATA_KEY, {}).placements || [];
-  }
+  } catch {}
   const placements = records
-    // The public API already returns published records only. The status check is
-    // retained for the browser-storage fallback used during offline development.
     .filter((item) => (!item.status || item.status === 'published') && placementUrl(item))
     .sort((a, b) => (b.academicYear || '').localeCompare(a.academicYear || ''));
 

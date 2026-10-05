@@ -1,9 +1,10 @@
 import { $, $$, escapeHtml as escapeCMS } from './shared/dom.js';
-import { readJson } from './shared/storage.js';
 import { safeHttpsUrl } from './shared/security.js';
 import { authService } from './services/auth.service.js';
 import { contentService } from './services/content.service.js';
 import { placementService } from './services/placement.service.js';
+import { homepageSettingsService } from './services/homepage-settings.service.js';
+import './pages/research-records.js';
 
 const body = document.body;
 const toast = $('#toast');
@@ -16,17 +17,12 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3400);
 }
 
-// Render administrator-published browser data into the public prototype.
-function readCMSData(key) {
-  return readJson(localStorage, key, null);
-}
-
 function safeCMSLink(value, fallback) {
   return safeHttpsUrl(value, fallback);
 }
 
 function displayCMSDate(value) {
-  if (!value) return { day: '�', month: '', long: '' };
+  if (!value) return { day: '—', month: '', long: '' };
   const date = new Date(`${value}T12:00:00`);
   return {
     day: String(date.getDate()).padStart(2, '0'),
@@ -35,39 +31,107 @@ function displayCMSDate(value) {
   };
 }
 
-async function applyPublishedCMSContent() {
-  const homepage = readCMSData('sgsitsHomepageSettings');
-  if (homepage) {
-    const isLegacyDefault = homepage.headline === 'Learn deeply. Build boldly. Lead responsibly.';
-    const eyebrow = $('.hero .eyebrow');
-    if (eyebrow && homepage.eyebrow && !isLegacyDefault) eyebrow.innerHTML = `<span></span> ${escapeCMS(homepage.eyebrow)}`;
-    const heroTitle = $('.hero h1');
-    if (heroTitle && homepage.headline && !isLegacyDefault) {
-      const parts = homepage.headline.match(/[^.!?]+[.!?]?/g)?.map((part) => part.trim()).filter(Boolean) || [homepage.headline];
-      heroTitle.innerHTML = parts.map((part, index) => index === 1 ? `<em>${escapeCMS(part)}</em>` : escapeCMS(part)).join('<br>');
-    }
-    const intro = $('.hero-copy > p');
-    if (intro && homepage.intro && !isLegacyDefault) intro.textContent = homepage.intro;
-    const heroButton = $('.hero-actions .button-gold');
-    if (heroButton && !isLegacyDefault) { if (homepage.button) heroButton.firstChild.textContent = `${homepage.button} `; if (homepage.link) heroButton.href = homepage.link; }
-    Object.entries(homepage.sections || {}).forEach(([id, visible]) => { const section = $(`#${id}`); if (section) section.hidden = !visible; });
-  }
+function showRecentNotices(notices) {
+  const modal=$('#recentNoticesModal');
+  const list=$('#recentNoticeList');
+  if(!modal||!list||!notices.length)return;
+  const parameters=new URLSearchParams(window.location.search);
+  if(parameters.has('login')||parameters.has('adminLogin'))return;
+  const recent=notices.slice(0,5);
+  const signature=recent.map((item)=>item._id||item.id||`${item.title}:${item.date||''}`).join('|');
+  try{
+    if(sessionStorage.getItem('sgsitsRecentNoticesSeen')===signature)return;
+    sessionStorage.setItem('sgsitsRecentNoticesSeen',signature);
+  }catch{}
+  list.innerHTML=recent.map((item)=>{
+    const date=displayCMSDate(item.date);
+    const target=`pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}`;
+    return `<a class="recent-notice-item" href="${target}"><time><strong>${date.day}</strong>${escapeCMS(date.month)}</time><span><h3>${escapeCMS(item.title||'Department notice')}</h3><p>${escapeCMS(item.summary||item.title||'Department notice')}</p></span><span aria-hidden="true">→</span></a>`;
+  }).join('');
+  openModal(modal);
+}
 
+function renderAnnouncementTicker(notices){
+  const strip=$('#announcementStrip');
+  const ticker=$('#noticeTicker');
+  const tickerNotices=notices.filter((item)=>item.showInTicker!==false);
+  if(!strip||!ticker||!tickerNotices.length)return;
+  const links=tickerNotices.slice(0,5).map((item)=>{
+    const target=`pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}`;
+    return `<a href="${target}">${escapeCMS(item.title||'Department notice')}</a>`;
+  }).join('');
+  const duplicateLinks=links.replaceAll('<a ','<a tabindex="-1" ');
+  ticker.innerHTML=`<div class="ticker-group">${links}</div><div class="ticker-group" aria-hidden="true">${duplicateLinks}</div>`;
+  strip.hidden=false;
+}
+
+function applyHomepageSettings(settings){
+  if(!settings)return;
+  const setText=(selector,value)=>{const node=$(selector);if(node&&typeof value==='string')node.textContent=value};
+  setText('#heroEyebrowText',settings.heroEyebrow);
+  setText('#heroTitle',settings.heroTitle);
+  setText('#heroOverviewCopy',settings.heroOverview);
+  setText('#heroImageCaptionTitle',settings.imageCaptionTitle);
+  setText('#heroImageCaptionSubtitle',settings.imageCaptionSubtitle);
+  setText('#homepageVisionHeading',settings.visionHeading);
+  setText('#homepageVisionText',settings.visionText);
+  setText('#homepageMissionHeading',settings.missionHeading);
+  const phone=String(settings.departmentPhone||'').trim();
+  const dial=phone.replace(/[^+\d]/g,'');
+  const email=String(settings.departmentEmail||'').trim().toLowerCase();
+  if(/^\+?\d{6,20}$/.test(dial)){
+    ['#departmentCallLink','#departmentPhoneDisplay'].forEach((selector)=>{const link=$(selector);if(link)link.href=`tel:${dial}`});
+    setText('#departmentPhoneDisplay',phone);
+  }
+  if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    ['#departmentMailLink','#departmentEmailDisplay'].forEach((selector)=>{const link=$(selector);if(link)link.href=`mailto:${email}`});
+    setText('#departmentEmailDisplay',email);
+  }
+  (settings.highlights||[]).slice(0,3).forEach((item,index)=>{
+    setText(`#heroHighlightValue${index+1}`,item.value);
+    setText(`#heroHighlightLabel${index+1}`,item.label);
+  });
+  const missionList=$('#homepageMissionItems');
+  if(missionList&&Array.isArray(settings.missionItems)&&settings.missionItems.length){
+    missionList.replaceChildren(...settings.missionItems.map((text,index)=>{
+      const item=document.createElement('li');
+      const label=document.createElement('span');label.textContent=`M${index+1}`;
+      const copy=document.createElement('p');copy.textContent=text;
+      item.append(label,copy);return item;
+    }));
+  }
+  const outcomes=$('#homepageProgramOutcomes');
+  if(outcomes&&Array.isArray(settings.programOutcomes)){
+    outcomes.replaceChildren(...settings.programOutcomes.map((outcome)=>{
+      const item=document.createElement('li');
+      const code=document.createElement('span');code.textContent=outcome.code;
+      const wrapper=document.createElement('div');
+      const title=document.createElement('h4');title.textContent=outcome.title;
+      const description=document.createElement('p');description.textContent=outcome.description;
+      wrapper.append(title,description);item.append(code,wrapper);return item;
+    }));
+  }
+}
+
+homepageSettingsService.getPublic().then(applyHomepageSettings).catch(()=>{});
+
+async function applyPublishedCMSContent() {
   let data;
   try{
     const [content,placements]=await Promise.all([contentService.listPublic(),placementService.listPublic()]);
     const keys={notice:'notices',news:'news',event:'events',document:'documents',media:'media'};
     data={notices:[],news:[],events:[],documents:[],media:[],placements};
-    content.forEach((item)=>{const key=keys[item.type];if(key)data[key].push({...item,date:item.displayDate?.slice?.(0,10)||item.displayDate,file:item.asset?{data:item.asset.url,name:item.asset.name,type:item.asset.mimeType}:null})});
-  }catch{data=readCMSData('sgsitsAdminContent')}
+    content.forEach((item)=>{const key=keys[item.type];const sourceDate=item.displayDate||item.publishedAt||item.createdAt;if(key)data[key].push({...item,date:sourceDate?.slice?.(0,10)||sourceDate,file:item.asset?{data:item.asset.url,name:item.asset.name,type:item.asset.mimeType}:null})});
+  }catch{return}
   if(!data)return;
   const notices = (data.notices || []).filter((item) => item.status === 'published').sort((a,b) => (b.date || '').localeCompare(a.date || ''));
   if (notices.length) {
-    $('#noticeTicker').innerHTML = notices.slice(0, 5).map((item) => { const date = displayCMSDate(item.date); return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}"><time>${date.day} ${date.month}</time> ${escapeCMS(item.summary||item.title)}</a>`; }).join('');
-    $('#noticeList').innerHTML = notices.slice(0, 6).map((item) => { const date = displayCMSDate(item.date); const category = ['Academic','Examination','Admission'].includes(item.category) ? 'academic' : 'student'; return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}" data-category="${category}"><time><strong>${date.day}</strong>${date.month}</time><span><b>${escapeCMS(item.title)}</b><small>${escapeCMS(item.summary||item.category||'Notice')}</small></span><i>?</i></a>`; }).join('');
+    renderAnnouncementTicker(notices);
+    $('#noticeList').innerHTML = notices.slice(0, 6).map((item) => { const date = displayCMSDate(item.date); return `<a href="pages/notices.html#notice-${encodeURIComponent(item._id||item.id||'')}"><time><strong>${date.day}</strong>${date.month}</time><span><b>${escapeCMS(item.title)}</b><small>${escapeCMS(item.summary||item.title||'Notice')}</small></span><i>?</i></a>`; }).join('');
+    showRecentNotices(notices);
   }
   const events = (data.events || []).filter((item) => item.status === 'published').sort((a,b) => (a.date || '').localeCompare(b.date || ''));
-  if (events.length) {
+  if (events.length && $('.event-stack')) {
     $('.event-stack').innerHTML = events.slice(0, 3).map((item, index) => {
       const date = displayCMSDate(item.date);
       const image = item.file?.type?.startsWith('image/') ? safeCMSLink(item.file.data, '') : '';
@@ -81,7 +145,7 @@ async function applyPublishedCMSContent() {
   }
   const placements = (data.placements || []).filter((item) => item.status === 'published' && safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, '')).sort((a,b) => (b.academicYear || '').localeCompare(a.academicYear || ''));
   if (placements.length) {
-    $('#placementArchivePreview').innerHTML = placements.slice(0, 3).map((item) => `<a class="placement-year-link" href="${escapeCMS(safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, 'pages/placements.html'))}" target="_blank" rel="noopener noreferrer"><span>${escapeCMS(item.title||`Placement ${(item.academicYear||'').replace('-', '�')}`)}</span><b>Open ${item.sourceType==='pdf'?'PDF':'sheet'} ?</b></a>`).join('') + '<a class="placement-all-link" href="pages/placements.html">View complete archive ?</a>';
+    $('#placementArchivePreview').innerHTML = placements.slice(0, 3).map((item) => `<a class="placement-year-link" href="${escapeCMS(safeCMSLink(item.sourceType==='pdf'?item.document?.url:item.sheetUrl, 'pages/placements.html'))}" target="_blank" rel="noopener noreferrer"><span>${escapeCMS(item.title||`Placement ${(item.academicYear||'').replace('-', '—')}`)}</span><b>Open ${item.sourceType==='pdf'?'PDF':'sheet'} ?</b></a>`).join('') + '<a class="placement-all-link" href="pages/placements.html">View complete archive ?</a>';
   }
 }
 
@@ -144,16 +208,15 @@ window.addEventListener('resize', () => {
 
 // Announcement ticker.
 const ticker = $('#noticeTicker');
-ticker.innerHTML += ticker.innerHTML;
 let tickerPaused = false;
 $('#tickerControl').addEventListener('click', (event) => {
   tickerPaused = !tickerPaused;
   ticker.classList.toggle('paused', tickerPaused);
-  event.currentTarget.textContent = tickerPaused ? '?' : '?';
+  event.currentTarget.textContent = tickerPaused ? '▶' : 'Ⅱ';
   event.currentTarget.setAttribute('aria-label', tickerPaused ? 'Play announcements' : 'Pause announcements');
 });
 
-// Programme and notice filters.
+// Programme filters.
 $$('[data-programme-filter]').forEach((button) => {
   button.addEventListener('click', () => {
     $$('[data-programme-filter]').forEach((item) => {
@@ -165,48 +228,26 @@ $$('[data-programme-filter]').forEach((button) => {
   });
 });
 
-$$('[data-notice-filter]').forEach((button) => {
-  button.addEventListener('click', () => {
-    $$('[data-notice-filter]').forEach((item) => item.classList.toggle('active', item === button));
-    const selected = button.dataset.noticeFilter;
-    $$('#noticeList [data-category]').forEach((notice) => notice.classList.toggle('hidden', selected !== 'all' && notice.dataset.category !== selected));
-  });
-});
-
-// Vision and mission expansion.
-const departmentList = $('#departmentList');
-$('#departmentToggle').addEventListener('click', (event) => {
-  const expanded = departmentList.classList.toggle('expanded');
-  event.currentTarget.textContent = expanded ? 'Show core commitments' : 'Read all mission commitments';
-});
-
 // Site search uses the content structure and can later be replaced by a CMS search endpoint.
 const searchOverlay = $('#searchOverlay');
 const siteSearch = $('#siteSearch');
 const searchIndex = [
-  { title: 'CSE undergraduate and postgraduate admissions', meta: 'Admissions', target: '#admissions', keywords: 'admission apply ug pg btech mtech computer science engineering seats' },
-  { title: 'Computer Science and Engineering programmes', meta: 'Academics', target: '#programmes', keywords: 'programme course btech mtech doctoral cse computer engineering' },
-  { title: 'Department vision and mission', meta: 'About CSE', target: '#departments', keywords: 'vision mission department purpose values' },
-  { title: 'CSE syllabus and curriculum', meta: 'Academic resource', target: 'pages/syllabus.html', keywords: 'syllabus curriculum scheme course btech mtech cse semester' },
-  { title: 'CSE semester timetables', meta: 'Academic resource', target: 'pages/timetable.html', keywords: 'class timetable schedule btech mtech cse semester' },
+  { title: 'CE undergraduate and postgraduate admissions', meta: 'Admissions', target: '#admissions', keywords: 'admission apply ug pg btech mtech computer engineering engineering seats' },
+  { title: 'Computer Engineering programmes', meta: 'Academics', target: '#programmes', keywords: 'programme course btech mtech doctoral ce computer engineering' },
+  { title: 'Department vision and mission', meta: 'About CE', target: '#departments', keywords: 'vision mission department purpose values' },
+  { title: 'CE syllabus and curriculum', meta: 'Academic resource', target: 'pages/syllabus.html', keywords: 'syllabus curriculum scheme course btech mtech ce semester' },
+  { title: 'CE class and examination timetables', meta: 'Academic resource', target: 'pages/timetable.html', keywords: 'class exam quiz practical mst midsem endsem timetable schedule btech mtech semester' },
+  { title: 'Previous Mid-Sem and End-Sem question papers', meta: 'Academic resource', target: 'pages/question-papers.html', keywords: 'previous year question paper midsem endsem subject semester archive' },
   { title: 'Institute academic calendar', meta: 'Academic resource', target: 'pages/academic-calendar.html', keywords: 'academic calendar semester dates holiday examination schedule' },
   { title: 'Faculty, staff and research scholars', meta: 'People', target: 'pages/faculty.html', keywords: 'faculty staff phd scholar people professor' },
   { title: 'Research papers, patents and projects', meta: 'Research', target: '#research', keywords: 'research paper publication patent project consultancy' },
   { title: 'Past placement sheets', meta: 'Placement', target: 'pages/placements.html', keywords: 'placement recruiter company career training alumni sheet archive year' },
   { title: 'Latest notices and news', meta: 'Notice centre', target: '#notices', keywords: 'notice news update circular pdf' },
   { title: 'Events, seminars and workshops', meta: 'Campus pulse', target: 'pages/events.html', keywords: 'event seminar workshop hackathon orientation competition' },
-  { title: 'CSE laboratories and department facilities', meta: 'Student life', target: '#campus', keywords: 'computer lab laboratory department facility map student' },
-  { title: 'SGSITS campus map and directions', meta: 'Visit the department', target: '#campus-map', keywords: 'campus map location directions address visit sgsits indore cse' },
+  { title: 'CE laboratories and department facilities', meta: 'Department', target: '#campus', keywords: 'computer lab laboratory department facility map student' },
+  { title: 'SGSITS campus map and directions', meta: 'Visit the department', target: '#campus-map', keywords: 'campus map location directions address visit sgsits indore ce' },
   { title: 'Department academic resources', meta: 'Resources', target: '#reports', keywords: 'syllabus timetable calendar notices research' }
 ];
-
-const publishedSearchContent = readCMSData('sgsitsAdminContent');
-if (publishedSearchContent) {
-  const publicTargets = { notices: 'pages/notices.html', news: '#events', events: 'pages/events.html', placements: 'pages/placements.html', documents: '#resources', media: '#campus' };
-  Object.entries(publishedSearchContent).forEach(([type, items]) => {
-    (items || []).filter((item) => item.status === 'published').forEach((item) => searchIndex.push({ title: item.title, meta: item.category || type, target: type === 'placements' ? safeCMSLink(item.sheetUrl, publicTargets.placements) : item.file?.data || publicTargets[type] || '#top', keywords: `${type} ${item.summary || ''} ${item.body || ''}` }));
-  });
-}
 
 function openSearch() {
   searchOverlay.classList.add('open');
@@ -283,7 +324,7 @@ $('#adminForm').addEventListener('submit', async (event) => {
   error.textContent = '';
   const submitButton = $('button[type="submit"]', event.currentTarget);
   submitButton.disabled = true;
-  submitButton.textContent = 'Opening workspace�';
+  submitButton.textContent = 'Opening workspace—';
   try {
     const user=await authService.login(identifier,password);
     if(role==='admin'&&user.role!=='admin')throw new Error('This account does not have administrator access.');
@@ -295,7 +336,7 @@ $('#adminForm').addEventListener('submit', async (event) => {
     submitButton.disabled=false;
     submitButton.textContent=role==='admin'?'Open admin console':'Open faculty workspace';
     error.textContent=['Failed to fetch','Load failed'].includes(loginError.message)
-      ? 'Cannot reach the SGSITS API. Check that the backend is running and open this site at http://localhost:4173.'
+      ? 'Cannot reach the SGSITS API. Check the deployment API URL and confirm that the backend is running.'
       : loginError.message;
   }
 });
@@ -324,7 +365,7 @@ $('#accessibilityToggle').addEventListener('click', (event) => {
   event.currentTarget.textContent = enlarged ? 'A' : 'A+';
   showToast(enlarged ? 'Larger text enabled.' : 'Default text size restored.');
 });
-$('#languageToggle').addEventListener('click', () => showToast('Hindi content can be enabled through the bilingual CMS fields.'));
+$('#languageToggle')?.addEventListener('click', () => showToast('Hindi content is not available yet.'));
 $('#year').textContent = new Date().getFullYear();
 
 if (new URLSearchParams(window.location.search).get('login') === 'required') {

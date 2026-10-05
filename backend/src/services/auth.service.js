@@ -7,10 +7,14 @@ import { AppError } from '../utils/app-error.js';
 import { AuditLog } from '../models/audit-log.model.js';
 import { createFacultySchema } from '../validators/auth.validator.js';
 
+// Always run bcrypt even when no account matches, preventing account-existence timing leaks.
+const DUMMY_PASSWORD_HASH='$2b$12$lZea5zETGzD0/FeOH/xRUO/A6V9NZXAXcrr9yfaFkiq7dg1wGFt0a';
+
 export async function verifyCredentials(identifier, password) {
   const normalized = identifier.trim().toLowerCase();
   const user = await User.findOne({ $or: [{ email: normalized }, { facultyId: identifier.trim().toUpperCase() }] }).select('+passwordHash');
-  if (!user || user.status !== 'active' || !await bcrypt.compare(password, user.passwordHash)) throw new AppError(401, 'Invalid credentials');
+  const passwordMatches=await bcrypt.compare(password,user?.passwordHash||DUMMY_PASSWORD_HASH);
+  if (!user || user.status !== 'active' || !passwordMatches) throw new AppError(401, 'Invalid credentials');
   return user;
 }
 
@@ -25,7 +29,7 @@ export async function createFacultyAccount(input, request) {
   const passwordHash = await bcrypt.hash(temporaryPassword, env.BCRYPT_ROUNDS);
   const userData = { _id:new mongoose.Types.ObjectId(), facultyId, passwordHash, role:'faculty', mustChangePassword:true };
   const profileData = {
-    user:userData._id, facultyId, draft:{ department:'Computer Science & Engineering' }, approvedSnapshot:null, reviewStatus:'draft'
+    user:userData._id, facultyId, draft:{ department:'Computer Engineering' }, approvedSnapshot:null, reviewStatus:'draft'
   };
   await new User(userData).validate();
   await new FacultyProfile(profileData).validate();

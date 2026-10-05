@@ -39,7 +39,9 @@ function pageContext(record, { preview=false, admin=false, missingId=false }={})
     initials:(value='')=>value.split(/\s+/).slice(0,2).map(word=>word[0]).join(''),
     safeLink:(value)=>value?.startsWith('https://')?value:'',formatDate:()=>'',
     facultyService:{getPublic:async(id)=>{requestedFacultyId=id;return record},getOwn:async()=>record,listPublic:async()=>[record],list:async()=>[],listAccessOptions:async()=>[]},
-    authService:{listFacultyAccounts:async()=>[]},placementService:{listAdmin:async()=>[]},contentService:{listAdmin:async()=>[]},uploadService:{},
+    authService:{me:async()=>({role:'admin'}),listFacultyAccounts:async()=>[]},placementService:{listAdmin:async()=>[]},contentService:{listAdmin:async()=>[]},uploadService:{},
+    academicSubjectService:{listManaged:async()=>[]},academicDocumentService:{listAdmin:async()=>[]},questionPaperService:{listAdmin:async()=>[]},
+    homepageSettingsService:{getAdmin:async()=>null,update:async(value)=>value},
     CustomEvent:class{constructor(type,options){this.type=type;this.detail=options?.detail}}
   };
   vm.createContext(context);
@@ -60,7 +62,7 @@ test('public profile without photo renders initials and registration fields, inc
   await loadScript('assets/js/faculty-profile.js',h);
   assert.equal(h.node('#publicInitials').textContent,'TT');
   assert.notEqual(h.node('#publicInitials').style.visibility,'hidden');
-  assert.equal(h.node('#publicAvatar').style.backgroundImage,undefined);
+  assert.equal(h.node('#publicAvatar').style.backgroundImage,'');
   assert.equal(h.node('#publicHighestQualification').textContent,'PhD');
   assert.equal(h.node('#publicSpecialisation').textContent,'Computer vision');
   assert.equal(h.node('#publicEmployeeNumber').textContent,'EMP-001');
