@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { facultyNoticePermissionSchema,resetFacultyPasswordSchema } from '../src/validators/auth.validator.js';
+import { facultyNoticePermissionSchema,facultyStatusSchema,resetFacultyPasswordSchema } from '../src/validators/auth.validator.js';
 
 test('accepts a valid faculty temporary-password reset',()=>{
   const result=resetFacultyPasswordSchema.safeParse({params:{facultyId:'fac-001'},body:{temporaryPassword:'Temporary#2026'}});
@@ -20,5 +20,10 @@ test('rejects an invalid faculty ID during password reset',()=>{
 
 test('accepts an explicit faculty notice-permission change',()=>{
   const result=facultyNoticePermissionSchema.safeParse({params:{facultyId:'fac-001'},body:{allowed:true}});
+  assert.equal(result.success,true);assert.equal(result.data.params.facultyId,'FAC-001');
+});
+
+test('accepts an explicit faculty account deactivation',()=>{
+  const result=facultyStatusSchema.safeParse({params:{facultyId:'fac-001'},body:{status:'inactive'}});
   assert.equal(result.success,true);assert.equal(result.data.params.facultyId,'FAC-001');
 });

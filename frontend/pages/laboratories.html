@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Computer Science & Engineering research at SGSITS Indore.">
+  <meta name="description" content="Computer Engineering research at SGSITS Indore.">
   <meta name="theme-color" content="#071b34">
-  <title>Laboratories � CSE SGSITS Indore</title>
+  <title>Laboratories — CE SGSITS Indore</title>
   <link rel="icon" type="image/png" href="../assets/images/sgsits-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -241,28 +241,29 @@
       .research-hero-inner, .topic-inner, .research-intro, .topic-content { padding-left: 18px; padding-right: 18px; }
     }
   </style>
+  <link rel="stylesheet" href="../assets/css/calm-theme.css?v=20261004-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
   <div class="utility-bar">
     <div class="shell utility-inner">
-      <p>Department of Computer Science &amp; Engineering � SGSITS Indore</p>
+      <p>Department of Computer Engineering — SGSITS Indore</p>
       <div class="utility-links" aria-label="Utility links">
         <a href="../index.html#notices">Notices</a>
         <a href="../index.html#contact">Contact</a>
         <button class="text-button" type="button" id="accessibilityToggle" aria-label="Increase text size">A+</button>
-        <button class="text-button" type="button" id="languageToggle" aria-label="Switch language">?????</button>
+
       </div>
     </div>
   </div>
   <header class="site-header" id="top">
     <div class="shell brand-row">
-      <a class="brand" href="../index.html#top" aria-label="SGSITS Computer Science and Engineering home">
+      <a class="brand" href="../index.html#top" aria-label="SGSITS Computer Engineering home">
         <img src="../assets/images/sgsits-logo.png" alt="SGSITS emblem" width="78" height="78">
         <span class="brand-copy">
-          <strong>CSE</strong>
-          <span>Department of Computer Science &amp; Engineering</span>
-          <small>SGSITS � Indore</small>
+          <strong>CE</strong>
+          <span>Department of Computer Engineering</span>
+          <small>SGSITS — Indore</small>
         </span>
       </a>
       <div class="header-actions">
@@ -276,12 +277,20 @@
     <nav class="main-nav" id="mainNav" aria-label="Main navigation">
       <div class="shell nav-inner">
         <a class="nav-home" href="../index.html#top">Home</a>
-        <a href="../index.html#about">Department</a>
+        <div class="nav-group">
+          <button type="button" aria-expanded="false">Department <span>⌄</span></button>
+          <div class="dropdown">
+            <a href="../index.html#about">About CE</a>
+            <a href="../index.html#departments">Vision &amp; mission</a>
+            <a href="faculty.html">Faculty &amp; staff</a>
+            <a href="research.html#research-facilities">Facilities</a>
+            <a href="events.html#clubs">Clubs &amp; chapters</a>
+          </div>
+        </div>
         <a href="../index.html#programmes">Academics</a>
         <a href="research.html" class="active">Research</a>
         <a href="../pages/events.html">Events</a>
         <a href="../pages/placements.html">Placements</a>
-        <a href="../index.html#campus">Student life</a>
       </div>
     </nav>
   </header>
@@ -289,7 +298,7 @@
   <main id="main" class="research-page">
     <section class="research-topic-hero">
       <div class="topic-inner">
-        <span class="research-eyebrow">Research � CSE SGSITS</span>
+        <span class="research-eyebrow">Research — CE SGSITS</span>
         <h1>Spaces to experiment, build and test.</h1>
         <p>Laboratories support practical learning, project development, experimentation and research activities.</p>
         <a class="research-back" href="research.html">? Back to Research</a>
@@ -324,12 +333,12 @@
     <div class="shell footer-top">
       <div class="footer-brand">
         <img src="../assets/images/sgsits-logo.png" alt="" width="84" height="84">
-        <h2>CSE<small>SGSITS Indore</small></h2>
+        <h2>CE<small>SGSITS Indore</small></h2>
         <p>Computing foundations.<br>Engineering with purpose.</p>
       </div>
       <div class="footer-nav">
-        <div><h3>Department</h3><a href="../index.html#about">About CSE</a><a href="../index.html#departments">Vision &amp; mission</a><a href="research.html">Research</a></div>
-        <div><h3>Students</h3><a href="../pages/syllabus.html">Syllabus</a><a href="../pages/timetable.html">Timetable</a><a href="../pages/placements.html">Placements</a></div>
+        <div><h3>Department</h3><a href="../index.html#about">About CE</a><a href="../index.html#departments">Vision &amp; mission</a><a href="research.html">Research</a></div>
+        <div><h3>Students</h3><a href="../pages/syllabus.html">Syllabus</a><a href="../pages/timetable.html">Timetable</a><a href="../pages/question-papers.html">Previous question papers</a><a href="../pages/placements.html">Placements</a></div>
         <div><h3>Quick links</h3><a href="../pages/notices.html">Notices</a><a href="../pages/events.html">Events</a><a href="../index.html#campus">Facilities</a><a href="../index.html#campus-map">Campus map</a></div>
       </div>
       <div class="footer-contact">
@@ -340,10 +349,11 @@
       </div>
     </div>
     <div class="shell footer-bottom">
-      <p>� <span id="year"></span> SGSITS CSE</p>
+      <p>— <span id="year"></span> SGSITS CE</p>
       <div><a href="../index.html#top">Back to top ?</a></div>
     </div>
   </footer>
   <script type="module" src="../assets/js/main.js?v=20260924-4"></script>
+  <script type="module" src="../assets/js/pages/research-records.js"></script>
 </body>
 </html>

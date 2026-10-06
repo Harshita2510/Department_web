@@ -27,6 +27,7 @@ export function me(request, response) {
 export async function changePassword(request, response) {
   const user = await request.user.constructor.findById(request.user.id).select('+passwordHash');
   if (!await bcrypt.compare(request.body.currentPassword, user.passwordHash)) throw new AppError(400, 'Current password is incorrect');
+  if (await bcrypt.compare(request.body.newPassword,user.passwordHash)) throw new AppError(400,'New password must be different from the current password');
   user.passwordHash = await bcrypt.hash(request.body.newPassword, env.BCRYPT_ROUNDS);
   user.mustChangePassword = false;
   user.tokenVersion += 1;
@@ -69,4 +70,14 @@ export async function updateFacultyNoticePermission(request,response){
   await user.save();
   await recordAudit(request,'FACULTY_NOTICE_PERMISSION_UPDATED','User',user.id,{facultyId:user.facultyId,allowed:request.body.allowed});
   response.json({success:true,data:{facultyId:user.facultyId,permissions:user.permissions}});
+}
+
+export async function updateFacultyStatus(request,response){
+  const user=await User.findOne({facultyId:request.params.facultyId,role:ROLES.FACULTY});
+  if(!user)throw new AppError(404,'Faculty account not found');
+  user.status=request.body.status;
+  if(user.status==='inactive')user.tokenVersion+=1;
+  await user.save();
+  await recordAudit(request,'FACULTY_STATUS_UPDATED','User',user.id,{facultyId:user.facultyId,status:user.status});
+  response.json({success:true,data:{facultyId:user.facultyId,status:user.status}});
 }

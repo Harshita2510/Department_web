@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createAcademicDocumentSchema,timetableSlotParamsSchema,updateAcademicDocumentSchema } from '../src/validators/academic-document.validator.js';
+import { AcademicDocument } from '../src/models/academic-document.model.js';
 
 const facultyId='507f1f77bcf86cd799439011';
 
@@ -32,8 +33,21 @@ test('accepts an editor-only timetable update without injecting defaults',()=>{
   assert.deepEqual(result.data.body,{editors:[]});
 });
 
+test('rejects a self-contained PG semester-five patch',()=>{
+  const result=updateAcademicDocumentSchema.safeParse({params:{id:facultyId},body:{programme:'pg-cse',semester:5}});
+  assert.equal(result.success,false);
+});
+
+test('model validation rejects PG semester five after separate partial fields are merged',async()=>{
+  const item=new AcademicDocument({
+    resourceType:'timetable',programme:'pg-cse',semester:5,academicYear:'2026-27',term:'odd',title:'Invalid PG timetable',
+    createdBy:facultyId,updatedBy:facultyId
+  });
+  await assert.rejects(item.validate(),/PG CE has only four semesters/);
+});
+
 test('validates all supported timetable upload slots',()=>{
-  for(const slot of ['classTable','quiz','mst1','mst2','mst3','endSemester']){
+  for(const slot of ['classTable','quiz','practical','mst1','mst2','mst3','endSemester']){
     assert.equal(timetableSlotParamsSchema.safeParse({params:{id:facultyId,slot}}).success,true);
   }
   assert.equal(timetableSlotParamsSchema.safeParse({params:{id:facultyId,slot:'surpriseTest'}}).success,false);

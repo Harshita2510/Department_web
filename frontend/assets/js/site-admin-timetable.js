@@ -3,11 +3,18 @@ import { academicDocumentService } from './services/academic-document.service.js
 import { facultyService } from './services/faculty.service.js';
 
 const $=(selector)=>document.querySelector(selector);
-const slots={classTable:'Class timetable',quiz:'Quiz timetable',mst1:'MST 1',mst2:'MST 2',mst3:'MST 3',endSemester:'End Semester'};
+const slots={classTable:'Class timetable',quiz:'Quiz timetable',practical:'Practical examination timetable',mst1:'MST 1',mst2:'MST 2',mst3:'MST 3',endSemester:'End Semester'};
 let records=[];
 let faculty=[];
 let uploadTarget=null;
 let toastTimer;
+let timetableMode='all';
+
+function visibleSlots(){
+  if(timetableMode==='class')return [['classTable',slots.classTable]];
+  if(timetableMode==='exam')return Object.entries(slots).filter(([slot])=>slot!=='classTable');
+  return Object.entries(slots);
+}
 
 function notify(message){
   const toast=$('#cmsToast');
@@ -28,7 +35,7 @@ function editorIds(record){
 function renderFacultyOptions(selected=[]){
   const chosen=new Set(selected);
   $('#timetableFacultyOptions').innerHTML=faculty.length
-    ?faculty.map((item)=>`<label><input type="checkbox" value="${escapeHtml(item.userId)}" ${chosen.has(item.userId)?'checked':''}><span>${escapeHtml(item.fullName||item.facultyId)}<small>${escapeHtml([item.facultyId,item.designation].filter(Boolean).join(' � '))}</small></span></label>`).join('')
+    ?faculty.map((item)=>`<label><input type="checkbox" value="${escapeHtml(item.userId)}" ${chosen.has(item.userId)?'checked':''}><span>${escapeHtml(item.fullName||item.facultyId)}<small>${escapeHtml([item.facultyId,item.designation].filter(Boolean).join(' — '))}</small></span></label>`).join('')
     :'<p>No active faculty accounts available.</p>';
 }
 
@@ -48,16 +55,26 @@ function slotMarkup(record,slot,label){
 }
 
 function render(){
-  $('#timetableRecordCount').textContent=records.length;
+  document.querySelectorAll('[data-timetable-count]').forEach((node)=>{node.textContent=records.length});
   $('#timetableAdminEmpty').classList.toggle('show',!records.length);
   $('#timetableAdminList').innerHTML=records.map((record)=>`<article class="timetable-admin-card">
     <header class="timetable-admin-head">
-      <div><h3>${record.programme==='ug-cse'?'B.Tech CSE':'M.Tech CSE'} � Semester ${record.semester}</h3><p>${escapeHtml(record.academicYear||'Current')} � ${escapeHtml(record.term||'semester')} � ${(record.editors||[]).length} faculty uploader${(record.editors||[]).length===1?'':'s'}</p></div>
+      <div><h3>${record.programme==='ug-cse'?'B.Tech CE':'M.Tech CE'} — Semester ${record.semester}</h3><p>${escapeHtml(record.academicYear||'Current')} — ${escapeHtml(record.term||'semester')} — ${(record.editors||[]).length} faculty uploader${(record.editors||[]).length===1?'':'s'}</p></div>
       <div><button data-timetable-edit="${record._id}">Edit access</button><button class="delete-timetable" data-timetable-delete="${record._id}">Delete semester</button></div>
     </header>
-    <div class="timetable-slots">${Object.entries(slots).map(([slot,label])=>slotMarkup(record,slot,label)).join('')}</div>
+    <div class="timetable-slots">${visibleSlots().map(([slot,label])=>slotMarkup(record,slot,label)).join('')}</div>
   </article>`).join('');
 }
+
+window.addEventListener('admin:timetable-mode',(event)=>{
+  timetableMode=event.detail?.mode||'all';
+  const classMode=timetableMode==='class';
+  $('#timetableManagementHeading').textContent=classMode?'Class timetables':'Exam, quiz & practical timetables';
+  $('#timetableManagementDescription').textContent=classMode
+    ?'Manage semester class schedules, faculty upload access and publication.'
+    :'Manage MST, End-Semester, quiz and practical schedules independently.';
+  render();
+});
 
 async function reload(){
   records=await academicDocumentService.listAdmin('timetable');
@@ -145,7 +162,7 @@ $('#timetableUploadInput').addEventListener('change',async(event)=>{
   if(!file||!uploadTarget)return;
   if(file.size>10*1024*1024){notify('Timetable files must be 10 MB or smaller.');return}
   if(!['application/pdf','image/jpeg','image/png','image/webp'].includes(file.type)){notify('Choose a PDF, JPG, PNG or WebP file.');return}
-  try{notify('Uploading timetable�');await academicDocumentService.uploadTimetable(uploadTarget.id,uploadTarget.slot,file);await reload();notify('Timetable uploaded as a draft. Publish it when ready.')}catch(error){notify(error.message)}
+  try{notify('Uploading timetable—');await academicDocumentService.uploadTimetable(uploadTarget.id,uploadTarget.slot,file);await reload();notify('Timetable uploaded as a draft. Publish it when ready.')}catch(error){notify(error.message)}
 });
 
 reload().catch((error)=>notify(error.message));

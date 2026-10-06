@@ -4,8 +4,13 @@ import { ROLES } from '../constants/roles.js';
 import { deleteCloudinaryImage,uploadSyllabusAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
 import { recordAudit } from '../services/audit.service.js';
 import { AppError } from '../utils/app-error.js';
+import { setPublicCache } from '../utils/public-cache.js';
 
 const safeFolder=(subject)=>`${subject.programme}/semester-${subject.semester}/${subject.normalizedName.replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}`;
+
+export function publicSyllabusVersion(item){
+  return item.publishedSyllabus||(item.syllabusStatus==='published'?item.syllabus:null);
+}
 
 function verifySignature(file){
   const b=file.buffer;
@@ -23,12 +28,16 @@ async function validateEditors(editorIds=[]){
 }
 
 export async function listPublicSubjects(request,response){
+  const query=request.validatedQuery||request.query;
   const filter={active:true};
-  if(request.query.programme)filter.programme=request.query.programme;
-  if(request.query.semester)filter.semester=Number(request.query.semester);
-  const records=await AcademicSubject.find(filter).sort({programme:1,semester:1,sortOrder:1,name:1}).select('programme semester subjectCode name sortOrder syllabus syllabusStatus publishedAt').lean();
-  const items=records.map((item)=>({...item,syllabus:item.syllabusStatus==='published'?item.syllabus:null}));
-  response.set('Cache-Control','no-store');
+  if(query.programme)filter.programme=query.programme;
+  if(query.semester)filter.semester=query.semester;
+  const records=await AcademicSubject.find(filter).sort({programme:1,semester:1,sortOrder:1,name:1}).select('programme semester subjectCode name sortOrder syllabus publishedSyllabus syllabusStatus publishedAt').lean();
+  const items=records.map((item)=>{
+    const approved=publicSyllabusVersion(item);
+    const result={...item,syllabus:approved};delete result.publishedSyllabus;return result;
+  });
+  setPublicCache(response);
   response.json({success:true,data:items});
 }
 
@@ -60,12 +69,13 @@ export async function uploadSubjectSyllabus(request,response){
   if(!request.file)throw new AppError(400,'Choose a syllabus PDF or image');
   if(!verifySignature(request.file))throw new AppError(415,'The uploaded file content does not match its declared type');
   const result=await uploadSyllabusAsset(request.file,safeFolder(item));
-  const previous=item.syllabus?.publicId;
+  if(item.syllabusStatus==='published'&&!item.publishedSyllabus&&item.syllabus)item.publishedSyllabus=item.syllabus.toObject?.()||item.syllabus;
+  const previousPending=item.syllabusStatus==='published'?null:item.syllabus?.publicId;
   item.syllabus={provider:'cloudinary',publicId:result.public_id,resourceType:result.resource_type,url:result.secure_url,name:request.file.originalname,mimeType:request.file.mimetype,size:result.bytes,width:result.width,height:result.height,format:result.format};
   item.syllabusStatus=request.user.role===ROLES.ADMIN?'draft':'submitted';item.uploadedBy=request.user.id;item.updatedBy=request.user.id;
-  item.submittedAt=request.user.role===ROLES.FACULTY?new Date():undefined;item.approvedBy=undefined;item.publishedAt=undefined;
+  item.submittedAt=request.user.role===ROLES.FACULTY?new Date():undefined;item.approvedBy=undefined;
   await item.save();
-  if(previous)await deleteCloudinaryImage(previous).catch(()=>{});
+  if(previousPending&&previousPending!==item.syllabus.publicId)await deleteCloudinaryImage(previousPending).catch(()=>{});
   await recordAudit(request,'SUBJECT_SYLLABUS_UPLOADED','AcademicSubject',item.id,{name:item.name,mimeType:request.file.mimetype,status:item.syllabusStatus});
   response.json({success:true,data:item});
 }
@@ -74,7 +84,10 @@ export async function publishSubjectSyllabus(request,response){
   const item=await AcademicSubject.findById(request.params.id);if(!item)throw new AppError(404,'Subject not found');
   if(!item.syllabus)throw new AppError(400,'Upload a syllabus before publishing');
   await verifyCloudinaryFileDelivery(item.syllabus);
+  const previousApproved=item.publishedSyllabus?.publicId||(item.syllabusStatus==='published'?item.syllabus?.publicId:null);
+  item.publishedSyllabus=item.syllabus.toObject?.()||item.syllabus;
   item.syllabusStatus='published';item.approvedBy=request.user.id;item.updatedBy=request.user.id;item.publishedAt=new Date();await item.save();
+  if(previousApproved&&previousApproved!==item.syllabus.publicId)await deleteCloudinaryImage(previousApproved).catch(()=>{});
   await recordAudit(request,'SUBJECT_SYLLABUS_PUBLISHED','AcademicSubject',item.id,{name:item.name});
   response.json({success:true,data:item});
 }
@@ -88,6 +101,7 @@ export async function requestSyllabusChanges(request,response){
 
 export async function deleteSubject(request,response){
   const item=await AcademicSubject.findByIdAndDelete(request.params.id);if(!item)throw new AppError(404,'Subject not found');
-  if(item.syllabus?.publicId)await deleteCloudinaryImage(item.syllabus.publicId).catch(()=>{});
+  const assets=new Set([item.syllabus?.publicId,item.publishedSyllabus?.publicId].filter(Boolean));
+  await Promise.all([...assets].map((publicId)=>deleteCloudinaryImage(publicId).catch(()=>{})));
   await recordAudit(request,'ACADEMIC_SUBJECT_DELETED','AcademicSubject',item.id,{name:item.name});response.status(204).end();
 }

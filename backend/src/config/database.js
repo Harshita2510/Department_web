@@ -5,9 +5,9 @@ export async function connectDatabase() {
   mongoose.set('strictQuery', true);
   await mongoose.connect(env.MONGODB_URI, {
     dbName: env.MONGODB_DB_NAME,
-    maxPoolSize: 20,
-    minPoolSize: 2,
-    serverSelectionTimeoutMS: 5000
+    maxPoolSize:env.MONGODB_MAX_POOL_SIZE,
+    minPoolSize:env.MONGODB_MIN_POOL_SIZE,
+    serverSelectionTimeoutMS:env.MONGODB_SERVER_SELECTION_TIMEOUT_MS
   });
 }
 

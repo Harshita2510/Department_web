@@ -6,17 +6,14 @@ import { facultyService } from './services/faculty.service.js';
 import { placementService } from './services/placement.service.js';
 import { contentService } from './services/content.service.js';
 import { uploadService } from './services/upload.service.js';
+import { academicDocumentService } from './services/academic-document.service.js';
+import { academicSubjectService } from './services/academic-subject.service.js';
+import { questionPaperService } from './services/question-paper.service.js';
+import { homepageSettingsService } from './services/homepage-settings.service.js';
 const ADMIN_SESSION_KEY = 'sgsitsAdminSession';
-const DATA_KEY = 'sgsitsAdminContent';
-const HOME_KEY = 'sgsitsHomepageSettings';
-const SETTINGS_KEY = 'sgsitsWebsiteSettings';
-const adminSession = JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+let adminSession;
 const ADMIN_UPLOAD_COLLECTIONS = new Set(['events', 'documents']);
 const API_CONTENT_TYPES={notices:'notice',news:'news',events:'event',documents:'document',media:'media'};
-
-if (adminSession?.role !== 'admin') {
-  window.location.replace('../index.html?adminLogin=required');
-}
 
 function requireAdministrator(action = 'manage website content') {
   if (adminSession?.role === 'admin') return true;
@@ -29,19 +26,12 @@ const typeConfig = {
   news: { title: 'News & stories', singular: 'News story', description: 'Share institute news, achievements, announcements and campus stories.', categories: ['Institute', 'Department', 'Research', 'Achievement', 'Campus'] },
   events: { title: 'Events', singular: 'Event', description: 'Manage seminars, workshops, conferences and student activities.', categories: ['Workshop', 'Seminar', 'Conference', 'Students', 'Cultural'] },
   placements: { title: 'Placement resources', singular: 'Placement resource', description: 'Publish a year-wise archive using either a public sheet link or an uploaded PDF.', categories: ['Placement sheet'] },
-  documents: { title: 'Documents', singular: 'Document', description: 'Upload syllabi, calendars, forms, reports, policies and official PDFs.', categories: ['Academic', 'NIRF', 'IQAC', 'Policy', 'Form', 'Report'] },
+  documents: { title: 'Research records', singular: 'Research record', description: 'Publish research areas, papers, projects, patents and laboratory information.', categories: ['Research area', 'Publication', 'Patent & project', 'Laboratory', 'Report'] },
   media: { title: 'Media library', singular: 'Media asset', description: 'Upload and organise approved website images and files.', categories: ['Image', 'Document', 'Video', 'Other'] }
 };
 
-const starterData = {
-  notices: [
-    { id: crypto.randomUUID(), title: 'Academic registration and semester commencement information', category: 'Academic', date: '2026-08-20', summary: 'Academic registration information for students.', body: '', status: 'published', featured: true, file: null, updatedAt: new Date('2026-08-20').toISOString() },
-    { id: crypto.randomUUID(), title: 'Orientation schedule for newly admitted students', category: 'Student affairs', date: '2026-08-18', summary: 'Orientation and induction schedule.', body: '', status: 'published', featured: false, file: null, updatedAt: new Date('2026-08-18').toISOString() }
-  ],
-  news: [], events: [], placements: [], documents: [], media: []
-};
-
-let store = loadJson(DATA_KEY, starterData);
+const starterData = {notices:[],news:[],events:[],placements:[],documents:[],media:[]};
+let store = structuredClone(starterData);
 Object.keys(typeConfig).forEach((type) => { if (!Array.isArray(store[type])) store[type] = []; });
 let currentType = 'notices';
 let selectedIds = new Set();
@@ -50,23 +40,10 @@ let pendingPlacementPdf=null;
 let toastTimer;
 let facultyProfiles=[];
 let facultyAccounts=[];
-
-function loadJson(key, fallback) {
-  try { return { ...fallback, ...JSON.parse(localStorage.getItem(key) || '{}') }; }
-  catch { return structuredClone(fallback); }
-}
-
-function saveStore() {
-  try {
-    localStorage.setItem(DATA_KEY, JSON.stringify(store));
-    updateDashboard();
-    updateCounts();
-    return true;
-  } catch (error) {
-    showToast('Browser storage is full. Remove large media files or export your data.');
-    return false;
-  }
-}
+let academicSubjects=[];
+let academicDocuments=[];
+let questionPapers=[];
+let homepageSettings=null;
 
 function showToast(message) {
   const toast = $('#cmsToast');
@@ -103,16 +80,52 @@ function flattenContent(item){
 }
 
 async function hydrateMongoData(){
-  try{
-    const [profiles,accounts,placements,content]=await Promise.all([facultyService.list(),authService.listFacultyAccounts(),placementService.listAdmin(1),contentService.listAdmin()]);
-    facultyProfiles=profiles.map(flattenFaculty);
-    facultyAccounts=accounts;
+  const requests={
+    profiles:facultyService.list(),accounts:authService.listFacultyAccounts(),placements:placementService.listAdmin(1),
+    content:contentService.listAdmin(),subjects:academicSubjectService.listManaged(),
+    documents:academicDocumentService.listAdmin(),papers:questionPaperService.listAdmin(),homepage:homepageSettingsService.getAdmin()
+  };
+  const keys=Object.keys(requests);
+  const results=await Promise.allSettled(Object.values(requests));
+  const loaded=Object.fromEntries(results.map((result,index)=>[keys[index],result.status==='fulfilled'?result.value:null]));
+  if(loaded.profiles)facultyProfiles=loaded.profiles.map(flattenFaculty);
+  if(loaded.accounts)facultyAccounts=loaded.accounts;
+  if(loaded.subjects)academicSubjects=loaded.subjects;
+  if(loaded.documents)academicDocuments=loaded.documents;
+  if(loaded.papers)questionPapers=loaded.papers;
+  if(loaded.homepage)homepageSettings=loaded.homepage;
+  if(loaded.content){
     ['notices','news','events','documents','media'].forEach((key)=>{store[key]=[]});
     const collectionKeys={notice:'notices',news:'news',event:'events',document:'documents',media:'media'};
-    content.forEach((item)=>{const key=collectionKeys[item.type];if(key)store[key].push(flattenContent(item))});
-    store.placements=placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '�')}`,category:item.sourceType==='pdf'?'Placement PDF':'Placement sheet',summary:`Open the placement ${item.sourceType==='pdf'?'PDF':'sheet'} for academic year ${item.academicYear.replace('-', '�')}.`,file:item.document?{...item.document,type:item.document.mimeType,data:item.document.url}:null}));
-    updateCounts();updateDashboard();renderUserAccounts();renderFaculty();if(currentType==='placements')renderCollection();
-  }catch(error){showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?adminLogin=required'),900)}
+    loaded.content.forEach((item)=>{const key=collectionKeys[item.type];if(key)store[key].push(flattenContent(item))});
+  }
+  if(loaded.placements)store.placements=loaded.placements.map((item)=>({...item,id:item._id,title:`Placement ${item.academicYear.replace('-', '—')}`,category:item.sourceType==='pdf'?'Placement PDF':'Placement sheet',summary:`Open the placement ${item.sourceType==='pdf'?'PDF':'sheet'} for academic year ${item.academicYear.replace('-', '—')}.`,file:item.document?{...item.document,type:item.document.mimeType,data:item.document.url}:null}));
+  updateCounts();updateDashboard();renderUserAccounts();renderFaculty();
+  if(typeConfig[currentType])renderCollection();
+  const failures=results.filter((result)=>result.status==='rejected');
+  if(failures.length)showToast(`${failures.length} admin section${failures.length===1?'':'s'} could not be refreshed. Other loaded data remains available.`);
+}
+
+async function refreshContentCollection(viewName){
+  const apiType=API_CONTENT_TYPES[viewName];
+  if(!apiType)return;
+  const items=await contentService.listAdmin(apiType);
+  store[viewName]=items.map(flattenContent);
+  updateCounts();updateDashboard();
+  if(currentType===viewName)renderCollection();
+}
+
+async function verifyAdministratorSession(){
+  try{
+    const user=await authService.me();
+    if(user.role!=='admin')throw new Error('Administrator access is required');
+    adminSession=user;
+    $('#adminAccountIdentifier').textContent=user.email||user.facultyId||'Authenticated account';
+    await hydrateMongoData();
+  }catch{
+    adminSession=null;
+    window.location.replace('../index.html?adminLogin=required');
+  }
 }
 
 function allContent() {
@@ -124,48 +137,129 @@ function updateCounts() {
   $$('[data-count="faculty"]').forEach((node) => node.textContent = getFacultyProfiles().length);
 }
 
-function storageSize() {
-  let bytes = 0;
-  for (let i = 0; i < localStorage.length; i += 1) {
-    const key = localStorage.key(i);
-    bytes += (key.length + (localStorage.getItem(key) || '').length) * 2;
-  }
-  return bytes;
-}
-
 function updateDashboard() {
   const content = allContent();
   const faculty = getFacultyProfiles();
-  $('#publishedStat').textContent = content.filter((item) => item.status === 'published').length + faculty.filter((item) => item.isPublished).length;
-  $('#draftStat').textContent = content.filter((item) => item.status === 'draft').length;
-  $('#submissionStat').textContent = faculty.filter((item) => item.reviewStatus === 'submitted').length;
-  $('#mediaStat').textContent = store.media.length + content.filter((item) => item.file).length;
-  const recent = content.sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 5);
-  $('#recentActivity').innerHTML = recent.length ? recent.map((item) => `<div class="activity-item"><span>${typeConfig[item.type]?.singular?.[0] || 'C'}</span><div><b>${escapeHtml(item.title)}</b><small>${escapeHtml(typeConfig[item.type].title)} � ${escapeHtml(item.status)}</small></div><time>${formatDate(item.updatedAt)}</time></div>`).join('') : '<div class="empty-mini">No content activity yet.</div>';
-  const submissions = faculty.filter((item) => item.reviewStatus === 'submitted').slice(0, 4);
-  $('#submissionPreview').innerHTML = submissions.length ? submissions.map((item) => `<div class="submission-item"><span>${initials(item.fullName)}</span><div><b>${escapeHtml(item.fullName || item.email)}</b><small>${escapeHtml(item.department || 'Department not selected')}</small></div><span>Review</span></div>`).join('') : '<div class="empty-mini">No faculty submissions waiting for review.</div>';
-  const bytes = storageSize();
-  const percent = Math.min(100, Math.round(bytes / (5 * 1024 * 1024) * 100));
-  $('#storageMeter').style.setProperty('--used', percent);
-  $('#storageUsed').textContent = bytes > 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(2)} MB used` : `${Math.round(bytes / 1024)} KB used`;
+  const timetableSlots=academicDocuments.filter((item)=>item.resourceType==='timetable').flatMap((item)=>Object.values(item.timetableFiles||{}));
+  const calendars=academicDocuments.filter((item)=>item.resourceType==='academic-calendar');
+  const published=content.filter((item)=>item.status==='published').length+
+    faculty.filter((item)=>item.isPublished).length+
+    academicSubjects.filter((item)=>item.syllabusStatus==='published').length+
+    timetableSlots.filter((item)=>item?.status==='published').length+
+    calendars.filter((item)=>item.status==='published').length+
+    questionPapers.filter((item)=>item.status==='published').length;
+  const drafts=content.filter((item)=>item.status==='draft').length+
+    academicSubjects.filter((item)=>['draft','submitted','changes_requested'].includes(item.syllabusStatus)).length+
+    timetableSlots.filter((item)=>['draft','submitted','changes_requested'].includes(item?.status)).length+
+    calendars.filter((item)=>item.status==='draft').length+
+    questionPapers.filter((item)=>item.status==='draft').length;
+  const submissions=faculty.filter((item)=>item.reviewStatus==='submitted').length+
+    academicSubjects.filter((item)=>item.syllabusStatus==='submitted').length+
+    timetableSlots.filter((item)=>item?.status==='submitted').length;
+  const assets=content.filter((item)=>item.file).length+
+    academicSubjects.filter((item)=>item.syllabus||item.publishedSyllabus).length+
+    timetableSlots.filter((item)=>item?.asset||item?.publishedAsset).length+
+    calendars.filter((item)=>item.documentUrl).length+
+    questionPapers.filter((item)=>item.asset).length;
+  $('#publishedStat').textContent=published;
+  $('#draftStat').textContent=drafts;
+  $('#submissionStat').textContent=submissions;
+  $('#mediaStat').textContent=assets;
+}
+
+async function refreshDashboardResources(){
+  [academicSubjects,academicDocuments,questionPapers]=await Promise.all([
+    academicSubjectService.listManaged(),academicDocumentService.listAdmin(),questionPaperService.listAdmin()
+  ]);
+  updateDashboard();
 }
 
 function showView(viewName) {
   $$('.cms-view').forEach((view) => view.classList.remove('active'));
   $$('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === viewName));
+  $$('[data-admin-nav-group]').forEach((group) => {
+    const containsActive = Boolean(group.querySelector('[data-view].active'));
+    group.classList.toggle('contains-active', containsActive);
+    if (containsActive) group.classList.add('open');
+    group.querySelector('[data-admin-nav-toggle]')?.setAttribute('aria-expanded', String(group.classList.contains('open')));
+  });
   let view;
+  const timetableMode = viewName === 'classTimetableManagement'
+    ? 'class'
+    : viewName === 'examTimetableManagement' ? 'exam' : null;
+  const pageSettingsAliases={
+    admissionUndergraduate:{page:'admission',section:'undergraduate'},admissionPostgraduate:{page:'admission',section:'postgraduate'},admissionDoctoral:{page:'admission',section:'doctoral'},admissionOfficial:{page:'admission',section:'official'},
+    researchAreas:{page:'research',section:'areas'},researchPublications:{page:'research',section:'publications'},researchProjects:{page:'research',section:'projects'},researchLaboratories:{page:'research',section:'laboratories'},
+    eventsSettings:{page:'events',section:'page'},placementsSettings:{page:'placements',section:'page'}
+  };
+  const pageSettingsTarget=pageSettingsAliases[viewName];
   if (typeConfig[viewName]) {
     currentType = viewName;
     view = $('#collectionView');
     setupCollection();
+    refreshContentCollection(viewName).catch((error)=>showToast(`Could not refresh ${typeConfig[viewName].title.toLowerCase()}: ${error.message}`));
   } else {
-    view = $(`#${viewName}View`) || $('#dashboardView');
+    view = timetableMode ? $('#timetableManagementView') : pageSettingsTarget ? $('#pageSettingsView') : ($(`#${viewName}View`) || $('#dashboardView'));
+    if(timetableMode)window.dispatchEvent(new CustomEvent('admin:timetable-mode',{detail:{mode:timetableMode}}));
+    if(pageSettingsTarget)window.dispatchEvent(new CustomEvent('admin:page-settings',{detail:pageSettingsTarget}));
     if (viewName === 'faculty') renderFaculty();
+    if(viewName==='homepage')renderHomepageSettings();
+    if(viewName==='dashboard'&&adminSession)refreshDashboardResources().catch((error)=>showToast(error.message));
   }
   view.classList.add('active');
-  $('#viewTitle').textContent = view.dataset.title === 'Content' ? typeConfig[currentType].title : view.dataset.title;
+  const timetableTitle=timetableMode==='class'?'Class timetable':timetableMode==='exam'?'Exam, quiz & practical timetable':null;
+  const pageSettingsTitle=pageSettingsTarget?`${pageSettingsTarget.page[0].toUpperCase()}${pageSettingsTarget.page.slice(1)} content`:null;
+  $('#viewTitle').textContent = timetableTitle || pageSettingsTitle || (view.dataset.title === 'Content' ? typeConfig[currentType].title : view.dataset.title);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeSidebar();
+}
+
+function renderHomepageSettings(){
+  if(!homepageSettings)return;
+  $('#homepageHeroEyebrow').value=homepageSettings.heroEyebrow||'';
+  $('#homepageHeroTitle').value=homepageSettings.heroTitle||'';
+  $('#homepageHeroOverview').value=homepageSettings.heroOverview||'';
+  $('#homepageImageCaptionTitle').value=homepageSettings.imageCaptionTitle||'';
+  $('#homepageImageCaptionSubtitle').value=homepageSettings.imageCaptionSubtitle||'';
+  $('#homepageDepartmentPhone').value=homepageSettings.departmentPhone||'';
+  $('#homepageDepartmentEmail').value=homepageSettings.departmentEmail||'';
+  $('#homepageVisionHeadingInput').value=homepageSettings.visionHeading||'';
+  $('#homepageVisionTextInput').value=homepageSettings.visionText||'';
+  $('#homepageMissionHeadingInput').value=homepageSettings.missionHeading||'';
+  (homepageSettings.highlights||[]).slice(0,3).forEach((item,index)=>{
+    $(`#homepageHighlightValue${index+1}`).value=item.value||'';
+    $(`#homepageHighlightLabel${index+1}`).value=item.label||'';
+  });
+  for(let index=0;index<4;index+=1)$(`#homepageMission${index+1}`).value=homepageSettings.missionItems?.[index]||'';
+  renderHomepageOutcomes(homepageSettings.programOutcomes||[]);
+}
+
+function renderHomepageOutcomes(outcomes){
+  $('#homepageOutcomeEditors').innerHTML=outcomes.map((outcome,index)=>`<article class="homepage-outcome-editor" data-homepage-outcome><header><strong>${escapeHtml(outcome.code||`PO${index+1}`)}</strong><button type="button" data-remove-homepage-outcome aria-label="Remove ${escapeHtml(outcome.code||`program outcome ${index+1}`)}">− Remove</button></header><div class="form-grid"><label class="field"><span>Code</span><input data-outcome-code required maxlength="10" value="${escapeHtml(outcome.code||'')}"></label><label class="field"><span>Title</span><input data-outcome-title required maxlength="160" value="${escapeHtml(outcome.title||'')}"></label><label class="field full"><span>Description</span><textarea data-outcome-description required minlength="10" maxlength="1500" rows="4">${escapeHtml(outcome.description||'')}</textarea></label></div></article>`).join('');
+}
+
+function addHomepageOutcome(){
+  const current=$$('[data-homepage-outcome]',$('#homepageOutcomeEditors')).map((item)=>({code:$('[data-outcome-code]',item).value,title:$('[data-outcome-title]',item).value,description:$('[data-outcome-description]',item).value}));
+  if(current.length>=20){showToast('A maximum of 20 program outcomes is supported.');return}
+  current.push({code:`PO${current.length+1}`,title:'',description:''});renderHomepageOutcomes(current);
+  $$('[data-homepage-outcome]',$('#homepageOutcomeEditors')).at(-1)?.querySelector('[data-outcome-title]')?.focus();
+}
+
+async function saveHomepageSettings(event){
+  event.preventDefault();
+  const form=$('#homepageSettingsForm');if(!form.reportValidity())return;
+  const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving—';
+  const payload={
+    heroEyebrow:$('#homepageHeroEyebrow').value.trim(),heroTitle:$('#homepageHeroTitle').value.trim(),heroOverview:$('#homepageHeroOverview').value.trim(),
+    highlights:[1,2,3].map((index)=>({value:$(`#homepageHighlightValue${index}`).value.trim(),label:$(`#homepageHighlightLabel${index}`).value.trim()})),
+    imageCaptionTitle:$('#homepageImageCaptionTitle').value.trim(),imageCaptionSubtitle:$('#homepageImageCaptionSubtitle').value.trim(),
+    departmentPhone:$('#homepageDepartmentPhone').value.trim(),departmentEmail:$('#homepageDepartmentEmail').value.trim(),
+    visionHeading:$('#homepageVisionHeadingInput').value.trim(),visionText:$('#homepageVisionTextInput').value.trim(),
+    missionHeading:$('#homepageMissionHeadingInput').value.trim(),missionItems:[1,2,3,4].map((index)=>$(`#homepageMission${index}`).value.trim()),
+    programOutcomes:$$('[data-homepage-outcome]',$('#homepageOutcomeEditors')).map((item)=>({code:$('[data-outcome-code]',item).value.trim(),title:$('[data-outcome-title]',item).value.trim(),description:$('[data-outcome-description]',item).value.trim()}))
+  };
+  try{homepageSettings=await homepageSettingsService.update(payload);renderHomepageSettings();showToast('Homepage content published. Open the public site to review it.');}
+  catch(error){showToast(error.message)}finally{button.disabled=false;button.textContent='Save and publish homepage'}
 }
 
 function setupCollection() {
@@ -185,22 +279,30 @@ function filteredItems() {
   const query = $('#collectionSearch').value.trim().toLowerCase();
   const status = $('#statusFilter').value;
   const category = $('#categoryFilter').value;
-  return store[currentType].filter((item) => (!query || `${item.title} ${item.summary} ${item.category}`.toLowerCase().includes(query)) && (status === 'all' || item.status === status) && (category === 'all' || item.category === category));
+  return store[currentType].filter((item) => {
+    const matchesStatus=status==='all'||item.status===status||(status==='published'&&Boolean(item.publishedSnapshot));
+    return (!query || `${item.title||''} ${item.summary||''} ${item.category||''}`.toLowerCase().includes(query))&&matchesStatus&&(category==='all'||item.category===category);
+  });
 }
 
 function renderCollection() {
   const items = filteredItems();
-  $('#contentRows').innerHTML = items.map((item) => `<tr>
+  $('#contentRows').innerHTML = items.map((item) => {const hasPendingPublishedRevision=item.status==='draft'&&Boolean(item.publishedSnapshot);const publishAction=item.status==='published'?'Move to draft':hasPendingPublishedRevision?'Publish revision':'Publish';return `<tr>
     <td><input type="checkbox" data-select-id="${item.id}" ${selectedIds.has(item.id) ? 'checked' : ''} aria-label="Select ${escapeHtml(item.title)}"></td>
     <td class="content-title"><b>${escapeHtml(item.title)}</b><small>${item.file ? `Attachment: ${escapeHtml(item.file.name)}` : escapeHtml(item.summary || 'No summary')}</small></td>
-    <td>${escapeHtml(item.category || '�')}</td><td>${formatDate(item.updatedAt || item.date)}</td>
-    <td><span class="status-pill ${item.status === 'draft' ? 'draft' : ''}">${escapeHtml(item.status)}</span></td>
-    <td><div class="row-actions"><button type="button" data-edit-id="${item.id}" aria-label="Edit">?</button><button type="button" data-toggle-id="${item.id}" aria-label="Toggle publish status">${item.status === 'published' ? '?' : '?'}</button></div></td>
-  </tr>`).join('');
+    <td>${escapeHtml(item.category || '—')}</td><td>${formatDate(item.updatedAt || item.date)}</td>
+    <td><span class="status-pill ${item.status === 'draft' ? 'draft' : ''}">${hasPendingPublishedRevision?'Live · revision draft':escapeHtml(item.status)}</span></td>
+    <td><div class="row-actions"><button type="button" data-edit-id="${item.id}" aria-label="Edit ${escapeHtml(item.title)}">Edit</button><button type="button" data-toggle-id="${item.id}" aria-label="${publishAction} ${escapeHtml(item.title)}">${publishAction}</button><button class="row-delete" type="button" data-delete-id="${item.id}" aria-label="Delete ${escapeHtml(item.title)}">− Delete</button></div></td>
+  </tr>`}).join('');
   $('#tableEmpty').classList.toggle('show', items.length === 0);
   $('.content-table').style.display = items.length ? 'table' : 'none';
   $$('[data-select-id]').forEach((checkbox) => checkbox.addEventListener('change', () => { checkbox.checked ? selectedIds.add(checkbox.dataset.selectId) : selectedIds.delete(checkbox.dataset.selectId); updateBulkBar(); }));
   $$('[data-edit-id]').forEach((button) => button.addEventListener('click', () => openContentDrawer(currentType, button.dataset.editId)));
+  $$('[data-delete-id]').forEach((button)=>button.addEventListener('click',async()=>{
+    const item=store[currentType].find((entry)=>entry.id===button.dataset.deleteId);
+    if(!item||!confirm(`Delete “${item.title}” permanently?`))return;
+    try{if(currentType==='placements')await placementService.remove(item.id);else await contentService.remove(item.id);store[currentType]=store[currentType].filter((entry)=>entry.id!==item.id);updateDashboard();updateCounts();renderCollection();showToast('Content deleted.')}catch(error){showToast(error.message)}
+  }));
   $$('[data-toggle-id]').forEach((button) => button.addEventListener('click', async () => {
     const item = store[currentType].find((entry) => entry.id === button.dataset.toggleId);
     const status=item.status==='published'?'draft':'published';
@@ -230,7 +332,7 @@ function openContentDrawer(type, id = '') {
   $('#placementFields').hidden = !isPlacement;
   $('#contentTitle').required = !isPlacement;
   $('#placementYear').required = isPlacement;
-  $('#placementYear').value = item?.academicYear || (item?.title || '').replace(/^Placement\s+/i, '').replace(/�/g, '-');
+  $('#placementYear').value = item?.academicYear || (item?.title || '').replace(/^Placement\s+/i, '').replace(/—/g, '-');
   $('#placementSheetUrl').value = item?.sheetUrl || '';
   const placementSource=item?.sourceType||(item?.document?'pdf':'link');
   const sourceInput=document.querySelector(`input[name="placementSource"][value="${placementSource}"]`);
@@ -243,24 +345,26 @@ function openContentDrawer(type, id = '') {
   $('#contentBody').value = item?.body || '';
   const summaryLabel = $('#contentSummary').closest('label').querySelector('span');
   const bodyLabel = $('#contentBody').closest('label').querySelector('span');
-  summaryLabel.innerHTML = isNotice ? 'Short description <b>*</b>' : 'Summary';
-  bodyLabel.innerHTML = isNotice ? 'Long description <b>*</b>' : 'Full content';
-  $('#contentSummary').required = isNotice;
+  summaryLabel.textContent = isNotice ? 'Short description (optional)' : 'Summary';
+  bodyLabel.textContent = isNotice ? 'Long description (optional)' : 'Full content';
+  $('#contentSummary').required = false;
   $('#contentSummary').maxLength = isNotice ? 240 : 400;
-  $('#contentSummary').placeholder = isNotice ? 'Brief text shown in the homepage notice ticker' : 'Short summary for cards and search results';
-  $('#contentBody').required = isNotice;
-  $('#contentBody').placeholder = isNotice ? 'Complete notice details shown in the notice archive' : 'Write the complete content here�';
-  $('#contentFeatured').checked = Boolean(item?.featured);
+  $('#contentSummary').placeholder = isNotice ? 'Optional — the title is used when left empty' : 'Short summary for cards and search results';
+  $('#contentBody').required = false;
+  $('#contentBody').placeholder = isNotice ? 'Optional — the title is used when left empty' : 'Write the complete content here—';
+  $('#contentFeatured').checked = isNotice ? item?.showInTicker !== false : Boolean(item?.featured);
+  $('.feature-check strong').textContent = isNotice ? 'Show in homepage ticker' : 'Feature this content';
+  $('.feature-check small').textContent = isNotice ? 'Display this published notice in the announcement strip at the top of the homepage.' : 'Give this item priority on relevant public pages.';
   pendingFile = item?.file || null;
   const uploadRules = {
-    notices: { accept: 'application/pdf', help: 'Official notice PDF � Maximum 10 MB' },
-    events: { accept: 'image/jpeg,image/png,image/webp,application/pdf', help: 'Event image or PDF � Maximum 2 MB in this prototype' },
-    documents: { accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv', help: 'PDF, Word, Excel or CSV � Maximum 2 MB' }
+    notices: { accept: 'application/pdf,image/jpeg,image/png', help: 'Official PDF, JPEG or PNG — Maximum 10 MB' },
+    events: { accept: 'image/jpeg,image/png,image/webp,application/pdf', help: 'Event image or PDF — Maximum 2 MB' },
+    documents: { accept: '.pdf,.doc,.docx,.xls,.xlsx,.csv', help: 'PDF, Word, Excel or CSV — Maximum 2 MB' }
   };
-  const uploadRule = uploadRules[type] || { accept: '', help: 'Click to choose a file � Maximum 2 MB in this prototype' };
+  const uploadRule = uploadRules[type] || { accept: '', help: 'Click to choose a file — Maximum 2 MB' };
   $('#contentFile').accept = uploadRule.accept;
   $('#uploadHelp').textContent = uploadRule.help;
-  $('#uploadPermissionText').textContent = isNotice ? 'The administrator and faculty granted Notice upload access can attach a PDF. Only the administrator can publish it.' : ADMIN_UPLOAD_COLLECTIONS.has(type) ? `Only the website administrator can upload ${config.title.toLowerCase()}.` : 'Only website administrators can upload this attachment.';
+  $('#uploadPermissionText').textContent = isNotice ? 'The administrator and faculty granted Notice upload access can attach a PDF, JPEG or PNG. Only the administrator can publish it.' : ADMIN_UPLOAD_COLLECTIONS.has(type) ? `Only the website administrator can upload ${config.title.toLowerCase()}.` : 'Only website administrators can upload this attachment.';
   $('#deleteCurrent').hidden = !item;
   renderAttachedFile();
   $('#editorDrawer').classList.add('open');
@@ -287,14 +391,14 @@ function setPlacementSource(source){
 function renderPlacementPdf(){
   const box=$('#placementPdfName');
   box.hidden=!pendingPlacementPdf;
-  box.innerHTML=pendingPlacementPdf?`<strong>${escapeHtml(pendingPlacementPdf.name)}</strong> � ${Math.ceil(pendingPlacementPdf.size/1024)} KB <button type="button" id="removePlacementPdf">Remove</button>`:'';
+  box.innerHTML=pendingPlacementPdf?`<strong>${escapeHtml(pendingPlacementPdf.name)}</strong> — ${Math.ceil(pendingPlacementPdf.size/1024)} KB <button type="button" id="removePlacementPdf">Remove</button>`:'';
   $('#removePlacementPdf')?.addEventListener('click',()=>{pendingPlacementPdf=null;$('#placementPdfInput').value='';renderPlacementPdf()});
 }
 
 function renderAttachedFile() {
   const box = $('#attachedFile');
   box.hidden = !pendingFile;
-  box.innerHTML = pendingFile ? `<strong>${escapeHtml(pendingFile.name)}</strong> � ${Math.ceil(pendingFile.size / 1024)} KB <button type="button" id="removeAttached">Remove</button>` : '';
+  box.innerHTML = pendingFile ? `<strong>${escapeHtml(pendingFile.name)}</strong> — ${Math.ceil(pendingFile.size / 1024)} KB <button type="button" id="removeAttached">Remove</button>` : '';
   $('#removeAttached')?.addEventListener('click', () => { pendingFile = null; renderAttachedFile(); });
 }
 
@@ -302,7 +406,7 @@ function readUpload(file, callback) {
   if (!requireAdministrator('upload files')) return;
   if (!file) return;
   const limit = currentType === 'notices' ? 10 : 2;
-  if (currentType === 'notices' && file.type !== 'application/pdf') { showToast('Notice attachments must be PDF files.'); return; }
+  if (currentType === 'notices' && !['application/pdf','image/jpeg','image/png'].includes(file.type)) { showToast('Notice attachments must be PDF, JPEG or PNG files.'); return; }
   if (file.size > limit * 1024 * 1024) { showToast(`Files in this section must be ${limit} MB or smaller.`); return; }
   const reader = new FileReader();
   reader.onload = () => callback({ name:file.name, type:file.type || 'application/octet-stream', size:file.size, data:reader.result, raw:file });
@@ -315,12 +419,12 @@ async function saveContent(status) {
   if (!$('#contentForm').reportValidity()) return;
   if (currentType === 'media' && !pendingFile) { showToast('Choose a file before saving a media asset.'); return; }
   if (currentType === 'documents' && !pendingFile) { showToast('Choose a document before saving this entry.'); return; }
-  if (currentType === 'notices' && !pendingFile) { showToast('Choose the official notice PDF before saving.'); return; }
+  if (currentType === 'notices' && !pendingFile) { showToast('Choose the official notice attachment before saving.'); return; }
   const id = $('#editingId').value;
   const existing = id ? store[currentType].find((entry) => entry.id === id) : null;
   let entry;
   if (currentType === 'placements') {
-    const academicYear = $('#placementYear').value.trim().replace(/[��]/g, '-');
+    const academicYear = $('#placementYear').value.trim().replace(/[——]/g, '-');
     if (!/^\d{4}-\d{2}$/.test(academicYear)) { showToast('Enter the academic year in YYYY-YY format, for example 2025-26.'); $('#placementYear').focus(); return; }
     const [startYear, shortEndYear] = academicYear.split('-');
     if ((Number(startYear) + 1) % 100 !== Number(shortEndYear)) { showToast('The placement year must cover consecutive years, for example 2025-26.'); $('#placementYear').focus(); return; }
@@ -331,13 +435,13 @@ async function saveContent(status) {
       try { sheetUrl = new URL($('#placementSheetUrl').value.trim()).href; } catch { showToast('Enter a valid public sheet link.'); $('#placementSheetUrl').focus(); return; }
       if (!sheetUrl.startsWith('https://')) { showToast('The public sheet link must begin with https://.'); $('#placementSheetUrl').focus(); return; }
     }else if(!pendingPlacementPdf){showToast('Choose a placement PDF before saving.');return}
-    const displayYear = `${startYear}�${shortEndYear}`;
+    const displayYear = `${startYear}—${shortEndYear}`;
     entry = { id: id || crypto.randomUUID(), title: `Placement ${displayYear}`, academicYear, sourceType, sheetUrl, category: sourceType==='pdf'?'Placement PDF':'Placement sheet', date: '', summary: `Open the placement ${sourceType==='pdf'?'PDF':'sheet'} for academic year ${displayYear}.`, body: '', featured: false, file:sourceType==='pdf'?pendingPlacementPdf:null, status, updatedAt: new Date().toISOString() };
   } else {
     entry = {
       id: id || crypto.randomUUID(), title: $('#contentTitle').value.trim(), category: $('#contentCategory').value,
       date: $('#contentDate').value, summary: $('#contentSummary').value.trim(), body: $('#contentBody').value.trim(),
-      featured: $('#contentFeatured').checked, file: pendingFile, status, updatedAt: new Date().toISOString()
+      featured: currentType==='notices'?false:$('#contentFeatured').checked, showInTicker:currentType==='notices'?$('#contentFeatured').checked:undefined, file: pendingFile, status, updatedAt: new Date().toISOString()
     };
   }
   if(currentType==='placements'){
@@ -358,13 +462,17 @@ async function saveContent(status) {
   else{
     try{
       let asset=existing?.asset||null;
+      let noticeFileId='';
       if(pendingFile?.raw)asset=currentType==='notices'
-        ? await uploadService.uploadNoticePdf(pendingFile.raw)
+        ? await uploadService.uploadNoticeAttachment(pendingFile.raw)
         : pendingFile.type.startsWith('image/')
           ? await uploadService.uploadImage(pendingFile.raw,currentType)
           : await uploadService.upload(pendingFile.raw);
       const payload={type:API_CONTENT_TYPES[currentType],title:entry.title,category:entry.category,summary:entry.summary,body:entry.body,displayDate:entry.date||undefined,featured:entry.featured,status};
-      if(asset)payload.asset=asset;
+      if(currentType==='notices')payload.showInTicker=entry.showInTicker;
+      if(currentType==='notices'&&pendingFile?.raw)noticeFileId=asset.id||asset.key;
+      if(noticeFileId)payload.noticeFileId=noticeFileId;
+      else if(currentType!=='notices'&&asset)payload.asset=asset;
       const saved=id?await contentService.update(id,payload):await contentService.create(payload);entry=flattenContent(saved);
     }catch(error){showToast(error.message);return}
   }
@@ -381,8 +489,12 @@ async function bulkSet(status) {
 }
 
 function renderFaculty() {
-  const profiles = getFacultyProfiles();
-  $('#facultyGrid').innerHTML = profiles.map((profile) => `<article class="faculty-card"><div class="faculty-card-top"><div class="faculty-photo" style="${profile.photo ? `background-image:url('${facultyPhotoUrl(profile.photo,134)}')` : ''}">${profile.photo ? '' : initials(profile.fullName || profile.facultyId)}</div><span class="faculty-state ${profile.isPublished ? 'published' : ''}">${profile.reviewStatus === 'submitted' ? 'Review needed' : profile.isPublished ? 'Published' : 'Profile incomplete'}</span></div><h3>${escapeHtml(profile.fullName || 'Profile not completed')}</h3><p>${escapeHtml(profile.designation || `Faculty ID: ${profile.facultyId}`)}</p><span>${escapeHtml(profile.department || profile.email || 'Waiting for faculty details')}</span><footer><small>Updated ${formatDate(profile.updatedAt)}</small><div class="faculty-card-actions"><button type="button" data-edit-faculty="${encodeURIComponent(profile.facultyId)}">Review</button>${profile.isPublished?`<a href="faculty-profile?facultyId=${encodeURIComponent(profile.facultyId)}" target="_blank" rel="noopener">View published ?</a>`:''}</div></footer></article>`).join('');
+  const profiles = getFacultyProfiles().map((profile)=>({...profile,safePhoto:facultyPhotoUrl(profile.photo,134)}));
+  const grid=$('#facultyGrid');
+  grid.innerHTML = profiles.map((profile,index) => `<article class="faculty-card"><div class="faculty-card-top"><div class="faculty-photo" data-faculty-photo-index="${index}">${profile.safePhoto ? '' : escapeHtml(initials(profile.fullName || profile.facultyId))}</div><span class="faculty-state ${profile.isPublished ? 'published' : ''}">${profile.reviewStatus === 'submitted' ? 'Review needed' : profile.isPublished ? 'Published' : 'Profile incomplete'}</span></div><h3>${escapeHtml(profile.fullName || 'Profile not completed')}</h3><p>${escapeHtml(profile.designation || `Faculty ID: ${profile.facultyId}`)}</p><span>${escapeHtml(profile.department || profile.email || 'Waiting for faculty details')}</span><footer><small>Updated ${formatDate(profile.updatedAt)}</small><div class="faculty-card-actions"><button type="button" data-edit-faculty="${encodeURIComponent(profile.facultyId)}">Review</button>${profile.isPublished?`<a href="faculty-profile.html?facultyId=${encodeURIComponent(profile.facultyId)}" target="_blank" rel="noopener">View published →</a>`:''}</div></footer></article>`).join('');
+  profiles.forEach((profile,index)=>{
+    if(profile.safePhoto)$(`[data-faculty-photo-index="${index}"]`,grid).style.backgroundImage=`url("${profile.safePhoto}")`;
+  });
   $('#facultyEmpty').classList.toggle('show', profiles.length === 0);
   $$('[data-edit-faculty]').forEach((button) => button.addEventListener('click', () => openFacultyDrawer(decodeURIComponent(button.dataset.editFaculty))));
 }
@@ -393,15 +505,16 @@ function openFacultyDrawer(facultyId = '') {
   $('#facultyEmailKey').value = profile.id||'';
   $('#facultyIdReview').value = profile.facultyId || facultyId;
   $('#adminReviewName').textContent=profile.fullName||'Faculty member';
-  $('#adminReviewEmployeeNumber').textContent=profile.facultyId||'�';
-  $('#adminReviewDesignation').textContent=profile.designation||'�';
-  $('#adminReviewEmail').textContent=profile.email||'�';
+  $('#adminReviewEmployeeNumber').textContent=profile.facultyId||'—';
+  $('#adminReviewDesignation').textContent=profile.designation||'—';
+  $('#adminReviewEmail').textContent=profile.email||'—';
   $('#adminReviewPhone').textContent=profile.phone||'Not provided';
-  $('#adminReviewExperience').textContent=profile.experienceYears===''||profile.experienceYears==null?'�':`${profile.experienceYears} years`;
-  $('#adminReviewQualification').textContent=profile.highestQualification||'�';
-  $('#adminReviewSpecialisation').textContent=profile.areaOfSpecialisation||'�';
-  const photo=$('#adminFacultyPhoto');photo.style.backgroundImage=profile.photo?`url("${facultyPhotoUrl(profile.photo,184)}")`:'';
-  $('#adminFacultyInitials').textContent=initials(profile.fullName||profile.facultyId);$('#adminFacultyInitials').style.visibility=profile.photo?'hidden':'';
+  $('#adminReviewExperience').textContent=profile.experienceYears===''||profile.experienceYears==null?'—':`${profile.experienceYears} years`;
+  $('#adminReviewQualification').textContent=profile.highestQualification||'—';
+  $('#adminReviewSpecialisation').textContent=profile.areaOfSpecialisation||'—';
+  const safePhoto=facultyPhotoUrl(profile.photo,184);
+  const photo=$('#adminFacultyPhoto');photo.style.backgroundImage=safePhoto?`url("${safePhoto}")`:'';
+  $('#adminFacultyInitials').textContent=initials(profile.fullName||profile.facultyId);$('#adminFacultyInitials').style.visibility=safePhoto?'hidden':'';
   $('#facultySubmissionData').innerHTML = profile.reviewStatus === 'submitted' ? `<strong>Faculty submission waiting</strong><br>Submitted ${formatDate(profile.submittedAt, true)}. Confirm the details, then approve and publish.` : profile.reviewStatus==='approved'&&profile.isPublished?'This profile is already approved and published.':profile.hasApprovedSnapshot?'<strong>Legacy profile is incomplete.</strong><br>The faculty member must complete all required fields, upload a photo, and submit it for approval again.':'Waiting for the faculty member to complete and submit this profile.';
   $('#approveFacultyProfile').disabled=profile.reviewStatus!=='submitted';
   $('#facultyDrawer').classList.add('open'); $('#facultyDrawer').setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll');
@@ -436,30 +549,12 @@ async function deleteFacultyProfile(){
   finally{button.disabled=false}
 }
 
-function setupHomepage() {
-  const defaults = { eyebrow:'Computer Science & Engineering � SGSITS', headline:'Think in systems. Build with purpose. Shape what�s next.', intro:'A department for rigorous computer science, hands-on engineering, meaningful research and technology that responds to industry and society.', button:'Explore CSE programmes', link:'#programmes', sections:{ about:true, programmes:true, departments:true, events:true, notices:true, research:true, placements:true, admissions:true, campus:true } };
-  const home = loadJson(HOME_KEY, defaults); home.sections = { ...defaults.sections, ...(home.sections || {}) };
-  $('#heroEyebrow').value = home.eyebrow; $('#heroHeadline').value = home.headline; $('#heroIntro').value = home.intro; $('#heroButton').value = home.button; $('#heroLink').value = home.link;
-  $('#sectionToggles').innerHTML = Object.entries(home.sections).map(([key,value]) => `<div class="toggle-row"><div><b>${key[0].toUpperCase()+key.slice(1)}</b><small>Show this section on the public homepage</small></div><label class="switch"><input type="checkbox" data-section="${key}" ${value ? 'checked' : ''}><span></span></label></div>`).join('');
-}
-
-function saveHomepage() {
-  const sections = {}; $$('[data-section]').forEach((input) => { sections[input.dataset.section] = input.checked; });
-  localStorage.setItem(HOME_KEY, JSON.stringify({ eyebrow:$('#heroEyebrow').value, headline:$('#heroHeadline').value, intro:$('#heroIntro').value, button:$('#heroButton').value, link:$('#heroLink').value, sections }));
-  showToast('Homepage settings saved.');
-}
-
-function setupSettings() {
-  const settings = loadJson(SETTINGS_KEY, { name:'Shri G. S. Institute of Technology & Science', email:'director@sgsits.ac.in', phone:'+91 731 2544415', address:'23, Sir M. Visvesvaraya Marg, Indore, Madhya Pradesh 452003' });
-  $('#settingName').value=settings.name; $('#settingEmail').value=settings.email; $('#settingPhone').value=settings.phone; $('#settingAddress').value=settings.address;
-}
-
 function renderUserAccounts() {
   const accounts = getFacultyAccounts();
   $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => {
     const canUploadNotices=account.permissions?.includes('notice_upload');
-    return `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member${canUploadNotices?'<small>Notice uploader</small>':''}</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span class="user-access-actions"><button type="button" data-notice-access="${escapeHtml(account.facultyId)}" data-allowed="${!canUploadNotices}">${canUploadNotices?'Remove notice access':'Allow notices'}</button><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`;
-  }).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>�</span><span>�</span><span>�</span></div>';
+    return `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member${canUploadNotices?'<small>Notice uploader</small>':''}</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span class="user-access-actions"><button type="button" data-account-status="${escapeHtml(account.facultyId)}" data-status="${account.status==='inactive'?'active':'inactive'}">${account.status==='inactive'?'Activate':'Deactivate'}</button><button type="button" data-notice-access="${escapeHtml(account.facultyId)}" data-allowed="${!canUploadNotices}">${canUploadNotices?'Remove notice access':'Allow notices'}</button><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`;
+  }).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
 }
 
 async function setFacultyNoticeAccess(facultyId,allowed){
@@ -550,7 +645,7 @@ async function createFacultyAccount() {
   if(firstInvalid){firstInvalid.focus();return}
   fields.facultyId=fields.facultyId.toUpperCase();
   const label=submit.textContent;
-  submit.disabled=true;submit.textContent='Creating login�';
+  submit.disabled=true;submit.textContent='Creating login—';
   let created=false;
   try{
     await authService.createFaculty(fields);
@@ -571,25 +666,33 @@ async function createFacultyAccount() {
   }catch{showToast('Faculty login created. Reload the page to refresh the faculty list.')}
 }
 
-function exportData() {
-  const faculty = getFacultyProfiles().map(({storageKey,...profile}) => profile);
-  const payload = JSON.stringify({ exportedAt:new Date().toISOString(), content:store, homepage:JSON.parse(localStorage.getItem(HOME_KEY)||'null'), settings:JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null'), faculty }, null, 2);
-  const blob = new Blob([payload], { type:'application/json' }); const link = document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=`sgsits-cms-backup-${new Date().toISOString().slice(0,10)}.json`; link.click(); URL.revokeObjectURL(link.href); showToast('CMS data exported.');
-}
-
 function openCreateMenu() { $('#createMenu').classList.add('open'); $('#createMenu').setAttribute('aria-hidden','false'); document.body.classList.add('no-scroll'); }
 function closeCreateMenu() { $('#createMenu').classList.remove('open'); $('#createMenu').setAttribute('aria-hidden','true'); document.body.classList.remove('no-scroll'); }
 function openSidebar(){ $('#cmsSidebar').classList.add('open'); $('#sidebarShade').classList.add('open'); document.body.classList.add('no-scroll'); }
 function closeSidebar(){ $('#cmsSidebar').classList.remove('open'); $('#sidebarShade').classList.remove('open'); document.body.classList.remove('no-scroll'); }
 
 const now = new Date(); $('#todayDate').textContent = now.getDate(); $('#todayMonth').textContent = new Intl.DateTimeFormat('en-IN',{month:'short',year:'numeric'}).format(now);
-updateCounts(); updateDashboard(); setupHomepage(); setupSettings(); renderUserAccounts();
-hydrateMongoData();
+updateCounts(); updateDashboard(); renderUserAccounts();
+verifyAdministratorSession();
 
 $$('[data-view]').forEach((button)=>button.addEventListener('click',()=>showView(button.dataset.view)));
-$$('[data-view-jump]').forEach((button)=>button.addEventListener('click',()=>showView(button.dataset.viewJump)));
-$$('[data-quick-create]').forEach((button)=>button.addEventListener('click',()=>openContentDrawer(button.dataset.quickCreate)));
+$$('[data-admin-nav-toggle]').forEach((button)=>button.addEventListener('click',()=>{
+  const group=button.closest('[data-admin-nav-group]');
+  const willOpen=!group.classList.contains('open');
+  group.classList.toggle('open',willOpen);
+  button.setAttribute('aria-expanded',String(willOpen));
+}));
 $('#globalCreate').addEventListener('click',openCreateMenu); $('#globalSearch').addEventListener('click',()=>{showView('notices');setTimeout(()=>$('#collectionSearch').focus(),50)}); $('#viewSite').addEventListener('click',()=>window.open('../index.html','_blank','noopener'));
+$('#dashboardPublishNotice').addEventListener('click',()=>openContentDrawer('notices'));
+$('#dashboardManageNotices').addEventListener('click',()=>showView('notices'));
+window.addEventListener('admin:manage-research-records',(event)=>{
+  showView('documents');
+  const category=event.detail?.category;
+  if(category&&typeConfig.documents.categories.includes(category)){$('#categoryFilter').value=category;renderCollection()}
+});
+$('#homepageSettingsForm').addEventListener('submit',saveHomepageSettings);
+$('#addHomepageOutcome').addEventListener('click',addHomepageOutcome);
+$('#homepageOutcomeEditors').addEventListener('click',(event)=>{const button=event.target.closest('[data-remove-homepage-outcome]');if(!button)return;button.closest('[data-homepage-outcome]')?.remove()});
 $$('[data-create-type]').forEach((button)=>button.addEventListener('click',()=>{closeCreateMenu();openContentDrawer(button.dataset.createType)})); $$('[data-close-create-menu]').forEach((button)=>button.addEventListener('click',closeCreateMenu));
 $('#collectionCreate').addEventListener('click',()=>openContentDrawer(currentType)); $('#emptyCreate').addEventListener('click',()=>openContentDrawer(currentType));
 $('#collectionSearch').addEventListener('input',renderCollection); $('#statusFilter').addEventListener('change',renderCollection); $('#categoryFilter').addEventListener('change',renderCollection);
@@ -602,13 +705,14 @@ $('#contentForm').addEventListener('submit',(event)=>{event.preventDefault();sav
 $('#addFaculty').addEventListener('click',openFacultyAccountModal); $('#facultyEmptyAdd').addEventListener('click',openFacultyAccountModal); $$('[data-close-faculty]').forEach((button)=>button.addEventListener('click',closeFacultyDrawer));
 $('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();approveFacultyProfile()});
 $('#deleteFacultyProfile').addEventListener('click',deleteFacultyProfile);
-$('#saveHomepage').addEventListener('click',saveHomepage); $('#saveSettings').addEventListener('click',()=>{localStorage.setItem(SETTINGS_KEY,JSON.stringify({name:$('#settingName').value,email:$('#settingEmail').value,phone:$('#settingPhone').value,address:$('#settingAddress').value}));showToast('Website settings saved.')}); $('#exportData').addEventListener('click',exportData);
 $('#inviteUser').addEventListener('click',openFacultyAccountModal); $('#facultyAccountForm').addEventListener('submit',async(event)=>{event.preventDefault();await createFacultyAccount()}); $$('[data-close-account]').forEach((button)=>button.addEventListener('click',closeFacultyAccountModal)); $('#toggleFacultyPassword').addEventListener('click',()=>{const input=$('#newFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleFacultyPassword').textContent=input.type==='password'?'Show':'Hide'}); $('#openSidebar').addEventListener('click',openSidebar); $('#closeSidebar').addEventListener('click',closeSidebar); $('#sidebarShade').addEventListener('click',closeSidebar);
 $('#facultyAccountRows').addEventListener('click',(event)=>{
   const resetButton=event.target.closest('[data-reset-faculty-password]');
   if(resetButton)openFacultyPasswordReset(resetButton.dataset.resetFacultyPassword);
   const accessButton=event.target.closest('[data-notice-access]');
   if(accessButton)setFacultyNoticeAccess(accessButton.dataset.noticeAccess,accessButton.dataset.allowed==='true');
+  const statusButton=event.target.closest('[data-account-status]');
+  if(statusButton)authService.setFacultyStatus(statusButton.dataset.accountStatus,statusButton.dataset.status).then((updated)=>{const account=facultyAccounts.find((item)=>item.facultyId===updated.facultyId);if(account)account.status=updated.status;renderUserAccounts();showToast(`${updated.facultyId} is now ${updated.status}.`)}).catch((error)=>showToast(error.message));
 });
 $('#facultyPasswordResetForm').addEventListener('submit',async(event)=>{event.preventDefault();await resetFacultyPassword()});
 $$('[data-close-password-reset]').forEach((button)=>button.addEventListener('click',closeFacultyPasswordReset));
@@ -616,7 +720,7 @@ $('#toggleResetFacultyPassword').addEventListener('click',()=>{const input=$('#r
 $('#adminLogout').addEventListener('click',async(event)=>{
   const button=event.currentTarget;
   button.disabled=true;
-  button.textContent='Signing out�';
+  button.textContent='Signing out—';
   try {
     await authService.logout();
   } catch {

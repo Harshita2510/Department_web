@@ -19,10 +19,16 @@ const body=baseBody.superRefine((value,context)=>{
   if(value.resourceType==='academic-calendar'&&(value.programme!=='institute-wide'||value.semester!=null))context.addIssue({code:'custom',message:'Calendar must be institute-wide without semester'});
   if(value.resourceType!=='academic-calendar'&&(value.programme==='institute-wide'||!value.semester))context.addIssue({code:'custom',message:'Programme and semester are required'});
   if(value.resourceType!=='timetable'&&!value.documentUrl)context.addIssue({code:'custom',message:'A document URL is required'});
-  if(value.programme==='pg-cse'&&value.semester>4)context.addIssue({code:'custom',message:'PG CSE has only four semesters'});
+  if(value.programme==='pg-cse'&&value.semester>4)context.addIssue({code:'custom',message:'PG CE has only four semesters'});
 });
 
+const partialBody=baseBody.partial().superRefine((value,context)=>{
+  if(value.resourceType==='academic-calendar'&&value.programme!==undefined&&value.programme!=='institute-wide')context.addIssue({code:'custom',message:'Calendar must be institute-wide'});
+  if(value.resourceType==='academic-calendar'&&value.semester!==undefined&&value.semester!==null)context.addIssue({code:'custom',message:'Calendar cannot have a semester'});
+  if(value.programme==='pg-cse'&&value.semester!==undefined&&value.semester!==null&&value.semester>4)context.addIssue({code:'custom',message:'PG CE has only four semesters'});
+}).refine((value)=>Object.keys(value).length>0,'At least one field is required');
+
 export const createAcademicDocumentSchema=z.object({body});
-export const updateAcademicDocumentSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i)}),body:baseBody.partial().refine((value)=>Object.keys(value).length>0,'At least one field is required')});
+export const updateAcademicDocumentSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i)}),body:partialBody});
 export const academicDocumentIdSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i)})});
-export const timetableSlotParamsSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i),slot:z.enum(['classTable','quiz','mst1','mst2','mst3','endSemester'])})});
+export const timetableSlotParamsSchema=z.object({params:z.object({id:z.string().regex(/^[a-f\d]{24}$/i),slot:z.enum(['classTable','quiz','practical','mst1','mst2','mst3','endSemester'])})});

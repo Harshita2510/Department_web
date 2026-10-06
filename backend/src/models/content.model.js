@@ -6,10 +6,16 @@ const assetSchema = new mongoose.Schema({
   url:String, originalUrl:String, name:String, mimeType:String, size:Number,
   width:Number, height:Number, format:String
 }, { _id: false });
+const publishedNoticeSnapshotSchema = new mongoose.Schema({
+  title: { type:String, required:true, trim:true }, category:String, summary:String, body:String,
+  displayDate:Date, featured:{ type:Boolean, default:false }, showInTicker:{ type:Boolean, default:true }, asset:{ type:assetSchema, required:true }
+}, { _id:false });
 const contentSchema = new mongoose.Schema({
   type: { type: String, enum: CONTENT_TYPES, required: true, index: true },
   title: { type: String, required: true, trim: true }, category: String, summary: String, body: String,
-  displayDate: Date, featured: { type: Boolean, default: false }, asset: assetSchema,
+  displayDate: Date, featured: { type: Boolean, default: false }, showInTicker:{ type:Boolean, default:true }, asset: assetSchema,
+  // The public copy is independent from a faculty member's pending revision.
+  publishedSnapshot: { type:publishedNoticeSnapshotSchema, default:null },
   status: { type: String, enum: PUBLICATION_STATUS, default: 'draft', index: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, publishedAt: Date

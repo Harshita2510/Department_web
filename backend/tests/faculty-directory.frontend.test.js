@@ -13,5 +13,5 @@ test('faculty directory is a separate page and is not rendered on the homepage',
   assert.match(page,/id="facultyDirectory"/);
   assert.match(page,/id="facultySearch"/);
   assert.match(script,/facultyService\.listPublic\(term\)/);
-  assert.match(script,/faculty-profile\?facultyId=/);
+  assert.match(script,/faculty-profile\.html\?facultyId=/);
 });

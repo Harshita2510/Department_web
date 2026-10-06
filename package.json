@@ -9,7 +9,9 @@
   "scripts": {
     "frontend": "serve frontend -l 4173 --no-clipboard",
     "backend": "npm --workspace backend run dev",
-    "check": "npm --workspace backend run check"
+    "load-test:800": "npm --workspace backend run load-test:public -- --visitors=800",
+    "load-test:k6": "k6 run load-tests/production-journey.k6.js",
+    "check": "npm --workspace backend run check && find frontend/assets/js -name '*.js' -print0 | xargs -0 -n1 node --check"
   },
   "devDependencies": {
     "serve": "^14.2.4"

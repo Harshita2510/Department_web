@@ -20,6 +20,8 @@ const academicSubjectSchema = new mongoose.Schema({
   sortOrder: { type:Number, min:0, max:999, default:0 },
   editors: [{ type:mongoose.Schema.Types.ObjectId, ref:'User' }],
   syllabus: { type:syllabusAssetSchema, default:null },
+  // Last administrator-approved asset; remains public during a pending replacement.
+  publishedSyllabus: { type:syllabusAssetSchema, default:null },
   syllabusStatus: { type:String, enum:['missing','draft','submitted','published','changes_requested'], default:'missing', index:true },
   uploadedBy: { type:mongoose.Schema.Types.ObjectId, ref:'User' },
   submittedAt:Date, approvedBy:{ type:mongoose.Schema.Types.ObjectId, ref:'User' }, publishedAt:Date,
@@ -34,7 +36,7 @@ academicSubjectSchema.index({ programme:1, semester:1, active:1, sortOrder:1, na
 
 academicSubjectSchema.pre('validate', function validateProgramme(next) {
   this.normalizedName=this.name.trim().toLowerCase().replace(/\s+/g,' ');
-  if(this.programme==='pg-cse'&&this.semester>4)return next(new Error('PG CSE has only four semesters'));
+  if(this.programme==='pg-cse'&&this.semester>4)return next(new Error('PG CE has only four semesters'));
   next();
 });
 

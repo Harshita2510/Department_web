@@ -4,8 +4,9 @@ import { ROLES } from '../constants/roles.js';
 import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { deleteCloudinaryImage,uploadTimetableAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
+import { setPublicCache } from '../utils/public-cache.js';
 
-const timetableSlots=new Set(['classTable','quiz','mst1','mst2','mst3','endSemester']);
+const timetableSlots=new Set(['classTable','quiz','practical','mst1','mst2','mst3','endSemester']);
 const safeFolder=(item,slot)=>`${item.programme}/semester-${item.semester}/${item.academicYear||'current'}/${slot}`;
 
 function verifySignature(file){
@@ -17,44 +18,69 @@ function verifySignature(file){
   return false;
 }
 
-async function validateEditors(editorIds=[]){
+async function validateEditors(editorIds=[],session){
   if(!editorIds.length)return;
-  const count=await User.countDocuments({_id:{$in:editorIds},role:ROLES.FACULTY,status:'active'});
+  const query=User.countDocuments({_id:{$in:editorIds},role:ROLES.FACULTY,status:'active'});
+  if(session)query.session(session);
+  const count=await query;
   if(count!==new Set(editorIds).size)throw new AppError(400,'Every timetable editor must be an active faculty account');
 }
 
-function publicTimetableFiles(files={}){
-  return Object.fromEntries([...timetableSlots].map((slot)=>[slot,files[slot]?.status==='published'?files[slot]:null]));
+export function publicTimetableFiles(files={}){
+  return Object.fromEntries([...timetableSlots].map((slot)=>{
+    const entry=files[slot];const approved=entry?.publishedAsset||(entry?.status==='published'?entry?.asset:null);
+    if(!approved)return [slot,null];
+    return [slot,{...entry,asset:approved,publishedAsset:undefined,status:'published'}];
+  }));
 }
 
 export async function listPublicAcademicDocuments(request,response){
-  const filter=request.query.type==='timetable'?{resourceType:'timetable'}:{status:'published'};
-  if(request.query.type)filter.resourceType=request.query.type;
+  const query=request.validatedQuery||request.query;
+  const filter=query.type==='timetable'?{resourceType:'timetable'}:{status:'published'};
+  if(query.type)filter.resourceType=query.type;
   const records=await AcademicDocument.find(filter).sort({isCurrent:-1,academicYear:-1,programme:1,semester:1}).select('-createdBy -updatedBy -editors').lean();
   const items=records.map((item)=>item.resourceType==='timetable'?{...item,timetableFiles:publicTimetableFiles(item.timetableFiles)}:item)
     .filter((item)=>item.resourceType!=='timetable'||Object.values(item.timetableFiles).some(Boolean));
-  response.set('Cache-Control','no-store');response.json({success:true,data:items});
+  setPublicCache(response);response.json({success:true,data:items});
 }
 
 export async function listManagedAcademicDocuments(request,response){
+  const query=request.validatedQuery||request.query;
   const filter=request.user.role===ROLES.ADMIN?{}:{editors:request.user.id,resourceType:'timetable'};
-  if(request.query.type)filter.resourceType=request.query.type;
+  if(query.type)filter.resourceType=query.type;
   const items=await AcademicDocument.find(filter).sort({updatedAt:-1}).populate('editors','facultyId email status');
   response.json({success:true,data:items});
 }
 
 export async function createAcademicDocument(request,response){
-  await validateEditors(request.body.editors);
-  if(request.body.resourceType==='academic-calendar'&&request.body.isCurrent)await AcademicDocument.updateMany({resourceType:'academic-calendar',isCurrent:true},{$set:{isCurrent:false}});
-  const item=await AcademicDocument.create({...request.body,createdBy:request.user.id,updatedBy:request.user.id,publishedAt:request.body.status==='published'?new Date():undefined});
+  const session=await AcademicDocument.startSession();let item;
+  try{
+    await session.withTransaction(async()=>{
+      await validateEditors(request.body.editors,session);
+      item=new AcademicDocument({...request.body,createdBy:request.user.id,updatedBy:request.user.id,publishedAt:request.body.status==='published'?new Date():undefined});
+      await item.validate();
+      if(item.resourceType==='academic-calendar'&&item.isCurrent)await AcademicDocument.updateMany({resourceType:'academic-calendar',isCurrent:true},{$set:{isCurrent:false}},{session});
+      await item.save({session});
+    });
+  }finally{await session.endSession();}
   await recordAudit(request,'ACADEMIC_DOCUMENT_CREATED','AcademicDocument',item.id,{resourceType:item.resourceType});response.status(201).json({success:true,data:item});
 }
 
 export async function updateAcademicDocument(request,response){
-  if(request.body.editors)await validateEditors(request.body.editors);
-  if(request.body.resourceType==='academic-calendar'&&request.body.isCurrent)await AcademicDocument.updateMany({_id:{$ne:request.params.id},resourceType:'academic-calendar',isCurrent:true},{$set:{isCurrent:false}});
-  const item=await AcademicDocument.findById(request.params.id);if(!item)throw new AppError(404,'Academic document not found');
-  Object.assign(item,request.body,{updatedBy:request.user.id});if(request.body.status==='published')item.publishedAt=new Date();await item.save();
+  const session=await AcademicDocument.startSession();let item;
+  try{
+    await session.withTransaction(async()=>{
+      item=await AcademicDocument.findById(request.params.id).session(session);
+      if(!item)throw new AppError(404,'Academic document not found');
+      if(request.body.editors)await validateEditors(request.body.editors,session);
+      Object.assign(item,request.body,{updatedBy:request.user.id});
+      // Validate the complete merged state; a partial request cannot bypass cross-field rules.
+      await item.validate();
+      if(item.resourceType==='academic-calendar'&&item.isCurrent)await AcademicDocument.updateMany({_id:{$ne:item._id},resourceType:'academic-calendar',isCurrent:true},{$set:{isCurrent:false}},{session});
+      if(request.body.status==='published'&&item.isModified('status'))item.publishedAt=new Date();
+      await item.save({session});
+    });
+  }finally{await session.endSession();}
   await recordAudit(request,'ACADEMIC_DOCUMENT_UPDATED','AcademicDocument',item.id,{resourceType:item.resourceType});response.json({success:true,data:item});
 }
 
@@ -66,10 +92,12 @@ export async function uploadTimetable(request,response){
   if(!request.file)throw new AppError(400,'Choose a timetable PDF or image');
   if(!verifySignature(request.file))throw new AppError(415,'The uploaded file content does not match its declared type');
   const result=await uploadTimetableAsset(request.file,safeFolder(item,slot));
-  const previous=item.timetableFiles[slot]?.asset?.publicId;const target=item.timetableFiles[slot];
+  const target=item.timetableFiles[slot];
+  if(target.status==='published'&&!target.publishedAsset&&target.asset)target.publishedAsset=target.asset.toObject?.()||target.asset;
+  const previousPending=target.status==='published'?null:target.asset?.publicId;
   target.asset={provider:'cloudinary',publicId:result.public_id,resourceType:result.resource_type,url:result.secure_url,name:request.file.originalname,mimeType:request.file.mimetype,size:result.bytes,width:result.width,height:result.height,format:result.format};
-  target.status=request.user.role===ROLES.ADMIN?'draft':'submitted';target.uploadedBy=request.user.id;target.submittedAt=request.user.role===ROLES.FACULTY?new Date():undefined;target.approvedBy=undefined;target.publishedAt=undefined;
-  item.updatedBy=request.user.id;await item.save();if(previous)await deleteCloudinaryImage(previous).catch(()=>{});
+  target.status=request.user.role===ROLES.ADMIN?'draft':'submitted';target.uploadedBy=request.user.id;target.submittedAt=request.user.role===ROLES.FACULTY?new Date():undefined;target.approvedBy=undefined;
+  item.updatedBy=request.user.id;await item.save();if(previousPending&&previousPending!==target.asset.publicId)await deleteCloudinaryImage(previousPending).catch(()=>{});
   await recordAudit(request,'TIMETABLE_UPLOADED','AcademicDocument',item.id,{slot,status:target.status});response.json({success:true,data:item});
 }
 
@@ -77,24 +105,30 @@ export async function publishTimetable(request,response){
   const slot=request.params.slot;if(!timetableSlots.has(slot))throw new AppError(400,'Unknown timetable category');
   const item=await AcademicDocument.findById(request.params.id);if(!item||item.resourceType!=='timetable')throw new AppError(404,'Timetable record not found');
   const target=item.timetableFiles[slot];if(!target?.asset)throw new AppError(400,'Upload this timetable before publishing');
-  await verifyCloudinaryFileDelivery(target.asset);target.status='published';target.approvedBy=request.user.id;target.publishedAt=new Date();item.updatedBy=request.user.id;await item.save();
+  await verifyCloudinaryFileDelivery(target.asset);
+  const previousApproved=target.publishedAsset?.publicId||(target.status==='published'?target.asset?.publicId:null);
+  target.publishedAsset=target.asset.toObject?.()||target.asset;target.status='published';target.approvedBy=request.user.id;target.publishedAt=new Date();item.updatedBy=request.user.id;await item.save();
+  if(previousApproved&&previousApproved!==target.asset.publicId)await deleteCloudinaryImage(previousApproved).catch(()=>{});
   await recordAudit(request,'TIMETABLE_PUBLISHED','AcademicDocument',item.id,{slot});response.json({success:true,data:item});
 }
 
 export async function deleteTimetableFile(request,response){
   const slot=request.params.slot;if(!timetableSlots.has(slot))throw new AppError(400,'Unknown timetable category');
   const item=await AcademicDocument.findById(request.params.id);if(!item||item.resourceType!=='timetable')throw new AppError(404,'Timetable record not found');
-  const target=item.timetableFiles[slot];if(!target?.asset)throw new AppError(404,'No timetable file is stored in this category');
-  const publicId=target.asset.publicId;
-  target.asset=null;target.status='missing';target.uploadedBy=undefined;target.approvedBy=undefined;target.submittedAt=undefined;target.publishedAt=undefined;
+  const target=item.timetableFiles[slot];if(!target?.asset&&!target?.publishedAsset)throw new AppError(404,'No timetable file is stored in this category');
+  const publicIds=new Set([target.asset?.publicId,target.publishedAsset?.publicId].filter(Boolean));
+  target.asset=null;target.publishedAsset=null;target.status='missing';target.uploadedBy=undefined;target.approvedBy=undefined;target.submittedAt=undefined;target.publishedAt=undefined;
   item.updatedBy=request.user.id;await item.save();
   await recordAudit(request,'TIMETABLE_FILE_DELETED','AcademicDocument',item.id,{slot});
-  await deleteCloudinaryImage(publicId).catch(()=>{});
+  await Promise.all([...publicIds].map((publicId)=>deleteCloudinaryImage(publicId).catch(()=>{})));
   response.status(204).end();
 }
 
 export async function deleteAcademicDocument(request,response){
   const item=await AcademicDocument.findByIdAndDelete(request.params.id);if(!item)throw new AppError(404,'Academic document not found');
-  if(item.resourceType==='timetable')await Promise.all([...timetableSlots].map((slot)=>deleteCloudinaryImage(item.timetableFiles[slot]?.asset?.publicId).catch(()=>{})));
+  if(item.resourceType==='timetable'){
+    const publicIds=new Set([...timetableSlots].flatMap((slot)=>[item.timetableFiles[slot]?.asset?.publicId,item.timetableFiles[slot]?.publishedAsset?.publicId]).filter(Boolean));
+    await Promise.all([...publicIds].map((publicId)=>deleteCloudinaryImage(publicId).catch(()=>{})));
+  }
   await recordAudit(request,'ACADEMIC_DOCUMENT_DELETED','AcademicDocument',item.id,{resourceType:item.resourceType});response.status(204).end();
 }

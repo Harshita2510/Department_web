@@ -2,6 +2,8 @@ import { escapeHtml } from './shared/dom.js';
 import { contentService } from './services/content.service.js';
 import { uploadService } from './services/upload.service.js';
 import { authService } from './services/auth.service.js';
+import { API_BASE_URL } from './config/api.js';
+import { noticeFileUrl } from './shared/notice-file.js';
 
 const nav=document.querySelector('#noticeWorkspaceNav');
 const panel=document.querySelector('#noticeWorkspacePanel');
@@ -28,8 +30,8 @@ function message(text,error=false){
 
 function render(items){
   list.innerHTML=items.map((item)=>`<article class="faculty-notice-item">
-    <div><small>${escapeHtml(item.category||'General')} � ${item.displayDate?new Date(item.displayDate).toLocaleDateString('en-IN'):'No date'}</small><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary||'')}</p></div>
-    <div><span class="notice-draft-status">${escapeHtml(item.status)}</span>${item.asset?.url?`<a href="${escapeHtml(item.asset.url)}" target="_blank" rel="noopener noreferrer">Open PDF ?</a>`:''}<button type="button" data-delete-notice="${item._id}">Delete draft</button></div>
+    <div><small>${escapeHtml(item.category||'General')} — ${item.displayDate?new Date(item.displayDate).toLocaleDateString('en-IN'):'No date'}</small><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary||'')}</p></div>
+    <div><span class="notice-draft-status">${escapeHtml(item.status)}</span>${noticeFileUrl(item.asset?.url,API_BASE_URL)?`<a href="${escapeHtml(noticeFileUrl(item.asset.url,API_BASE_URL))}" target="_blank" rel="noopener noreferrer">Open attachment</a>`:''}<button type="button" data-delete-notice="${item._id}">Delete draft</button></div>
   </article>`).join('');
   empty.hidden=items.length>0;
 }
@@ -42,14 +44,14 @@ async function loadNotices(){
 async function saveNotice(event){
   event.preventDefault();
   if(!form.reportValidity())return;
-  const file=document.querySelector('#facultyNoticePdf').files[0];
-  if(file.type!=='application/pdf'){message('Choose a PDF document.',true);return}
-  if(file.size>10*1024*1024){message('The notice PDF must be 10 MB or smaller.',true);return}
+  const file=document.querySelector('#facultyNoticeAttachment').files[0];
+  if(!['application/pdf','image/jpeg','image/png'].includes(file.type)){message('Choose a PDF, JPEG or PNG file.',true);return}
+  if(file.size>10*1024*1024){message('The notice attachment must be 10 MB or smaller.',true);return}
   const button=form.querySelector('button[type="submit"]');
-  button.disabled=true;button.textContent='Uploading�';message('');
+  button.disabled=true;button.textContent='Uploading—';message('');
   try{
-    const asset=await uploadService.uploadNoticePdf(file);
-    await contentService.create({type:'notice',title:document.querySelector('#facultyNoticeTitle').value.trim(),category:document.querySelector('#facultyNoticeCategory').value,summary:document.querySelector('#facultyNoticeShort').value.trim(),body:document.querySelector('#facultyNoticeLong').value.trim(),displayDate:document.querySelector('#facultyNoticeDate').value||undefined,asset,status:'draft'});
+    const asset=await uploadService.uploadNoticeAttachment(file);
+    await contentService.create({type:'notice',title:document.querySelector('#facultyNoticeTitle').value.trim(),category:document.querySelector('#facultyNoticeCategory').value,summary:document.querySelector('#facultyNoticeShort').value.trim(),body:document.querySelector('#facultyNoticeLong').value.trim(),displayDate:document.querySelector('#facultyNoticeDate').value||undefined,noticeFileId:asset.id||asset.key,status:'draft'});
     form.reset();message('Notice draft submitted. The administrator must review and publish it.');await loadNotices();
   }catch(error){message(error.message,true)}
   finally{button.disabled=false;button.textContent='Submit notice draft'}

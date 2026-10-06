@@ -1,5 +1,5 @@
 /*
-  Homepage-specific styles for the SGSITS CSE Phase 1 homepage.
+  Homepage-specific styles for the SGSITS CE Phase 1 homepage.
   Shared site styles remain in main.css.
 */
 
@@ -18,24 +18,15 @@
     }
 
     .departments-section h2,
-    .departments-section p,
+    .departments-section .vision-mission-header p,
     .departments-section .kicker {
       color: #ffffff;
     }
 
-    .departments-section .department-list a {
-      color: #ffffff;
-      border-color: rgba(255, 255, 255, 0.2);
+    .departments-section .vision-card h3,
+    .departments-section .vision-card p {
+      color: #071b34;
     }
-
-    .departments-section .department-list a span {
-      color: rgba(255, 255, 255, 0.65);
-    }
-
-    .departments-section .department-list a b {
-      color: rgba(255, 255, 255, 0.65);
-    }
-
 
     /* ---------- ABOUT ---------- */
 
@@ -68,6 +59,83 @@
 
     .intro-section .arrow-link {
       color: #071b34;
+    }
+
+    .introduction-header {
+      padding-bottom: 25px;
+      border-bottom: 1px solid rgba(7, 27, 52, 0.16);
+    }
+
+    .introduction-header .kicker {
+      display: block;
+      margin-bottom: 10px;
+      color: #8397b1;
+    }
+
+    .introduction-header h2 {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0;
+      font: 700 clamp(30px, 3.2vw, 46px)/1.15 var(--font-display);
+      letter-spacing: -.035em;
+    }
+
+    .introduction-icon {
+      width: 30px;
+      height: 30px;
+      display: inline-grid;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 2px solid #bd8a2f;
+      border-radius: 50%;
+      color: #bd8a2f;
+      font: 800 16px/1 Georgia, serif;
+    }
+
+    .introduction-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, .75fr);
+      gap: clamp(42px, 6vw, 82px);
+      align-items: center;
+      padding-top: 38px;
+    }
+
+    .introduction-copy p {
+      margin: 0;
+      color: #40536d;
+      font-size: clamp(16px, 1.45vw, 21px);
+      line-height: 1.75;
+      text-align: justify;
+    }
+
+    .introduction-photo {
+      margin: 0;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 12px 28px rgba(7, 27, 52, .16);
+    }
+
+    .introduction-photo img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: block;
+      object-fit: cover;
+    }
+
+    .introduction-shell .fact-rail {
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .introduction-layout { grid-template-columns: 1fr; }
+      .introduction-photo { width: min(100%, 620px); }
+    }
+
+    @media (max-width: 600px) {
+      .introduction-header h2 { align-items: flex-start; font-size: 28px; }
+      .introduction-icon { width: 26px; height: 26px; font-size: 14px; }
+      .introduction-copy p { font-size: 15px; text-align: left; }
     }
 
 
@@ -175,10 +243,6 @@
     gap:64px;
   }
 
-  .department-layout{
-    gap:72px;
-  }
-
   .research-layout{
     gap:64px;
   }
@@ -230,4 +294,3 @@
     background:#fff;
     box-shadow:0 1px 0 rgba(7,27,52,.08);
   }
-

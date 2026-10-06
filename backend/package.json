@@ -7,7 +7,10 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed:admin": "node scripts/seed-admin.js",
-    "check": "node --check src/server.js && node --check src/app.js",
+    "audit:notices": "node scripts/audit-notice-assets.js",
+    "audit:faculty-images": "node scripts/audit-faculty-images.js",
+    "load-test:public": "node scripts/load-test-public.js",
+    "check": "find src scripts -name '*.js' -print0 | xargs -0 -n1 node --check",
     "test": "node --test",
     "backup": "node scripts/backup/run.js",
     "backup:now": "node scripts/backup/run.js --force",
@@ -32,6 +35,8 @@
     "mongoose": "^8.18.0",
     "morgan": "^1.10.1",
     "multer": "^2.3.0",
+    "rate-limit-redis": "^6.0.1",
+    "redis": "^6.3.0",
     "zod": "^4.1.5"
   }
 }

@@ -11,7 +11,10 @@ const placementDocumentSchema=new mongoose.Schema({
 const placementSchema = new mongoose.Schema({
   academicYear: { type: String, required: true, unique: true, match: /^\d{4}-\d{2}$/ },
   sourceType:{type:String,enum:['link','pdf'],default:'link'},
-  sheetUrl: { type: String, default:'' },
+  sheetUrl: { type:String, default:'', validate:{
+    validator(value){if(this.sourceType!=='link')return value==='';try{return new URL(value).protocol==='https:'}catch{return false}},
+    message:'Placement sheet URL must be a valid HTTPS URL'
+  } },
   document:{type:placementDocumentSchema,default:null},
   status: { type: String, enum: PUBLICATION_STATUS, default: 'draft', index: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

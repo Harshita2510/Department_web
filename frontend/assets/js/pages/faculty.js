@@ -35,7 +35,7 @@ function createFacultyCard(record) {
     );
 
   const href =
-    `faculty-profile?facultyId=${encodeURIComponent(record.facultyId)}`;
+    `faculty-profile.html?facultyId=${encodeURIComponent(record.facultyId)}`;
 
 
   const photoMarkup = photo
@@ -72,8 +72,8 @@ function createFacultyCard(record) {
         </div>
 
         <div class="faculty-card-department">
-          COMPUTER SCIENCE<br>
-          &amp; ENGINEERING
+          COMPUTER<br>
+          ENGINEERING
         </div>
 
       </div>
@@ -136,8 +136,8 @@ function createFacultyCard(record) {
 
 
       <div class="faculty-card-footer">
-        <span>CSE</span>
-        <span>SGSITS � INDORE</span>
+        <span>CE</span>
+        <span>SGSITS — INDORE</span>
       </div>
 
     </article>
@@ -186,8 +186,8 @@ async function load(term = '') {
 
   result.textContent =
     term
-      ? `Searching faculty for �${term}��`
-      : 'Loading published faculty profiles�';
+      ? `Searching faculty for —${term}——`
+      : 'Loading published faculty profiles—';
 
   try {
 
@@ -202,7 +202,7 @@ async function load(term = '') {
             records.length === 1
               ? 'profile matches'
               : 'profiles match'
-          } �${term}�.`
+          } —${term}—.`
 
         : `Showing ${records.length} published faculty ${
             records.length === 1

@@ -1,8 +1,18 @@
 import mongoose from 'mongoose';
+import { env } from '../config/env.js';
+import { isCloudinaryFacultyPhotoUrl } from '../utils/cloudinary-faculty-photo.js';
+
+const facultyPhotoUrlField = {
+  type:String,
+  validate:{
+    validator:(value)=>!value || isCloudinaryFacultyPhotoUrl(value,env.CLOUDINARY_CLOUD_NAME),
+    message:'Faculty photos must be uploaded through this website'
+  }
+};
 
 const profileFields = {
   title: String, fullName: String, designation: String, department: String, email: String,
-  phone: String, office: String, officeHours: String, bio: String, photoUrl: String, photoPublicId: String,
+  phone: String, office: String, officeHours: String, bio: String, photoUrl: facultyPhotoUrlField, photoPublicId: String,
   highestQualification: String, areaOfSpecialisation: String,
   scholarUrl: String, orcidUrl: String, linkedinUrl: String, websiteUrl: String,
   qualifications: [String], researchInterests: [String], coursesTaught: [String],
