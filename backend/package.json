@@ -11,7 +11,12 @@
     "audit:faculty-images": "node scripts/audit-faculty-images.js",
     "load-test:public": "node scripts/load-test-public.js",
     "check": "find src scripts -name '*.js' -print0 | xargs -0 -n1 node --check",
-    "test": "node --test"
+    "test": "node --test",
+    "backup": "node scripts/backup/run.js",
+    "backup:now": "node scripts/backup/run.js --force",
+    "backup:check": "node scripts/backup/check.js",
+    "backup:auth": "node scripts/backup/authorize.js",
+    "backup:decrypt": "node scripts/backup/decrypt.js"
   },
   "engines": {
     "node": ">=20"
