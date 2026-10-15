@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config/api.js';
+import { API_BASE_URL } from '../config/api.js?v=20261015-2';
 
 export async function apiRequest(path, options = {}) {
   const isFormData=options.body instanceof FormData;

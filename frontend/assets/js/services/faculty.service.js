@@ -1,4 +1,4 @@
-import { apiRequest } from './api-client.js';
+import { apiRequest } from './api-client.js?v=20261015-2';
 
 export const facultyService={
   getOwn:()=>apiRequest('/faculty/me'),

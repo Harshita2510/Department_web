@@ -38,23 +38,43 @@ function subjectMarkup(subject) {
   return `<li class="resource-document${url?'':' subject-unavailable'}"><span class="document-icon" aria-hidden="true">${documentIcon}</span><span class="document-copy"><strong>${escapeHtml(label)}</strong><small>${url?`${type} · Official subject syllabus`:'Syllabus awaiting publication'}</small></span>${url?`<span class="document-size">${escapeHtml(formatFileSize(subject.syllabus?.size))}</span>${documentActions(url,label,subject.syllabus?.mimeType||'application/pdf')}`:'<span class="document-status">Not published</span>'}</li>`;
 }
 
-function semesterMarkup(item, programme) {
+function semesterMarkup(item) {
   const semester=romanNumerals[item.number-1];
   const subjects=item.subjects||[];
-  return `<li class="semester-item"><details class="semester-group"><summary><span><strong>Semester ${semester}</strong><small>${subjects.length} ${subjects.length===1?'subject':'subjects'}</small></span><i aria-hidden="true"></i></summary><div class="subject-list"><ol>${subjects.length?subjects.map(subjectMarkup).join(''):`<li class="semester-empty">No subjects have been added for ${escapeHtml(programme.title)} Semester ${semester}.</li>`}</ol></div></details></li>`;
+  return `<li class="semester-item" data-semester-panel="${item.number}" hidden><div class="subject-list"><ol>${subjects.map(subjectMarkup).join('')}</ol></div></li>`;
 }
 
 export function renderProgrammeDocuments({ container, programmes, documentName, notice }) {
-  container.innerHTML = programmes.map((programme, index) => `
+  const visibleProgrammes=documentName==='syllabus'
+    ?programmes.filter((programme)=>programme.semesters.some((semester)=>(semester.subjects||[]).length))
+    :programmes;
+
+  container.innerHTML = visibleProgrammes.length ? visibleProgrammes.map((programme, index) => {
+    const populatedSemesters=programme.semesters.filter((semester)=>(semester.subjects||[]).length);
+    return `
     <details class="programme" ${index === 0 ? 'open' : ''}>
       <summary><span class="programme-icon" aria-hidden="true">${programmeIcon}</span><span class="programme-heading"><small>${escapeHtml(programme.level)}</small><strong>${escapeHtml(programme.title)}</strong><em>${escapeHtml(programme.duration)}</em></span><i aria-hidden="true"></i></summary>
-      <div class="programme-content"><p>${documentName==='syllabus'?'Select a semester, then open a subject syllabus PDF or image.':`Select a semester to open its official ${escapeHtml(documentName)} PDF.`}</p><ol>${programme.semesters.map((item) => documentName==='syllabus'?semesterMarkup(item,programme):documentMarkup(item, programme, documentName)).join('')}</ol></div>
+      <div class="programme-content">${documentName==='syllabus'?`<p>Choose a semester to see its subjects, then view or download an individual syllabus.</p><div class="semester-picker" role="group" aria-label="Choose a semester for ${escapeHtml(programme.title)}">${populatedSemesters.map((item)=>`<button type="button" data-semester-choice="${item.number}">Semester ${romanNumerals[item.number-1]} <span>${item.subjects.length} ${item.subjects.length===1?'subject':'subjects'}</span></button>`).join('')}</div><ol class="semester-subject-panels">${populatedSemesters.map((item) => semesterMarkup(item)).join('')}</ol>`:`<p>Select a semester to open its official ${escapeHtml(documentName)} PDF.</p><ol>${programme.semesters.map((item) => documentMarkup(item, programme, documentName)).join('')}</ol>`}</div>
     </details>
-  `).join('');
+  `;
+  }).join('') : '<p class="resource-search-empty">No subject syllabi have been published yet.</p>';
 
   container.querySelectorAll('.programme').forEach((details) => details.addEventListener('toggle', () => {
     if (!details.open) return;
     container.querySelectorAll('.programme').forEach((programme) => { if (programme !== details) programme.open = false; });
+  }));
+
+  container.querySelectorAll('[data-semester-choice]').forEach((button) => button.addEventListener('click', () => {
+    const programme=button.closest('.programme');
+    const selectedSemester=button.dataset.semesterChoice;
+    programme.querySelectorAll('[data-semester-choice]').forEach((choice)=>{
+      const selected=choice===button;
+      choice.classList.toggle('selected',selected);
+      choice.setAttribute('aria-pressed',String(selected));
+    });
+    programme.querySelectorAll('[data-semester-panel]').forEach((panel)=>{
+      panel.hidden=panel.dataset.semesterPanel!==selectedSemester;
+    });
   }));
 
   bindResourceDocumentSearch({ input:document.querySelector('#resourceSearch'), container });

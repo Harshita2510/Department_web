@@ -8,6 +8,11 @@
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/academic-resources.css">
   <link rel="stylesheet" href="../assets/css/faculty-directory.css">
+  <script>
+    if (['localhost', '127.0.0.1', '0.0.0.0', '[::1]'].includes(location.hostname) && location.port !== '5000') {
+      window.SGSITS_API_URL = `${location.protocol}//${location.hostname}:5000/api`;
+    }
+  </script>
 
   <style id="faculty-header-overrides">
     /* Match the homepage header width and scrolling behaviour. */
@@ -230,6 +235,6 @@
   <footer><div><span>© <span id="currentYear"></span> SGSITS Indore</span><a href="../index.html">Return to homepage →</a></div></footer>
 
   <script type="module" src="../assets/js/main.js?v=20260924-4"></script>
-  <script type="module" src="../assets/js/pages/faculty.js?v=20260924-5"></script>
+  <script type="module" src="../assets/js/pages/faculty.js?v=20261015-2"></script>
 </body>
 </html>

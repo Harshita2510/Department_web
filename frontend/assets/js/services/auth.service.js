@@ -2,7 +2,9 @@ import { apiRequest } from './api-client.js';
 
 export const authService={
   login:(identifier,password)=>apiRequest('/auth/login',{method:'POST',body:JSON.stringify({identifier,password})}),
-  me:()=>apiRequest('/auth/me'),
+  // Permissions can be changed by an administrator while a faculty member is
+  // signed in, so this must always read the current server-side account.
+  me:()=>apiRequest('/auth/me',{cache:'no-store'}),
   logout:()=>apiRequest('/auth/logout',{method:'POST'}),
   changePassword:(currentPassword,newPassword)=>apiRequest('/auth/password',{method:'PATCH',body:JSON.stringify({currentPassword,newPassword})}),
   listFacultyAccounts:()=>apiRequest('/auth/faculty'),

@@ -356,12 +356,12 @@
   z-index: 1;
 
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 
   margin: 16px 10px 0;
   padding: 10px 12px;
 
-  min-height: 52px;
+  min-height: 64px;
 
   background: #f7f5ef;
   border-radius: 8px;
@@ -372,35 +372,32 @@
 
 .faculty-info-row {
   width: 100%;
-
-  border-bottom: none;
-}
-
-
-.faculty-info-icon {
-  display: inline-block;
-
-  margin-right: 5px;
-
-  color: #e8a936;
-
-  font-size: 0.85rem;
-
-  line-height: 1;
 }
 
 
 .faculty-info-label {
-  display: none;
+  display: block;
+
+  color: #75849a;
+
+  font-size: 0.48rem;
+
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+
+  text-transform: uppercase;
 }
 
 
 .faculty-info-value {
-  display: inline;
+  display: block;
+
+  margin-top: 5px;
 
   color: #071b34;
 
-  font-size: 0.65rem;
+  font-size: 0.70rem;
 
   font-weight: 600;
 
