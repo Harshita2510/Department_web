@@ -1,7 +1,7 @@
 import { facultyPhotoUrl } from '../shared/faculty-photo.js';
 import { escapeHtml, initials } from '../shared/dom.js';
 import { safeHttpsUrl } from '../shared/security.js';
-import { facultyService } from '../services/faculty.service.js';
+import { facultyService } from '../services/faculty.service.js?v=20261015-2';
 
 const directory = document.querySelector('#facultyDirectory');
 const result = document.querySelector('#facultyResult');
@@ -26,7 +26,7 @@ function createFacultyCard(record) {
     profile.designation || 'Faculty Member';
 
   const specialization =
-    profile.areaOfSpecialisation || 'Not available';
+    profile.areaOfSpecialisation || 'Specialisation not listed';
 
   const photo =
     facultyPhotoUrl(
@@ -34,8 +34,12 @@ function createFacultyCard(record) {
       400
     );
 
-  const href =
-    `faculty-profile.html?facultyId=${encodeURIComponent(record.facultyId)}`;
+  // The directory never guesses an ID.  Each profile link is built from the
+  // employee ID returned by the public faculty API for this exact record.
+  const facultyId = String(record.facultyId || '').trim().toUpperCase();
+  const profileUrl = new URL('faculty-profile.html', window.location.href);
+  if (facultyId) profileUrl.searchParams.set('facultyId', facultyId);
+  const href = profileUrl.href;
 
 
   const photoMarkup = photo
@@ -104,35 +108,27 @@ function createFacultyCard(record) {
       <div class="faculty-card-info">
 
         <div class="faculty-info-row">
-
-          <span
-            class="faculty-info-icon"
-            aria-hidden="true"
-          >
-            ?
-          </span>
-
-          <span class="faculty-info-label">
-            Specialisation
-          </span>
-
-          <span class="faculty-info-value">
-            ${escapeHtml(specialization)}
-          </span>
-
+          <span class="faculty-info-label">Area of specialisation</span>
+          <span class="faculty-info-value">${escapeHtml(specialization)}</span>
         </div>
 
       </div>
 
 
-      <a
-        class="faculty-profile-link"
-        href="${href}"
-        aria-label="View ${escapeHtml(name)}'s full faculty profile"
-      >
-        View Profile
-        <span aria-hidden="true">?</span>
-      </a>
+      ${facultyId ? `
+        <a
+          class="faculty-profile-link"
+          href="${escapeHtml(href)}"
+          aria-label="View ${escapeHtml(name)}'s full faculty profile"
+        >
+          View Profile
+          <span aria-hidden="true">→</span>
+        </a>
+      ` : `
+        <span class="faculty-profile-link is-unavailable" role="status">
+          Profile link unavailable
+        </span>
+      `}
 
 
       <div class="faculty-card-footer">

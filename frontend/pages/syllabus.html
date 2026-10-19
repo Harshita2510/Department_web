@@ -13,6 +13,11 @@
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/academic-resources.css">
   <link rel="stylesheet" href="../assets/css/syllabus-subjects.css">
+  <script>
+    if (['localhost', '127.0.0.1', '0.0.0.0', '[::1]'].includes(location.hostname) && location.port !== '5000') {
+      window.SGSITS_API_URL = `${location.protocol}//${location.hostname}:5000/api`;
+    }
+  </script>
 <style>
   .utility-bar { position: relative !important; top: auto !important; z-index: 1000; }
   .site-header { position: sticky !important; top: 0 !important; z-index: 999; background: #fff; }
@@ -200,7 +205,7 @@
     <section class="syllabus-section resource-library" aria-labelledby="syllabusTitle">
       <div class="syllabus-inner">
         <div class="section-heading resource-library-heading">
-          <div><span>NEP 2020 ready</span><h2 id="syllabusTitle">Curriculum and Syllabi</h2></div>
+          <div><h2 id="syllabusTitle">Curriculum and Syllabus</h2></div>
           <label class="resource-search" for="resourceSearch">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16.2 16.2 4.3 4.3"></path></svg>
             <input id="resourceSearch" type="search" placeholder="Search syllabi..." autocomplete="off">

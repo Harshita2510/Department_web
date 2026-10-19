@@ -14,13 +14,25 @@ const feedback=document.querySelector('#facultyNoticeFeedback');
 form.addEventListener('submit',saveNotice);
 list.addEventListener('click',deleteNotice);
 
+function hasNoticePermission(permissions){
+  return Array.isArray(permissions)&&permissions.some((permission)=>String(permission).toLowerCase()==='notice_upload');
+}
+
 async function initialise(){
   try{
     const current=await authService.me();
-    const allowed=current.permissions?.includes('notice_upload');
+    // Keep the browser's display session in sync, but authorisation remains
+    // server-side for every upload and notice request.
+    const previous=JSON.parse(sessionStorage.getItem('sgsitsFacultySession')||'{}');
+    sessionStorage.setItem('sgsitsFacultySession',JSON.stringify({...previous,...current,signedInAt:previous.signedInAt||new Date().toISOString()}));
+    const allowed=hasNoticePermission(current.permissions);
     nav.hidden=!allowed;panel.hidden=!allowed;
     if(allowed)await loadNotices();
-  }catch{/* The main faculty portal handles expired sessions. */}
+  }catch(error){
+    // Do not silently turn a temporary API error into a misleading
+    // "no access" state.
+    console.error('Unable to check notice permission:',error);
+  }
 }
 
 function message(text,error=false){

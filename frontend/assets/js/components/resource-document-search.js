@@ -14,6 +14,32 @@ export function bindResourceDocumentSearch({ input, container }) {
     container.querySelectorAll('.programme').forEach((programme) => {
       const heading = programme.querySelector('.programme-heading')?.textContent.toLocaleLowerCase() || '';
       const programmeMatches = Boolean(query) && heading.includes(query);
+
+      // Syllabus uses an explicit semester picker.  During a search, reveal
+      // only the semester panels that contain matching subjects; when the
+      // search is cleared, restore the visitor's chosen semester.
+      if (programme.querySelector('.semester-picker')) {
+        let visibleDocuments = 0;
+        programme.querySelectorAll('.resource-document').forEach((documentRow) => {
+          const visible = !query || programmeMatches || documentRow.textContent.toLocaleLowerCase().includes(query);
+          documentRow.hidden = !visible;
+          if (visible) visibleDocuments += 1;
+        });
+        if (query) {
+          programme.querySelectorAll('[data-semester-panel]').forEach((panel) => {
+            panel.hidden = !programmeMatches && ![...panel.querySelectorAll('.resource-document')].some((row) => !row.hidden);
+          });
+        } else {
+          const selected = programme.querySelector('[data-semester-choice].selected');
+          programme.querySelectorAll('[data-semester-panel]').forEach((panel) => {
+            panel.hidden = !selected || panel.dataset.semesterPanel !== selected.dataset.semesterChoice;
+          });
+        }
+        const visible = !query || programmeMatches || visibleDocuments > 0;
+        programme.hidden = !visible;
+        if (visible) visibleProgrammes += 1;
+        return;
+      }
       let visibleDocuments = 0;
 
       programme.querySelectorAll('.resource-document').forEach((documentRow) => {

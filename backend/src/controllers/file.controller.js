@@ -115,6 +115,10 @@ export async function downloadFile(request,response){
     'Content-Length':file.length,
     'Cache-Control':access.isPublic?'public, max-age=3600':'private, no-store',
     'Vary':'Cookie',
+    // The static site and API use different localhost ports (and can use separate
+    // production origins), so Helmet's default same-origin resource policy would
+    // otherwise block an authorized image preview in the public document viewer.
+    'Cross-Origin-Resource-Policy':'cross-origin',
     'Content-Security-Policy':`default-src 'none'; frame-ancestors 'self' ${env.FRONTEND_ORIGIN}`,
     'Content-Disposition':`${/^(application\/pdf|image\/)/.test(file.contentType||'')?'inline':'attachment'}; filename="${file.filename.replace(/["\r\n]/g,'_')}"`
   });

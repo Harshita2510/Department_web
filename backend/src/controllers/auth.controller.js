@@ -21,6 +21,7 @@ export function logout(_request, response) {
 
 export function me(request, response) {
   const user=request.user;
+  response.set('Cache-Control','no-store, private');
   response.json({ success:true, data:{ id:user.id, facultyId:user.facultyId, email:user.email, role:user.role, permissions:user.permissions||[],mustChangePassword:user.mustChangePassword } });
 }
 

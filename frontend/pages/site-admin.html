@@ -224,7 +224,7 @@
         <input id="subjectId" type="hidden">
         <div class="form-grid">
           <label class="field"><span>Programme</span><select id="subjectProgramme" required><option value="ug-cse">B.Tech CE</option><option value="pg-cse">M.Tech CE</option></select></label>
-          <label class="field"><span>Semester</span><select id="subjectSemester" required></select></label>
+          <label class="field"><span>Semester <b>*</b></span><select id="subjectSemester" required aria-describedby="subjectSemesterHelp"></select><small id="subjectSemesterHelp">Required — this decides where the subject appears on the public syllabus page.</small></label>
           <label class="field"><span>Subject code</span><input id="subjectCode" maxlength="30" placeholder="CS-301"></label>
           <label class="field"><span>Display order</span><input id="subjectSortOrder" type="number" min="0" max="999" value="0"></label>
           <label class="field full"><span>Subject name</span><input id="subjectName" required maxlength="160" placeholder="Data Structures"></label>

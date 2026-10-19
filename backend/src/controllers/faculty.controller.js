@@ -164,7 +164,7 @@ export async function listPublicFaculty(request, response) {
   const items=await FacultyProfile.find(filter)
     .sort({'approvedSnapshot.fullName':1,facultyId:1})
     .limit(limit)
-    .select('facultyId approvedSnapshot.title approvedSnapshot.fullName approvedSnapshot.designation approvedSnapshot.department approvedSnapshot.photoUrl approvedSnapshot.researchInterests publishedAt')
+    .select('facultyId approvedSnapshot.title approvedSnapshot.fullName approvedSnapshot.designation approvedSnapshot.department approvedSnapshot.photoUrl approvedSnapshot.areaOfSpecialisation approvedSnapshot.researchInterests publishedAt')
     .lean();
   setPublicCache(response);
   response.json({success:true,data:items.map(withCurrentDepartment)});
