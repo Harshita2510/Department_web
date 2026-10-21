@@ -182,7 +182,7 @@
         <section class="cms-view" id="usersView" data-title="Users &amp; roles">
           <div class="collection-head"><div><span>Access control</span><h2>Users &amp; roles</h2><p>Manage faculty credentials and keep publishing permissions restricted.</p></div><button class="primary-button" id="inviteUser" type="button">+ Add faculty login</button></div>
           <div class="role-grid"><article><span class="role-icon admin-role">A</span><div><h3>Website administrator</h3><p>Exclusive publishing access, plus control over events, placements, academic calendars and faculty permissions.</p><strong>Full website publishing access</strong></div></article><article><span class="role-icon teacher-role">T</span><div><h3>Faculty member</h3><p>Can edit their own profile. Selected faculty may also submit notice drafts for administrator review.</p><strong>No publishing access</strong></div></article></div>
-          <div class="user-table"><div class="user-row user-head"><span>User</span><span>Role</span><span>Status</span><span>Access</span></div><div class="user-row"><span><b>Website Admin</b><small id="adminAccountIdentifier">Authenticated account</small></span><span>Administrator</span><span><i></i> Active</span><span>Full website</span></div><div id="facultyAccountRows"></div></div>
+          <div class="user-table"><div class="user-row user-head"><span>User</span><span>Role</span><span>Status</span><span>Access</span></div><div class="user-row"><span><b>Website Admin</b><small id="adminAccountIdentifier">Authenticated account</small></span><span>Administrator</span><span><i></i> Active <small id="adminPasswordStatus"></small></span><span class="user-access-actions">Full website <button type="button" id="changeAdminPassword">Change password</button></span></div><div id="facultyAccountRows"></div></div>
         </section>
 
       </div>
@@ -212,6 +212,23 @@
         <label class="field"><span>Confirm temporary password <b>*</b></span><input id="confirmResetFacultyPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
         <div class="credential-warning"><strong>Security action</strong><p>This immediately signs the faculty member out everywhere. They will be prompted to change the temporary password after signing in.</p></div>
         <button class="primary-button" type="submit">Reset password</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="adminPasswordModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="adminPasswordTitle">
+    <div class="modal-shade" data-close-admin-password></div>
+    <div class="create-menu-card account-create-card">
+      <button data-close-admin-password type="button" aria-label="Close">—</button>
+      <span>Account security</span>
+      <h2 id="adminPasswordTitle">Change administrator password</h2>
+      <p class="account-intro">Use a new, unique password kept in a password manager. Changing it signs this administrator out everywhere.</p>
+      <form id="adminPasswordForm">
+        <label class="field"><span>Current password <b>*</b></span><input id="adminCurrentPassword" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></label>
+        <label class="field"><span>New password <b>*</b></span><div class="password-input"><input id="adminNewPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><button id="toggleAdminPassword" type="button">Show</button></div><small>Use at least 10 characters and do not reuse the temporary password.</small></label>
+        <label class="field"><span>Confirm new password <b>*</b></span><input id="adminConfirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+        <p id="adminPasswordFeedback" class="registration-error" role="alert" aria-live="polite"></p>
+        <button class="primary-button" type="submit">Update password</button>
       </form>
     </div>
   </div>
