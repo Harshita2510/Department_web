@@ -1,12 +1,18 @@
 import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
 import { env } from '../config/env.js';
-import { redisClient } from '../config/redis.js';
+import { connectRedis, redisClient } from '../config/redis.js';
 
 function sharedStore(prefix){
   if(!redisClient)return undefined;
   return new RedisStore({
-    sendCommand:(...args)=>redisClient.sendCommand(args),
+    async sendCommand(...args){
+      // Render/Valkey can close an idle connection. Reconnect before handing
+      // the command to the shared limiter, rather than returning a 500 for
+      // every public request with ClientClosedError.
+      if(!redisClient.isOpen)await connectRedis();
+      return redisClient.sendCommand(args);
+    },
     prefix:`sgsits:${prefix}:`
   });
 }
