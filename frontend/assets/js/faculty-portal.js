@@ -473,6 +473,16 @@ $('#passwordForm').addEventListener('submit', async (event) => {
   }
 });
 
+$$('[data-password-target]').forEach((button)=>button.addEventListener('click',()=>{
+  const input=$(`#${button.dataset.passwordTarget}`);
+  const willShow=input.type==='password';
+  input.type=willShow?'text':'password';
+  button.textContent=willShow?'Hide':'Show';
+  button.setAttribute('aria-pressed',String(willShow));
+  const fieldName=button.dataset.passwordTarget.replace(/([A-Z])/g,' $1').toLowerCase();
+  button.setAttribute('aria-label',`${willShow?'Hide':'Show'} ${fieldName}`);
+}));
+
 $('#logoutButton').addEventListener('click', () => {
   authService.logout().catch(()=>{});
   sessionStorage.removeItem(sessionKey);
