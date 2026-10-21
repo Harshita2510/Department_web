@@ -31,6 +31,6 @@ export const authorize = (...roles) => (request, _response, next) => {
 };
 
 export const requirePasswordChanged = (request, _response, next) => {
-  if (request.user.role===ROLES.FACULTY&&request.user.mustChangePassword) return next(new AppError(403, 'Change the temporary password before using the faculty workspace'));
+  if (request.user.mustChangePassword) return next(new AppError(403, 'Change the temporary password before using this workspace'));
   next();
 };

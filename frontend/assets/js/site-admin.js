@@ -121,10 +121,54 @@ async function verifyAdministratorSession(){
     if(user.role!=='admin')throw new Error('Administrator access is required');
     adminSession=user;
     $('#adminAccountIdentifier').textContent=user.email||user.facultyId||'Authenticated account';
+    $('#adminPasswordStatus').textContent=user.mustChangePassword?'Temporary password must be changed':'';
+    if(user.mustChangePassword){openAdminPasswordModal(true);return;}
     await hydrateMongoData();
   }catch{
     adminSession=null;
     window.location.replace('../index.html?adminLogin=required');
+  }
+}
+
+function openAdminPasswordModal(isInitialPassword=false){
+  const modal=$('#adminPasswordModal');
+  $('#adminPasswordForm').reset();
+  $('#adminPasswordFeedback').textContent='';
+  $('#adminPasswordTitle').textContent=isInitialPassword?'Secure your administrator account':'Change administrator password';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.classList.add('no-scroll');
+  setTimeout(()=>$('#adminCurrentPassword').focus(),80);
+}
+
+function closeAdminPasswordModal(){
+  $('#adminPasswordModal').classList.remove('open');
+  $('#adminPasswordModal').setAttribute('aria-hidden','true');
+  document.body.classList.remove('no-scroll');
+}
+
+async function changeAdministratorPassword(){
+  const form=$('#adminPasswordForm');
+  if(!form.reportValidity())return;
+  const currentPassword=$('#adminCurrentPassword').value;
+  const newPassword=$('#adminNewPassword').value;
+  const confirmation=$('#adminConfirmPassword').value;
+  const feedback=$('#adminPasswordFeedback');
+  if(newPassword!==confirmation){feedback.textContent='The new passwords do not match.';return;}
+  if(newPassword===currentPassword){feedback.textContent='Choose a new password that is different from the current password.';return;}
+  const submit=form.querySelector('[type="submit"]');
+  submit.disabled=true;
+  submit.textContent='Updating password—';
+  feedback.textContent='';
+  try{
+    await authService.changePassword(currentPassword,newPassword);
+    closeAdminPasswordModal();
+    showToast('Password updated. Please sign in again.');
+    setTimeout(()=>window.location.replace('../index.html?adminLogin=required'),900);
+  }catch(error){
+    feedback.textContent=error.message;
+    submit.disabled=false;
+    submit.textContent='Update password';
   }
 }
 
@@ -717,6 +761,10 @@ $('#facultyAccountRows').addEventListener('click',(event)=>{
 $('#facultyPasswordResetForm').addEventListener('submit',async(event)=>{event.preventDefault();await resetFacultyPassword()});
 $$('[data-close-password-reset]').forEach((button)=>button.addEventListener('click',closeFacultyPasswordReset));
 $('#toggleResetFacultyPassword').addEventListener('click',()=>{const input=$('#resetFacultyPassword');input.type=input.type==='password'?'text':'password';$('#toggleResetFacultyPassword').textContent=input.type==='password'?'Show':'Hide'});
+$('#changeAdminPassword').addEventListener('click',()=>openAdminPasswordModal(false));
+$('#adminPasswordForm').addEventListener('submit',async(event)=>{event.preventDefault();await changeAdministratorPassword()});
+$$('[data-close-admin-password]').forEach((button)=>button.addEventListener('click',closeAdminPasswordModal));
+$('#toggleAdminPassword').addEventListener('click',()=>{const input=$('#adminNewPassword');input.type=input.type==='password'?'text':'password';$('#toggleAdminPassword').textContent=input.type==='password'?'Show':'Hide'});
 $('#adminLogout').addEventListener('click',async(event)=>{
   const button=event.currentTarget;
   button.disabled=true;

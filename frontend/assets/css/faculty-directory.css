@@ -211,7 +211,7 @@
   justify-content: center;
 
   margin:
-    6px 14px 14px;
+    8px 14px 24px;
 }
 
 
@@ -298,7 +298,8 @@
   position: relative;
   z-index: 1;
 
-  padding: 0 10px;
+  min-height: 78px;
+  padding: 0 18px;
 
   text-align: center;
 }
@@ -315,11 +316,11 @@
     Larger than before, but responsive enough
     for longer faculty names.
   */
-  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+  font-size: clamp(1.14rem, 1.55vw, 1.48rem);
 
   font-weight: 800;
 
-  line-height: 1.08;
+  line-height: 1.2;
 
   /*
     Prevent long names from breaking
@@ -332,15 +333,15 @@
 
 
 .faculty-card-identity p {
-  margin: 7px 0 0;
+  margin: 9px 0 0;
 
   color: #e8a936;
 
-  font-size: 0.54rem;
+  font-size: 0.60rem;
 
   font-weight: 800;
 
-  letter-spacing: 0.09em;
+  letter-spacing: 0.07em;
 
   line-height: 1.25;
 
@@ -358,13 +359,13 @@
   display: flex;
   align-items: flex-start;
 
-  margin: 16px 10px 0;
-  padding: 10px 12px;
+  margin: 16px 14px 0;
+  padding: 13px 15px;
 
-  min-height: 64px;
+  min-height: 70px;
 
   background: #f7f5ef;
-  border-radius: 8px;
+  border-radius: 10px;
 
   color: #071b34;
 }
@@ -380,7 +381,7 @@
 
   color: #75849a;
 
-  font-size: 0.48rem;
+  font-size: 0.52rem;
 
   font-weight: 800;
 
@@ -393,11 +394,11 @@
 .faculty-info-value {
   display: block;
 
-  margin-top: 5px;
+  margin-top: 6px;
 
   color: #071b34;
 
-  font-size: 0.70rem;
+  font-size: 0.76rem;
 
   font-weight: 600;
 
@@ -429,10 +430,10 @@
     calc(100% - 24px);
 
   margin:
-    12px auto 8px;
+    14px auto 10px;
 
   padding:
-    8px 8px;
+    10px 8px;
 
   background:
     #e8a936;
@@ -447,7 +448,7 @@
     999px;
 
   font-size:
-    0.52rem;
+    0.58rem;
 
   font-weight:
     800;
