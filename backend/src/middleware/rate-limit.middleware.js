@@ -33,6 +33,11 @@ export const apiRateLimiter = rateLimit({
   // Probes must still report dependency failure when Redis itself is down.
   skip:(request)=>request.method==='OPTIONS'||request.path.startsWith('/health'),
   store:sharedStore('api'),
+  // Rate limiting must never make the public site or an authenticated account
+  // action unavailable when a free Redis/Valkey instance is waking up or
+  // reconnecting. The store remains in use whenever it is healthy; during a
+  // transient store failure express-rate-limit allows this request through.
+  passOnStoreError:true,
   handler:reject
 });
 
@@ -43,6 +48,7 @@ export const loginRateLimiter = rateLimit({
   legacyHeaders:false,
   skipSuccessfulRequests:true,
   store:sharedStore('login'),
+  passOnStoreError:true,
   keyGenerator(request) {
     const identity=String(request.body?.identifier||request.body?.email||'unknown')
       .trim().toLowerCase().slice(0,150);
