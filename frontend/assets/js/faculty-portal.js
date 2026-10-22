@@ -365,6 +365,13 @@ function closeSidebar() {
   document.body.classList.remove('no-scroll');
 }
 
+function openPasswordChange() {
+  $('#passwordChangeFields').hidden=false;
+  $('#openPasswordChange').hidden=true;
+  $('#openPasswordChange').setAttribute('aria-expanded','true');
+  setTimeout(()=>$('#currentPassword').focus(),0);
+}
+
 async function bootstrapProfile(){
   try{
     const current=await authService.me();
@@ -402,6 +409,7 @@ $('#instituteEmail').addEventListener('input', (event) => {
 if (session.mustChangePassword) {
   document.body.classList.add('password-change-required');
   showPanel('settingsPanel');
+  openPasswordChange();
   showToast('Please replace the temporary password provided by the administrator.');
 }
 
@@ -501,6 +509,8 @@ $('#passwordForm').addEventListener('submit', async (event) => {
     submit.textContent='Update password';
   }
 });
+
+$('#openPasswordChange').addEventListener('click',openPasswordChange);
 
 $$('[data-password-target]').forEach((button)=>button.addEventListener('click',()=>{
   const input=$(`#${button.dataset.passwordTarget}`);
