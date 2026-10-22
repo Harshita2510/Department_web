@@ -20,12 +20,8 @@ function hasNoticePermission(permissions){
 
 async function initialise(){
   try{
-    const current=await authService.me();
-    // Keep the browser's display session in sync, but authorisation remains
-    // server-side for every upload and notice request.
-    const previous=JSON.parse(sessionStorage.getItem('sgsitsFacultySession')||'{}');
-    sessionStorage.setItem('sgsitsFacultySession',JSON.stringify({...previous,...current,signedInAt:previous.signedInAt||new Date().toISOString()}));
-    const allowed=hasNoticePermission(current.permissions);
+    const permissions=await window.sgsitsFacultyPermissionsReady;
+    const allowed=hasNoticePermission(permissions);
     nav.hidden=!allowed;panel.hidden=!allowed;
     if(allowed)await loadNotices();
   }catch(error){

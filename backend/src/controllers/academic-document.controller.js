@@ -1,6 +1,6 @@
 import { AcademicDocument } from '../models/academic-document.model.js';
 import { User } from '../models/user.model.js';
-import { ROLES } from '../constants/roles.js';
+import { PERMISSIONS,ROLES } from '../constants/roles.js';
 import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { deleteCloudinaryImage,uploadTimetableAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
@@ -46,6 +46,7 @@ export async function listPublicAcademicDocuments(request,response){
 
 export async function listManagedAcademicDocuments(request,response){
   const query=request.validatedQuery||request.query;
+  if(request.user.role===ROLES.FACULTY&&!request.user.permissions?.includes(PERMISSIONS.TIMETABLE_UPLOAD))return response.json({success:true,data:[]});
   const filter=request.user.role===ROLES.ADMIN?{}:{editors:request.user.id,resourceType:'timetable'};
   if(query.type)filter.resourceType=query.type;
   const items=await AcademicDocument.find(filter).sort({updatedAt:-1}).populate('editors','facultyId email status');
@@ -87,8 +88,8 @@ export async function updateAcademicDocument(request,response){
 export async function uploadTimetable(request,response){
   const slot=request.params.slot;if(!timetableSlots.has(slot))throw new AppError(400,'Unknown timetable category');
   const item=await AcademicDocument.findById(request.params.id);if(!item||item.resourceType!=='timetable')throw new AppError(404,'Timetable record not found');
-  const permitted=request.user.role===ROLES.ADMIN||item.editors.some((id)=>id.equals(request.user.id));
-  if(!permitted)throw new AppError(403,'You are not assigned to upload this timetable');
+  const permitted=request.user.role===ROLES.ADMIN||(request.user.permissions?.includes(PERMISSIONS.TIMETABLE_UPLOAD)&&item.editors.some((id)=>id.equals(request.user.id)));
+  if(!permitted)throw new AppError(403,'Timetable upload permission and semester assignment are required');
   if(!request.file)throw new AppError(400,'Choose a timetable PDF or image');
   if(!verifySignature(request.file))throw new AppError(415,'The uploaded file content does not match its declared type');
   const result=await uploadTimetableAsset(request.file,safeFolder(item,slot));

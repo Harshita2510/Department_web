@@ -63,13 +63,20 @@ export async function resetFacultyPassword(request,response){
 }
 
 export async function updateFacultyNoticePermission(request,response){
+  request.params.permission=PERMISSIONS.NOTICE_UPLOAD;
+  return updateFacultyPermission(request,response);
+}
+
+export async function updateFacultyPermission(request,response){
   const user=await User.findOne({facultyId:request.params.facultyId,role:ROLES.FACULTY});
   if(!user)throw new AppError(404,'Faculty account not found');
+  const permission=request.params.permission;
+  if(!Object.values(PERMISSIONS).includes(permission))throw new AppError(400,'Unknown faculty permission');
   const permissions=new Set(user.permissions||[]);
-  if(request.body.allowed)permissions.add(PERMISSIONS.NOTICE_UPLOAD);else permissions.delete(PERMISSIONS.NOTICE_UPLOAD);
+  if(request.body.allowed)permissions.add(permission);else permissions.delete(permission);
   user.permissions=[...permissions];
   await user.save();
-  await recordAudit(request,'FACULTY_NOTICE_PERMISSION_UPDATED','User',user.id,{facultyId:user.facultyId,allowed:request.body.allowed});
+  await recordAudit(request,'FACULTY_PERMISSION_UPDATED','User',user.id,{facultyId:user.facultyId,permission,allowed:request.body.allowed});
   response.json({success:true,data:{facultyId:user.facultyId,permissions:user.permissions}});
 }
 

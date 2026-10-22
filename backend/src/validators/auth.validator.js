@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PERMISSIONS } from '../constants/roles.js';
 
 export const loginSchema = z.object({ body: z.object({ identifier: z.string().trim().min(3), password: z.string().min(8).max(128) }) });
 export const createFacultySchema = z.object({ body: z.object({
@@ -12,6 +13,13 @@ export const resetFacultyPasswordSchema=z.object({
 });
 export const facultyNoticePermissionSchema=z.object({
   params:z.object({facultyId:z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,30}$/)}),
+  body:z.object({allowed:z.boolean()})
+});
+export const facultyPermissionSchema=z.object({
+  params:z.object({
+    facultyId:z.string().trim().toUpperCase().regex(/^[A-Z0-9-]{3,30}$/),
+    permission:z.enum(Object.values(PERMISSIONS))
+  }),
   body:z.object({allowed:z.boolean()})
 });
 export const facultyStatusSchema=z.object({

@@ -6,6 +6,11 @@ import { uploadService } from './services/upload.service.js';
 
 const sessionKey = 'sgsitsFacultySession';
 const session = JSON.parse(sessionStorage.getItem(sessionKey) || 'null');
+let resolveFacultyPermissions;
+// The specialist upload modules wait for this server-side permission check.
+// Do not rely on a stale value stored in sessionStorage after an administrator
+// grants or revokes access.
+window.sgsitsFacultyPermissionsReady=new Promise((resolve)=>{resolveFacultyPermissions=resolve;});
 
 if (!session?.facultyId || session?.role !== 'faculty') {
   window.location.replace('../index.html?login=required');
@@ -49,6 +54,22 @@ let profile = { ...defaultProfile };
 profile.facultyId = facultyId;
 let saveTimer;
 let toastTimer;
+
+function applyFacultyPermissions(permissions=[]){
+  const granted=new Set(permissions||[]);
+  $$('[data-faculty-permission]').forEach((element)=>{
+    element.hidden=!granted.has(element.dataset.facultyPermission);
+  });
+}
+
+function synchroniseFacultySession(current){
+  const saved=JSON.parse(sessionStorage.getItem(sessionKey)||'{}');
+  const updated={...saved,...current,signedInAt:saved.signedInAt||new Date().toISOString()};
+  sessionStorage.setItem(sessionKey,JSON.stringify(updated));
+  applyFacultyPermissions(current.permissions||[]);
+  resolveFacultyPermissions?.(current.permissions||[]);
+  resolveFacultyPermissions=null;
+}
 
 const editableFields = [
   'title', 'fullName', 'designation', 'department', 'phone', 'office', 'officeHours', 'bio',
@@ -206,7 +227,7 @@ function renderDashboard() {
   const tasks = [
     { label: 'Add name and designation', done: Boolean(profile.fullName && profile.designation), target: 'profilePanel' },
     { label: 'Add email and optional contact', done: Boolean(profile.email), target: 'profilePanel' },
-    { label: 'Add experience, qualification and specialisation', done: profile.experienceYears!==''&&Boolean(profile.highestQualification&&profile.areaOfSpecialisation), target: 'academicPanel' },
+    { label: 'Add experience, qualification and specialisation', done: profile.experienceYears!==''&&Boolean(profile.highestQualification&&profile.areaOfSpecialisation), target: 'profilePanel' },
     { label: 'Upload your profile photograph', done: Boolean(profile.photo), target: 'profilePanel' }
   ];
   $('#completionTasks').innerHTML = tasks.map((task) => `<div class="completion-task ${task.done ? 'done' : ''}"><i>?</i><span>${task.label}</span><button type="button" data-go-to="${task.target}" aria-label="Open ${task.label}">?</button></div>`).join('');
@@ -345,7 +366,15 @@ function closeSidebar() {
 }
 
 async function bootstrapProfile(){
-  try{applyApiProfile(await facultyService.getOwn());populateForms();renderPublications();renderAchievements();renderDashboard()}catch(error){showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?login=required'),1000)}
+  try{
+    const current=await authService.me();
+    synchroniseFacultySession(current);
+    applyApiProfile(await facultyService.getOwn());populateForms();renderPublications();renderAchievements();renderDashboard();
+  }catch(error){
+    // Keep restricted upload areas hidden if the session cannot be verified.
+    resolveFacultyPermissions?.([]);resolveFacultyPermissions=null;
+    showToast(error.message);if(/Authentication|session/i.test(error.message))setTimeout(()=>window.location.replace('../index.html?login=required'),1000);
+  }
 }
 bootstrapProfile();
 

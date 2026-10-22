@@ -596,8 +596,18 @@ async function deleteFacultyProfile(){
 function renderUserAccounts() {
   const accounts = getFacultyAccounts();
   $('#facultyAccountRows').innerHTML = accounts.length ? accounts.map((account) => {
-    const canUploadNotices=account.permissions?.includes('notice_upload');
-    return `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member${canUploadNotices?'<small>Notice uploader</small>':''}</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span class="user-access-actions"><button type="button" data-account-status="${escapeHtml(account.facultyId)}" data-status="${account.status==='inactive'?'active':'inactive'}">${account.status==='inactive'?'Activate':'Deactivate'}</button><button type="button" data-notice-access="${escapeHtml(account.facultyId)}" data-allowed="${!canUploadNotices}">${canUploadNotices?'Remove notice access':'Allow notices'}</button><button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`;
+    const permissions=new Set(account.permissions||[]);
+    const uploadPermissions=[
+      ['notice_upload','notices','notice'],
+      ['syllabus_upload','syllabus','syllabus'],
+      ['timetable_upload','timetable','timetable']
+    ];
+    const granted=uploadPermissions.filter(([permission])=>permissions.has(permission)).map(([,label])=>`${label} uploader`);
+    const accessButtons=uploadPermissions.map(([permission,label,singular])=>{
+      const allowed=permissions.has(permission);
+      return `<button type="button" data-faculty-permission="${permission}" data-faculty-id="${escapeHtml(account.facultyId)}" data-allowed="${!allowed}">${allowed?`Remove ${singular} access`:`Allow ${label}`}</button>`;
+    }).join('');
+    return `<div class="user-row"><span><b>${escapeHtml(account.facultyId)}</b><small>Faculty login</small></span><span>Faculty member${granted.length?`<small>${granted.join(' · ')}</small>`:''}</span><span><i></i> ${account.status === 'inactive' ? 'Inactive' : 'Active'}${account.mustChangePassword?'<small>Password change required</small>':''}</span><span class="user-access-actions"><button type="button" data-account-status="${escapeHtml(account.facultyId)}" data-status="${account.status==='inactive'?'active':'inactive'}">${account.status==='inactive'?'Activate':'Deactivate'}</button>${accessButtons}<button class="danger-link" type="button" data-reset-faculty-password="${escapeHtml(account.facultyId)}">Reset password</button></span></div>`;
   }).join('') : '<div class="user-row"><span><b>No faculty logins</b><small>Create the first Faculty ID</small></span><span>—</span><span>—</span><span>—</span></div>';
 }
 
@@ -608,6 +618,17 @@ async function setFacultyNoticeAccess(facultyId,allowed){
     if(account)account.permissions=updated.permissions||[];
     renderUserAccounts();
     showToast(`${facultyId} ${allowed?'can now submit notice drafts':'no longer has notice upload access'}.`);
+  }catch(error){showToast(error.message)}
+}
+
+async function setFacultyPermission(facultyId,permission,allowed){
+  const labels={notice_upload:'notice',syllabus_upload:'syllabus',timetable_upload:'timetable'};
+  try{
+    const updated=await authService.setFacultyPermission(facultyId,permission,allowed);
+    const account=facultyAccounts.find((item)=>item.facultyId===facultyId);
+    if(account)account.permissions=updated.permissions||[];
+    renderUserAccounts();
+    showToast(`${facultyId} ${allowed?`can now upload ${labels[permission]} files`:`no longer has ${labels[permission]} upload access`}.`);
   }catch(error){showToast(error.message)}
 }
 
@@ -755,6 +776,8 @@ $('#facultyAccountRows').addEventListener('click',(event)=>{
   if(resetButton)openFacultyPasswordReset(resetButton.dataset.resetFacultyPassword);
   const accessButton=event.target.closest('[data-notice-access]');
   if(accessButton)setFacultyNoticeAccess(accessButton.dataset.noticeAccess,accessButton.dataset.allowed==='true');
+  const permissionButton=event.target.closest('[data-faculty-permission]');
+  if(permissionButton)setFacultyPermission(permissionButton.dataset.facultyId,permissionButton.dataset.facultyPermission,permissionButton.dataset.allowed==='true');
   const statusButton=event.target.closest('[data-account-status]');
   if(statusButton)authService.setFacultyStatus(statusButton.dataset.accountStatus,statusButton.dataset.status).then((updated)=>{const account=facultyAccounts.find((item)=>item.facultyId===updated.facultyId);if(account)account.status=updated.status;renderUserAccounts();showToast(`${updated.facultyId} is now ${updated.status}.`)}).catch((error)=>showToast(error.message));
 });

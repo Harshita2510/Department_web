@@ -52,15 +52,15 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v4c0 3-1.8 5-4 5s-4-2-4-5V4Z"></path><path d="M8 6H4v2c0 2 2 3 4 3M16 6h4v2c0 2-2 3-4 3M12 13v4M8 21h8M9 17h6"></path></svg>
           Achievements
         </button>
-        <button type="button" data-panel-target="syllabusUploadPanel">
+        <button type="button" data-panel-target="syllabusUploadPanel" data-faculty-permission="syllabus_upload" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"></path><path d="M8 10h8M8 14h8M8 18h5"></path></svg>
           Syllabus uploads <span class="nav-status" id="syllabusAssignmentCount">0</span>
         </button>
-        <button type="button" data-panel-target="timetableUploadPanel">
+        <button type="button" data-panel-target="timetableUploadPanel" data-faculty-permission="timetable_upload" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16"></rect><path d="M4 9h16M9 4v16"></path></svg>
           Timetable uploads <span class="nav-status" id="timetableAssignmentCount">0</span>
         </button>
-        <button id="noticeWorkspaceNav" type="button" data-panel-target="noticeWorkspacePanel" hidden>
+        <button id="noticeWorkspaceNav" type="button" data-panel-target="noticeWorkspacePanel" data-faculty-permission="notice_upload" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
           Notice drafts
         </button>
@@ -127,7 +127,7 @@
         </section>
 
         <section class="portal-panel" id="profilePanel" data-title="My profile">
-          <div class="editor-heading"><div><span>Public information</span><h2>Personal &amp; professional details</h2><p>This information appears at the top of your public faculty profile.</p></div><div class="section-progress"><span>Section status</span><strong id="personalStatus">Incomplete</strong></div></div>
+          <div class="editor-heading"><div><span>Public information</span><h2>Personal &amp; professional details</h2><p>Complete every field marked <b>*</b> here before submitting your profile for review.</p></div><div class="section-progress"><span>Section status</span><strong id="personalStatus">Incomplete</strong></div></div>
           <form class="editor-form" id="profileForm">
             <div class="form-card photo-card">
               <div class="form-card-title"><span>01</span><div><h3>Profile photograph</h3><p>Upload your own official photograph for administrator approval.</p></div></div>
@@ -151,7 +151,16 @@
             </div>
 
             <div class="form-card">
-              <div class="form-card-title"><span>03</span><div><h3>Professional links</h3><p>Help students and collaborators find your verified work.</p></div></div>
+              <div class="form-card-title"><span>03</span><div><h3>Required academic information</h3><p>These details are required before your profile can be submitted for review.</p></div></div>
+              <div class="form-grid">
+                <label class="field"><span>Highest qualification <b>*</b></span><input id="highestQualification" type="text" maxlength="300" placeholder="e.g. Ph.D. in Computer Engineering" required></label>
+                <label class="field"><span>Area of specialisation <b>*</b></span><input id="areaOfSpecialisation" type="text" maxlength="500" placeholder="e.g. Artificial Intelligence" required></label>
+                <label class="field"><span>Experience (years) <b>*</b></span><input id="experienceYears" type="number" min="0" step="any" placeholder="0" required></label>
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-card-title"><span>04</span><div><h3>Professional links</h3><p>Help students and collaborators find your verified work.</p></div></div>
               <div class="form-grid">
                 <label class="field"><span>Google Scholar</span><input id="scholarUrl" name="scholarUrl" type="url" placeholder="https://scholar.google.com/—"></label>
                 <label class="field"><span>ORCID</span><input id="orcidUrl" name="orcidUrl" type="url" placeholder="https://orcid.org/—"></label>
@@ -163,11 +172,11 @@
         </section>
 
         <section class="portal-panel" id="academicPanel" data-title="Academic details">
-          <div class="editor-heading"><div><span>Teaching &amp; research</span><h2>Academic profile</h2><p>Add qualifications, expertise, research interests and current teaching.</p></div></div>
+          <div class="editor-heading"><div><span>Teaching &amp; research</span><h2>Academic profile</h2><p>Add optional supporting qualifications, expertise, research interests and current teaching.</p></div></div>
           <form class="editor-form" id="academicForm">
             <div class="form-card">
-              <div class="form-card-title"><span>01</span><div><h3>Qualifications</h3><p>Enter one qualification per line, highest degree first.</p></div></div>
-              <label class="field"><span>Highest qualification <b>*</b></span><input id="highestQualification" type="text" maxlength="300" required></label><label class="field"><span>Area of specialisation <b>*</b></span><input id="areaOfSpecialisation" type="text" maxlength="500" required></label><label class="field"><span>Academic qualifications</span><textarea id="qualifications" rows="6" placeholder="Ph.D. in Computer Engineering, IIT —&#10;M.Tech. in —&#10;B.E. in —"></textarea></label>
+              <div class="form-card-title"><span>01</span><div><h3>Academic qualifications</h3><p>Optional — enter one qualification per line, highest degree first.</p></div></div>
+              <label class="field"><span>Academic qualifications</span><textarea id="qualifications" rows="6" placeholder="Ph.D. in Computer Engineering, IIT —&#10;M.Tech. in —&#10;B.E. in —"></textarea></label>
             </div>
             <div class="form-card">
               <div class="form-card-title"><span>02</span><div><h3>Areas of expertise</h3><p>Use commas to separate items.</p></div></div>
@@ -175,7 +184,7 @@
             </div>
             <div class="form-card">
               <div class="form-card-title"><span>03</span><div><h3>Experience &amp; supervision</h3><p>Summarise your current academic responsibilities.</p></div></div>
-              <div class="form-grid"><label class="field"><span>Experience (years) <b>*</b></span><input id="experienceYears" type="number" min="0" step="any" placeholder="0" required></label><label class="field"><span>Ph.D. scholars supervised</span><input id="scholarsSupervised" type="number" min="0" placeholder="0"></label><label class="field full-field"><span>Current research / lab summary</span><textarea id="researchSummary" rows="6" maxlength="900" placeholder="Describe your current projects, laboratory or research group—"></textarea></label></div>
+              <div class="form-grid"><label class="field"><span>Ph.D. scholars supervised</span><input id="scholarsSupervised" type="number" min="0" placeholder="0"></label><label class="field full-field"><span>Current research / lab summary</span><textarea id="researchSummary" rows="6" maxlength="900" placeholder="Describe your current projects, laboratory or research group—"></textarea></label></div>
             </div>
           </form>
         </section>
@@ -192,21 +201,21 @@
           <div class="empty-state" id="achievementEmpty"><div>?</div><h3>No achievements added yet</h3><p>Add an award, grant, professional distinction or other verified recognition.</p><button class="secondary-action" type="button" data-add-achievement>Add first achievement</button></div>
         </section>
 
-        <section class="portal-panel" id="syllabusUploadPanel" data-title="Syllabus uploads">
+        <section class="portal-panel" id="syllabusUploadPanel" data-title="Syllabus uploads" data-faculty-permission="syllabus_upload" hidden>
           <div class="editor-heading"><div><span>Assigned access</span><h2>Subject syllabus uploads</h2><p>You can upload a PDF or image only for subjects assigned to you by the website administrator.</p></div></div>
           <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Your upload is submitted for review and will not appear publicly until an administrator publishes it.</p></div>
           <div class="faculty-subject-list" id="facultySubjectList"></div><div class="empty-state" id="facultySubjectEmpty"><div>?</div><h3>No syllabus subjects assigned</h3><p>Ask the website administrator to assign a subject before uploading.</p></div>
           <input id="facultySyllabusFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
         </section>
 
-        <section class="portal-panel" id="timetableUploadPanel" data-title="Timetable uploads">
+        <section class="portal-panel" id="timetableUploadPanel" data-title="Timetable uploads" data-faculty-permission="timetable_upload" hidden>
           <div class="editor-heading"><div><span>Assigned access</span><h2>Class, quiz &amp; exam timetable uploads</h2><p>Upload a PDF or image only for programme semesters assigned to you by the administrator.</p></div></div>
           <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Uploads are submitted for review and remain private until an administrator publishes them.</p></div>
           <div class="faculty-timetable-list" id="facultyTimetableList"></div><div class="empty-state" id="facultyTimetableEmpty"><div>?</div><h3>No timetable semesters assigned</h3><p>Ask the administrator to grant timetable upload access.</p></div>
           <input id="facultyTimetableFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" hidden>
         </section>
 
-        <section class="portal-panel" id="noticeWorkspacePanel" data-title="Notice drafts" hidden>
+        <section class="portal-panel" id="noticeWorkspacePanel" data-title="Notice drafts" data-faculty-permission="notice_upload" hidden>
           <div class="editor-heading"><div><span>Assigned access</span><h2>Submit a notice</h2><p>Create an official notice draft and attach a PDF, JPEG or PNG file.</p></div></div>
           <div class="faculty-syllabus-note"><strong>Administrator approval required</strong><p>Your draft remains private until the website administrator reviews and publishes it.</p></div>
           <div class="faculty-notice-layout">
@@ -238,9 +247,9 @@
   </div>
 
   <div class="portal-toast" id="portalToast" role="status" aria-live="polite"></div>
-  <script type="module" src="../assets/js/faculty-portal.js?v=20261021-1"></script>
-  <script type="module" src="../assets/js/faculty-syllabus.js"></script>
-  <script type="module" src="../assets/js/faculty-timetable.js"></script>
-  <script type="module" src="../assets/js/faculty-notices.js?v=20261015-1"></script>
+  <script type="module" src="../assets/js/faculty-portal.js?v=20261022-2"></script>
+  <script type="module" src="../assets/js/faculty-syllabus.js?v=20261022-1"></script>
+  <script type="module" src="../assets/js/faculty-timetable.js?v=20261022-1"></script>
+  <script type="module" src="../assets/js/faculty-notices.js?v=20261022-1"></script>
 </body>
 </html>

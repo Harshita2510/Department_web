@@ -1,6 +1,6 @@
 import { AcademicSubject } from '../models/academic-subject.model.js';
 import { User } from '../models/user.model.js';
-import { ROLES } from '../constants/roles.js';
+import { PERMISSIONS,ROLES } from '../constants/roles.js';
 import { deleteCloudinaryImage,uploadSyllabusAsset,verifyCloudinaryFileDelivery } from '../services/cloudinary.service.js';
 import { recordAudit } from '../services/audit.service.js';
 import { AppError } from '../utils/app-error.js';
@@ -42,6 +42,7 @@ export async function listPublicSubjects(request,response){
 }
 
 export async function listManagedSubjects(request,response){
+  if(request.user.role===ROLES.FACULTY&&!request.user.permissions?.includes(PERMISSIONS.SYLLABUS_UPLOAD))return response.json({success:true,data:[]});
   const filter=request.user.role===ROLES.ADMIN?{}:{editors:request.user.id,active:true};
   const items=await AcademicSubject.find(filter).sort({programme:1,semester:1,sortOrder:1,name:1}).populate('editors','facultyId email status');
   response.json({success:true,data:items});
@@ -64,8 +65,8 @@ export async function updateSubject(request,response){
 
 export async function uploadSubjectSyllabus(request,response){
   const item=await AcademicSubject.findById(request.params.id);if(!item||!item.active)throw new AppError(404,'Subject not found');
-  const permitted=request.user.role===ROLES.ADMIN||item.editors.some((id)=>id.equals(request.user.id));
-  if(!permitted)throw new AppError(403,'You are not assigned to upload this subject syllabus');
+  const permitted=request.user.role===ROLES.ADMIN||(request.user.permissions?.includes(PERMISSIONS.SYLLABUS_UPLOAD)&&item.editors.some((id)=>id.equals(request.user.id)));
+  if(!permitted)throw new AppError(403,'Syllabus upload permission and subject assignment are required');
   if(!request.file)throw new AppError(400,'Choose a syllabus PDF or image');
   if(!verifySignature(request.file))throw new AppError(415,'The uploaded file content does not match its declared type');
   const result=await uploadSyllabusAsset(request.file,safeFolder(item));
