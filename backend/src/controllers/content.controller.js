@@ -69,6 +69,12 @@ export async function listAdminContent(request,response){
 export async function createContent(request,response){
   if(request.user.role===ROLES.FACULTY&&(!canUploadNotices(request.user)||request.body.type!=='notice'))throw new AppError(403,'You can only create notices when notice access is assigned');
   const input={...request.body};if(request.user.role===ROLES.FACULTY){input.status='draft';input.showInTicker=false;}
+  // A client may retry after a network failure even though the first request
+  // was already stored. Return that original item instead of duplicating it.
+  if(input.clientRequestId){
+    const existing=await Content.findOne({createdBy:request.user.id,clientRequestId:input.clientRequestId});
+    if(existing)return response.status(200).json({success:true,data:existing});
+  }
   if(input.type==='notice'){
     if(input.asset)throw new AppError(400,'Notice attachment metadata is created by the server');
     input.asset=await resolveNoticeFile(input.noticeFileId,request.user);
@@ -77,7 +83,16 @@ export async function createContent(request,response){
   delete input.noticeFileId;
   await ensurePublishableNotice(input,request.user);
   if(input.type==='notice'&&input.status==='published')input.publishedSnapshot=makePublishedNoticeSnapshot(input);
-  const item=await Content.create({...input,createdBy:request.user.id,updatedBy:request.user.id,publishedAt:input.status==='published'?new Date():undefined});
+  let item;
+  try{
+    item=await Content.create({...input,createdBy:request.user.id,updatedBy:request.user.id,publishedAt:input.status==='published'?new Date():undefined});
+  }catch(error){
+    if(error?.code===11000&&input.clientRequestId){
+      item=await Content.findOne({createdBy:request.user.id,clientRequestId:input.clientRequestId});
+      if(item)return response.status(200).json({success:true,data:item});
+    }
+    throw error;
+  }
   await recordAudit(request,'CONTENT_CREATED','Content',item.id,{type:item.type,status:item.status});response.status(201).json({success:true,data:item});
 }
 export async function updateContent(request,response){

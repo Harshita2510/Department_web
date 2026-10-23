@@ -37,6 +37,8 @@ let currentType = 'notices';
 let selectedIds = new Set();
 let pendingFile = null;
 let pendingPlacementPdf=null;
+let contentSaveInFlight=false;
+let contentCreateRequestId='';
 let toastTimer;
 let facultyProfiles=[];
 let facultyAccounts=[];
@@ -364,6 +366,7 @@ function updateBulkBar() {
 function openContentDrawer(type, id = '') {
   if (!requireAdministrator(`${id ? 'edit' : 'create'} ${type}`)) return;
   currentType = type;
+  contentCreateRequestId=id?'':crypto.randomUUID();
   const config = typeConfig[type];
   const item = id ? store[type].find((entry) => entry.id === id) : null;
   const isPlacement = type === 'placements';
@@ -421,7 +424,7 @@ function closeContentDrawer() {
   $('#editorDrawer').classList.remove('open');
   $('#editorDrawer').setAttribute('aria-hidden', 'true');
   document.body.classList.remove('no-scroll');
-  $('#contentForm').reset(); pendingFile = null;pendingPlacementPdf=null;
+  $('#contentForm').reset(); pendingFile = null;pendingPlacementPdf=null;contentCreateRequestId='';
 }
 
 function setPlacementSource(source){
@@ -513,6 +516,7 @@ async function saveContent(status) {
           ? await uploadService.uploadImage(pendingFile.raw,currentType)
           : await uploadService.upload(pendingFile.raw);
       const payload={type:API_CONTENT_TYPES[currentType],title:entry.title,category:entry.category,summary:entry.summary,body:entry.body,displayDate:entry.date||undefined,featured:entry.featured,status};
+      if(!id)payload.clientRequestId=contentCreateRequestId;
       if(currentType==='notices')payload.showInTicker=entry.showInTicker;
       if(currentType==='notices'&&pendingFile?.raw)noticeFileId=asset.id||asset.key;
       if(noticeFileId)payload.noticeFileId=noticeFileId;
@@ -523,6 +527,19 @@ async function saveContent(status) {
   if (existing) Object.assign(existing, entry); else store[currentType].unshift(entry);
   updateDashboard();updateCounts();
   closeContentDrawer(); showView(currentType); showToast(status === 'published' ? `${typeConfig[currentType].singular} published.` : 'Draft saved.');
+}
+
+async function runContentSave(status) {
+  if (contentSaveInFlight) return;
+  contentSaveInFlight = true;
+  const controls = [$('#contentForm button[type="submit"]'), $('#saveDraft')].filter(Boolean);
+  controls.forEach((button) => { button.disabled = true; });
+  try {
+    await saveContent(status);
+  } finally {
+    contentSaveInFlight = false;
+    controls.forEach((button) => { button.disabled = false; });
+  }
 }
 
 async function bulkSet(status) {
@@ -766,7 +783,7 @@ $('#bulkPublish').addEventListener('click',()=>bulkSet('published')); $('#bulkDr
 $$('[data-close-drawer]').forEach((button)=>button.addEventListener('click',closeContentDrawer)); $('#contentUploadZone').addEventListener('click',()=>$('#contentFile').click()); $('#contentFile').addEventListener('change',(event)=>readUpload(event.target.files[0],(file)=>{pendingFile=file;renderAttachedFile()}));
 $$('input[name="placementSource"]').forEach((input)=>input.addEventListener('change',()=>setPlacementSource(input.value)));
 $('#placementPdfInput').addEventListener('change',(event)=>{const file=event.target.files[0];if(!file)return;if(file.type!=='application/pdf'){showToast('Placement documents must be PDF files.');event.target.value='';return}if(file.size>10*1024*1024){showToast('Placement PDFs must be 10 MB or smaller.');event.target.value='';return}pendingPlacementPdf={name:file.name,type:file.type,size:file.size,raw:file};renderPlacementPdf()});
-$('#contentForm').addEventListener('submit',(event)=>{event.preventDefault();saveContent('published')}); $('#saveDraft').addEventListener('click',()=>saveContent('draft')); $('#deleteCurrent').addEventListener('click',async()=>{const id=$('#editingId').value;if(!id||!confirm('Delete this content permanently?'))return;try{if(currentType==='placements')await placementService.remove(id);else await contentService.remove(id);store[currentType]=store[currentType].filter((item)=>item.id!==id);closeContentDrawer();showView(currentType);showToast('Content deleted.')}catch(error){showToast(error.message)}});
+$('#contentForm').addEventListener('submit',(event)=>{event.preventDefault();runContentSave('published')}); $('#saveDraft').addEventListener('click',()=>runContentSave('draft')); $('#deleteCurrent').addEventListener('click',async()=>{const id=$('#editingId').value;if(!id||!confirm('Delete this content permanently?'))return;try{if(currentType==='placements')await placementService.remove(id);else await contentService.remove(id);store[currentType]=store[currentType].filter((item)=>item.id!==id);closeContentDrawer();showView(currentType);showToast('Content deleted.')}catch(error){showToast(error.message)}});
 $('#addFaculty').addEventListener('click',openFacultyAccountModal); $('#facultyEmptyAdd').addEventListener('click',openFacultyAccountModal); $$('[data-close-faculty]').forEach((button)=>button.addEventListener('click',closeFacultyDrawer));
 $('#facultyAdminForm').addEventListener('submit',(event)=>{event.preventDefault();approveFacultyProfile()});
 $('#deleteFacultyProfile').addEventListener('click',deleteFacultyProfile);

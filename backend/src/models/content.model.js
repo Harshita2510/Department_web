@@ -17,10 +17,14 @@ const contentSchema = new mongoose.Schema({
   // The public copy is independent from a faculty member's pending revision.
   publishedSnapshot: { type:publishedNoticeSnapshotSchema, default:null },
   status: { type: String, enum: PUBLICATION_STATUS, default: 'draft', index: true },
+  // A browser-generated key makes a create request safe to retry when the
+  // server completed it but the response was interrupted.
+  clientRequestId: { type:String, trim:true, maxlength:100 },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, publishedAt: Date
 }, { timestamps: true });
 
 contentSchema.index({ type: 1, status: 1, displayDate: -1 });
+contentSchema.index({ createdBy: 1, clientRequestId: 1 }, { unique:true, sparse:true });
 contentSchema.index({ title: 'text', summary: 'text', body: 'text' });
 export const Content = mongoose.model('Content', contentSchema);

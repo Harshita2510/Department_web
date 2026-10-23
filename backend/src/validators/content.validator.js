@@ -8,7 +8,7 @@ const asset = z.object({
   height:z.number().int().positive().optional(),format:z.string().max(20).optional()
 }).optional();
 const noticeFileId=z.string().regex(/^[a-f\d]{24}$/i,'Choose a valid uploaded notice attachment').optional();
-const content = z.object({ type:z.enum(CONTENT_TYPES), title:z.string().trim().min(2).max(250), category:z.string().max(80).optional(), summary:z.string().trim().max(240).optional(), body:z.string().trim().max(50_000).optional(), displayDate:z.coerce.date().optional(), featured:z.boolean().optional(), showInTicker:z.boolean().optional(), asset, noticeFileId, status:z.enum(['draft','published']).optional() });
+const content = z.object({ type:z.enum(CONTENT_TYPES), title:z.string().trim().min(2).max(250), category:z.string().max(80).optional(), summary:z.string().trim().max(240).optional(), body:z.string().trim().max(50_000).optional(), displayDate:z.coerce.date().optional(), featured:z.boolean().optional(), showInTicker:z.boolean().optional(), asset, noticeFileId, clientRequestId:z.string().regex(/^[a-zA-Z0-9-]{16,100}$/,'Invalid request identifier').optional(), status:z.enum(['draft','published']).optional() });
 export const createContentSchema=z.object({body:content.superRefine((value,context)=>{
   if(value.type==='notice'&&!value.noticeFileId)context.addIssue({code:'custom',path:['noticeFileId'],message:'Upload a notice PDF, JPEG or PNG first'});
   if(value.type==='notice'&&value.asset)context.addIssue({code:'custom',path:['asset'],message:'Notice attachment metadata is created by the server'});
