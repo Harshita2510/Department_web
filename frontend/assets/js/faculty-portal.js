@@ -53,6 +53,9 @@ const defaultProfile = {
 let profile = { ...defaultProfile };
 profile.facultyId = facultyId;
 let saveTimer;
+let saveInFlight=false;
+let saveQueuedWhileSaving=false;
+let profileEditVersion=0;
 let toastTimer;
 
 function applyFacultyPermissions(permissions=[]){
@@ -122,6 +125,7 @@ function markSaving(state = 'unsaved') {
 }
 
 function queueSave() {
+  profileEditVersion+=1;
   if (profile.reviewStatus === 'approved' || profile.reviewStatus === 'submitted') profile.reviewStatus = 'draft';
   markSaving('unsaved');
   clearTimeout(saveTimer);
@@ -157,9 +161,28 @@ function applyApiProfile(record) {
 
 async function saveProfile(showConfirmation = false) {
   clearTimeout(saveTimer);
+  // Never send concurrent updates: a slow earlier response could otherwise
+  // overwrite text typed after that request was sent.
+  if(saveInFlight){saveQueuedWhileSaving=true;return null;}
   collectFields();
+  const savedVersion=profileEditVersion;
+  const draft=apiDraft();
+  saveInFlight=true;
   markSaving('saving');
-  try{const record=await facultyService.updateOwn(apiDraft());applyApiProfile(record);markSaving('saved');populateForms();renderPublications();renderAchievements();renderDashboard();if(showConfirmation)showToast('Your profile changes have been saved to MongoDB.');return record}catch(error){markSaving('unsaved');showToast(error.message);return null}
+  try{
+    const record=await facultyService.updateOwn(draft);
+    // The user continued editing while this request was in transit. Keep the
+    // newer local values intact and save them next instead of re-populating
+    // the form from this older response.
+    if(savedVersion!==profileEditVersion){saveQueuedWhileSaving=true;markSaving('unsaved');return record;}
+    applyApiProfile(record);markSaving('saved');populateForms();renderPublications();renderAchievements();renderDashboard();
+    if(showConfirmation)showToast('Your profile changes have been saved to MongoDB.');
+    return record;
+  }catch(error){markSaving('unsaved');showToast(error.message);return null}
+  finally{
+    saveInFlight=false;
+    if(saveQueuedWhileSaving){saveQueuedWhileSaving=false;void saveProfile();}
+  }
 }
 
 function showToast(message) {
