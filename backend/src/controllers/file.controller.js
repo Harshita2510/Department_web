@@ -9,6 +9,7 @@ import { Content } from '../models/content.model.js';
 import { AcademicDocument } from '../models/academic-document.model.js';
 import { FacultyProfile } from '../models/faculty-profile.model.js';
 import { cloudinaryFacultyPhotoPublicId } from '../utils/cloudinary-faculty-photo.js';
+import { gridFsFileDeliveryUrl } from '../services/notice-file.service.js';
 
 const bucket=()=>new mongoose.mongo.GridFSBucket(mongoose.connection.db,{bucketName:'uploads'});
 
@@ -22,7 +23,7 @@ export async function uploadFile(request,response){
   if(!request.file)throw new AppError(400,'Choose a file to upload');
   const stream=bucket().openUploadStream(request.file.originalname,{contentType:request.file.mimetype,metadata:{uploadedBy:request.user.id}});
   await new Promise((resolve,reject)=>{Readable.from(request.file.buffer).pipe(stream).on('finish',resolve).on('error',reject)});
-  const data={provider:'gridfs',id:String(stream.id),key:String(stream.id),url:`${env.API_PUBLIC_URL}/files/${stream.id}`,name:request.file.originalname,mimeType:request.file.mimetype,size:request.file.size};
+  const data={provider:'gridfs',id:String(stream.id),key:String(stream.id),url:gridFsFileDeliveryUrl(stream.id),name:request.file.originalname,mimeType:request.file.mimetype,size:request.file.size};
   await recordAudit(request,'FILE_UPLOADED','GridFS',stream.id,{name:data.name,mimeType:data.mimeType,size:data.size});
   response.status(201).json({success:true,data});
 }
@@ -33,7 +34,7 @@ export async function uploadNoticeFile(request,response){
   if(!request.file)throw new AppError(400,'Choose a notice attachment');
   const stream=bucket().openUploadStream(request.file.originalname,{contentType:request.file.mimetype,metadata:{uploadedBy:request.user.id,purpose:'notice'}});
   await new Promise((resolve,reject)=>{Readable.from(request.file.buffer).pipe(stream).on('finish',resolve).on('error',reject)});
-  const data={provider:'gridfs',id:String(stream.id),key:String(stream.id),url:`${env.API_PUBLIC_URL}/files/${stream.id}`,name:request.file.originalname,mimeType:request.file.mimetype,size:request.file.size};
+  const data={provider:'gridfs',id:String(stream.id),key:String(stream.id),url:gridFsFileDeliveryUrl(stream.id),name:request.file.originalname,mimeType:request.file.mimetype,size:request.file.size};
   await recordAudit(request,'NOTICE_ATTACHMENT_UPLOADED','GridFS',stream.id,{name:data.name,mimeType:data.mimeType,size:data.size});
   response.status(201).json({success:true,data});
 }
@@ -104,7 +105,7 @@ export async function downloadFile(request,response){
   const fileId=String(id);
   const [publishedContent,publishedAcademicDocument]=await Promise.all([
     Content.exists({$or:[{status:'published','asset.key':fileId},{'publishedSnapshot.asset.key':fileId}]}),
-    AcademicDocument.exists({status:'published',documentUrl:`${env.API_PUBLIC_URL.replace(/\/$/,'')}/files/${fileId}`})
+    AcademicDocument.exists({status:'published',documentUrl:gridFsFileDeliveryUrl(fileId)})
   ]);
   const access=fileAccessDecision({publishedContent,publishedAcademicDocument,user:request.user,uploaderId:file.metadata?.uploadedBy});
   if(!access.allowed)throw new AppError(404,'File not found');

@@ -3,7 +3,7 @@ import { AppError } from '../utils/app-error.js';
 import { recordAudit } from '../services/audit.service.js';
 import { PERMISSIONS,ROLES } from '../constants/roles.js';
 import { setPublicCache } from '../utils/public-cache.js';
-import { deleteGridFsFile,noticeFileDeliveryUrl,noticeFileIdPattern,resolveNoticeFile } from '../services/notice-file.service.js';
+import { deleteGridFsFile,gridFsFileDeliveryUrl,noticeFileDeliveryUrl,noticeFileIdPattern,resolveNoticeFile } from '../services/notice-file.service.js';
 
 const canUploadNotices=(user)=>user.role===ROLES.ADMIN||user.permissions?.includes(PERMISSIONS.NOTICE_UPLOAD);
 const gridFsKeys=(item)=>new Set([item.asset,item.publishedSnapshot?.asset].filter((asset)=>asset?.provider==='gridfs'&&noticeFileIdPattern.test(String(asset.key||''))).map((asset)=>String(asset.key)));
@@ -32,6 +32,12 @@ function securePublicNoticeAsset(item){
   return {...value,asset:{...value.asset,provider:'gridfs',url:noticeFileDeliveryUrl(value.asset.key)}};
 }
 
+function securePublicGridFsAsset(item){
+  const value=item.toObject?.()||item;
+  if(value.asset?.provider!=='gridfs'||!noticeFileIdPattern.test(String(value.asset?.key||'')))return value;
+  return {...value,asset:{...value.asset,provider:'gridfs',url:gridFsFileDeliveryUrl(value.asset.key)}};
+}
+
 export function makePublishedNoticeSnapshot(item){
   const value=item.toObject?.()||item;
   return {title:value.title,category:value.category,summary:value.summary,body:value.body,displayDate:value.displayDate,featured:Boolean(value.featured),showInTicker:value.showInTicker!==false,asset:value.asset};
@@ -39,7 +45,7 @@ export function makePublishedNoticeSnapshot(item){
 
 export function publicContentVersion(item){
   const value=item.toObject?.()||item;
-  if(value.type!=='notice')return value;
+  if(value.type!=='notice')return securePublicGridFsAsset(value);
   const approved=value.publishedSnapshot||(value.status==='published'?value:null);
   if(!approved)return null;
   const publicValue={...value,...approved,status:'published'};

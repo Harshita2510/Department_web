@@ -1,8 +1,15 @@
 import { contentService } from '../services/content.service.js';
+import { API_BASE_URL } from '../config/api.js';
 import { escapeHtml } from '../shared/dom.js';
 
 function safeUrl(value){
-  try{const url=new URL(value,location.href);return url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname))?url.href:'';}catch{return '';}
+  try{
+    const url=new URL(value,location.href);const apiUrl=new URL(API_BASE_URL,location.href);
+    // Repair records uploaded while API_PUBLIC_URL was set to a service origin
+    // without the required /api path. This also keeps old published records usable.
+    if(url.origin===apiUrl.origin&&/^\/files\/[a-f\d]{24}$/i.test(url.pathname)&&/\/api$/i.test(apiUrl.pathname))url.pathname=`${apiUrl.pathname}${url.pathname}`;
+    return url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname))?url.href:'';
+  }catch{return '';}
 }
 function empty(message){return `<article class="file-card"><span class="file-meta">RESEARCH RECORDS</span><h3>No published records yet</h3><p>${escapeHtml(message)}</p></article>`;}
 function fileCard(item,index){

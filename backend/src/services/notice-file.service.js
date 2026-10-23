@@ -6,8 +6,21 @@ import { AppError } from '../utils/app-error.js';
 export const noticeFileIdPattern=/^[a-f\d]{24}$/i;
 const noticeMimeTypes=new Set(['application/pdf','image/jpeg','image/png']);
 
+// Keep delivered GridFS links on the mounted API router even if an older
+// deployment environment was configured with only the service origin.
+export function publicApiBaseUrl(){
+  const url=new URL(env.API_PUBLIC_URL);
+  const path=url.pathname.replace(/\/$/,'');
+  if(!/(^|\/)api$/i.test(path))url.pathname=`${path}/api`;
+  return url.href.replace(/\/$/,'');
+}
+
+export function gridFsFileDeliveryUrl(fileId){
+  return `${publicApiBaseUrl()}/files/${fileId}`;
+}
+
 export function noticeFileDeliveryUrl(fileId){
-  return `${env.API_PUBLIC_URL.replace(/\/$/,'')}/files/${fileId}`;
+  return gridFsFileDeliveryUrl(fileId);
 }
 
 export function buildNoticeAsset(file,id=String(file?._id||'')){
