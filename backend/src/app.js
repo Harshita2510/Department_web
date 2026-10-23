@@ -46,5 +46,9 @@ app.use(express.json({ limit:'1mb' }));
 app.use(express.urlencoded({ extended:false, limit:'1mb' }));
 app.use(morgan(env.NODE_ENV==='production'?'combined':'dev'));
 app.use('/api', apiRateLimiter, apiRouter);
+// Older published GridFS assets were saved without the /api route prefix.
+// Preserve those public links and cached cards by forwarding them to the
+// actual file endpoint instead of returning a route-not-found response.
+app.get('/files/:id',(request,response)=>response.redirect(308,`/api/files/${encodeURIComponent(request.params.id)}`));
 app.use(notFound);
 app.use(errorHandler);
