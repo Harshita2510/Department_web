@@ -17,7 +17,13 @@ async function apply(){
     }
     if(page==='research'){
       setText('.research-kicker',value.eyebrow);setText('.research-opening h1',value.title);setText('.research-description',value.description);
-      document.querySelectorAll('.research-focus-card').forEach((card,index)=>{setText(`.research-focus-card:nth-child(${index+1}) h2`,value[`area${index+1}Title`]);setText(`.research-focus-card:nth-child(${index+1}) p`,value[`area${index+1}Description`])});
+      // Published research records replace these placeholders. Do not let the
+      // editable static page settings overwrite records returned by the API.
+      document.querySelectorAll('.research-focus-card:not([data-dynamic-research-record])').forEach((card,index)=>{
+        const heading=card.querySelector('h2');const description=card.querySelector('p');
+        if(heading&&value[`area${index+1}Title`])heading.textContent=value[`area${index+1}Title`];
+        if(description&&value[`area${index+1}Description`])description.textContent=value[`area${index+1}Description`];
+      });
       const resources=document.querySelectorAll('.research-resource');
       if(resources[0])resources[0].querySelector('h3').textContent=value.laboratoriesTitle;
       if(resources[1])resources[1].querySelector('h3').textContent=value.publicationsTitle;
