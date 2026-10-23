@@ -526,19 +526,42 @@ async function saveContent(status) {
   }
   if (existing) Object.assign(existing, entry); else store[currentType].unshift(entry);
   updateDashboard();updateCounts();
-  closeContentDrawer(); showView(currentType); showToast(status === 'published' ? `${typeConfig[currentType].singular} published.` : 'Draft saved.');
+  return true;
 }
 
 async function runContentSave(status) {
   if (contentSaveInFlight) return;
   contentSaveInFlight = true;
   const controls = [$('#contentForm button[type="submit"]'), $('#saveDraft')].filter(Boolean);
+  const publishButton=$('#savePublish');
+  const originalPublishText=publishButton?.textContent||'Publish';
+  if(status==='published'&&publishButton){
+    publishButton.classList.add('is-publishing');
+    publishButton.setAttribute('aria-busy','true');
+    publishButton.textContent='Publishing…';
+  }
   controls.forEach((button) => { button.disabled = true; });
   try {
-    await saveContent(status);
+    const saved=await saveContent(status);
+    if(!saved)return;
+    if(status==='published'&&publishButton){
+      publishButton.classList.remove('is-publishing');
+      publishButton.classList.add('is-published');
+      publishButton.removeAttribute('aria-busy');
+      publishButton.textContent='Published ✓';
+      // Keep the confirmed state visible before the drawer closes.
+      await new Promise((resolve)=>setTimeout(resolve,650));
+    }
+    closeContentDrawer();showView(currentType);
+    showToast(status==='published'?`${typeConfig[currentType].singular} published.`:'Draft saved.');
   } finally {
     contentSaveInFlight = false;
     controls.forEach((button) => { button.disabled = false; });
+    if(publishButton){
+      publishButton.classList.remove('is-publishing','is-published');
+      publishButton.removeAttribute('aria-busy');
+      publishButton.textContent=originalPublishText;
+    }
   }
 }
 
