@@ -27,7 +27,7 @@ const typeConfig = {
   events: { title: 'Events', singular: 'Event', description: 'Manage seminars, workshops, conferences and student activities.', categories: ['Workshop', 'Seminar', 'Conference', 'Students', 'Cultural'] },
   placements: { title: 'Placement resources', singular: 'Placement resource', description: 'Publish a year-wise archive using either a public sheet link or an uploaded PDF.', categories: ['Placement sheet'] },
   documents: { title: 'Research records', singular: 'Research record', description: 'Publish research areas, papers, projects, patents and laboratory information.', categories: ['Research area', 'Publication', 'Patent & project', 'Laboratory', 'Report'] },
-  media: { title: 'Media library', singular: 'Media asset', description: 'Upload and organise approved website images and files.', categories: ['Image', 'Document', 'Video', 'Other'] }
+  media: { title: 'Department facilities', singular: 'Facility', description: 'Publish laboratories, classrooms, equipment, project spaces and other facilities shown on the public Facilities section.', categories: ['Laboratory', 'Classroom', 'Equipment', 'Project space', 'Other'] }
 };
 
 const starterData = {notices:[],news:[],events:[],placements:[],documents:[],media:[]};
