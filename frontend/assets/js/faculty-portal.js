@@ -60,6 +60,8 @@ function applyFacultyPermissions(permissions=[]){
   $$('[data-faculty-permission]').forEach((element)=>{
     element.hidden=!granted.has(element.dataset.facultyPermission);
   });
+  const activeRestrictedPanel=$$('.portal-panel.active[data-faculty-permission]').find((panel)=>panel.hidden);
+  if(activeRestrictedPanel)showPanel('overviewPanel');
 }
 
 function synchroniseFacultySession(current){
@@ -275,6 +277,10 @@ function populateForms() {
 }
 
 function showPanel(panelId) {
+  const requestedPanel = $(`#${panelId}`);
+  if (requestedPanel?.dataset.facultyPermission && requestedPanel.hidden) {
+    panelId='overviewPanel';
+  }
   if(session.mustChangePassword&&panelId!=='settingsPanel'){
     showToast('Change your temporary password before opening the profile editor.');
     panelId='settingsPanel';

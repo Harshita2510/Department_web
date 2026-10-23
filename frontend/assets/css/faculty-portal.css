@@ -42,6 +42,10 @@ a { color: inherit; text-decoration: none; }
 .nav-label { display: block; padding: 0 12px 9px; color: #6f8498; font-size: 8px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .nav-label-second { margin-top: 24px; }
 .portal-nav button { width: 100%; min-height: 45px; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; padding: 0 12px; border: 0; background: transparent; color: #aebdca; font-size: 11px; font-weight: 600; text-align: left; cursor: pointer; transition: background .2s, color .2s; }
+/* Upload workspaces are opt-in.  This must override the generic button and
+   active-panel display rules, otherwise CSS can accidentally reveal a
+   permission-gated item even when its HTML hidden attribute is present. */
+[data-faculty-permission][hidden] { display: none !important; }
 .portal-nav button:hover, .portal-nav button.active { background: rgba(255,255,255,.08); color: white; }
 .portal-nav button.active { box-shadow: inset 2px 0 var(--gold); }
 .portal-nav svg { width: 17px; height: 17px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
