@@ -168,6 +168,34 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3600);
 }
 
+const wait=(milliseconds)=>new Promise((resolve)=>setTimeout(resolve,milliseconds));
+
+function isNetworkFailure(error){
+  return /^(load failed|failed to fetch|networkerror)$/i.test(String(error?.message||'').trim());
+}
+
+async function changePasswordWithRecovery(currentPassword,newPassword){
+  try{
+    await authService.changePassword(currentPassword,newPassword);
+    return {changed:true};
+  }catch(error){
+    if(!isNetworkFailure(error))throw error;
+
+    // A free Render service can wake while the first request is in flight.
+    // Check the session before retrying: a changed password invalidates the
+    // token, while an unchanged account still has a valid session.
+    await wait(1500);
+    try{
+      await authService.me();
+    }catch(sessionError){
+      if(/authentication|required|expired|session/i.test(String(sessionError?.message||'')))return {changed:true,recovered:true};
+      throw error;
+    }
+    await authService.changePassword(currentPassword,newPassword);
+    return {changed:true,retried:true};
+  }
+}
+
 function setAvatar(element, includeFallback = true, width = 156) {
   const safePhoto=facultyPhotoUrl(profile.photo,width);
   if (safePhoto) {
@@ -496,10 +524,13 @@ $('#passwordForm').addEventListener('submit', async (event) => {
   submit.textContent='Updating password—';
   setFeedback('Securely updating your password—','pending');
   try {
-    await authService.changePassword(currentPassword,newPassword);
+    const result=await changePasswordWithRecovery(currentPassword,newPassword);
     sessionStorage.removeItem(sessionKey);
     form.reset();
-    setFeedback('Password updated. Redirecting you to sign in—','success');
+    const successMessage=result.recovered
+      ? 'Password updated. The connection was interrupted after the request; please sign in again.'
+      : 'Password updated. Redirecting you to sign in—';
+    setFeedback(successMessage,'success');
     showToast('Password updated. Please sign in again.');
     setTimeout(()=>window.location.href='../index.html',1200);
   } catch(error) {
