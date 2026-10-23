@@ -10,9 +10,16 @@ function fileCard(item,index){
   const content=`<span class="file-meta">${escapeHtml(item.category)} / ${String(index+1).padStart(2,'0')}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.summary||item.body||'Open this research record for details.')}</p><span class="file-action">${url?'VIEW DOCUMENT ↗':'RESEARCH RECORD'}</span>`;
   return url?`<a class="file-card" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${content}</a>`:`<article class="file-card">${content}</article>`;
 }
-function focusCard(item,index){return `<article class="research-focus-card" data-dynamic-research-record="true"><span class="research-card-number">R / ${String(index+1).padStart(2,'0')}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary||item.body||'Research focus area')}</p><span class="research-card-arrow" aria-hidden="true">→</span></article>`;}
+function focusCard(item,index){
+  const url=safeUrl(item.asset?.url);
+  const content=`<span class="research-card-number">R / ${String(index+1).padStart(2,'0')}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary||item.body||'Research focus area')}</p><span class="research-card-arrow" aria-hidden="true">${url?'VIEW DOCUMENT ↗':'→'}</span>`;
+  return url?`<a class="research-focus-card" data-dynamic-research-record="true" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Open document: ${escapeHtml(item.title)}">${content}</a>`:`<article class="research-focus-card" data-dynamic-research-record="true">${content}</article>`;
+}
 function topicCards(items,label){
-  const cards=items.length?items.map((item,index)=>`<article class="topic-box" data-dynamic-research-record="true"><span>${String(index+1).padStart(2,'0')} / ${escapeHtml(item.category).toUpperCase()}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary||item.body||'Research record')}</p></article>`).join(''):`<article class="topic-box"><span>RESEARCH RECORDS</span><h2>No published records yet</h2><p>The administrator has not published a record in this section yet.</p></article>`;
+  const cards=items.length?items.map((item,index)=>{
+    const url=safeUrl(item.asset?.url);const content=`<span>${String(index+1).padStart(2,'0')} / ${escapeHtml(item.category).toUpperCase()}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary||item.body||'Research record')}</p>`;
+    return url?`<a class="topic-box" data-dynamic-research-record="true" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="Open document: ${escapeHtml(item.title)}">${content}</a>`:`<article class="topic-box" data-dynamic-research-record="true">${content}</article>`;
+  }).join(''):`<article class="topic-box"><span>RESEARCH RECORDS</span><h2>No published records yet</h2><p>The administrator has not published a record in this section yet.</p></article>`;
   return `<span class="research-eyebrow" style="color:#a48135;">${escapeHtml(label)}</span><div class="topic-grid">${cards}</div>`;
 }
 async function load(){
