@@ -56,6 +56,8 @@ let saveTimer;
 let saveInFlight=false;
 let saveQueuedWhileSaving=false;
 let profileEditVersion=0;
+let profileLoaded=false;
+const locallyEditedFields=new Set();
 let toastTimer;
 
 function applyFacultyPermissions(permissions=[]){
@@ -128,6 +130,9 @@ function queueSave() {
   profileEditVersion+=1;
   if (profile.reviewStatus === 'approved' || profile.reviewStatus === 'submitted') profile.reviewStatus = 'draft';
   markSaving('unsaved');
+  // The initial profile request may still be loading on a cold production
+  // service. Do not save the default, half-loaded profile over real data.
+  if(!profileLoaded)return;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => saveProfile(), 650);
 }
@@ -433,7 +438,16 @@ async function bootstrapProfile(){
   try{
     const current=await authService.me();
     synchroniseFacultySession(current);
-    applyApiProfile(await facultyService.getOwn());populateForms();renderPublications();renderAchievements();renderDashboard();
+    const record=await facultyService.getOwn();
+    // A faculty member can start typing before a slow initial request returns.
+    // Keep those locally entered values while hydrating every other field from
+    // MongoDB, rather than replacing the active input with older server data.
+    const localValues=Object.fromEntries([...locallyEditedFields].map((field)=>[field,profile[field]]));
+    applyApiProfile(record);
+    Object.assign(profile,localValues);
+    profileLoaded=true;
+    populateForms();renderPublications();renderAchievements();renderDashboard();
+    if(locallyEditedFields.size){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProfile(),650);}
   }catch(error){
     // Keep restricted upload areas hidden if the session cannot be verified.
     resolveFacultyPermissions?.([]);resolveFacultyPermissions=null;
@@ -449,16 +463,19 @@ editableFields.forEach((fieldId) => {
   const field = $(`#${fieldId}`);
   if (!field) return;
   field.addEventListener('input', () => {
+    locallyEditedFields.add(fieldId);
     profile[fieldId] = field.value;
     if (fieldId === 'bio') $('#bioCount').textContent = field.value.length;
     queueSave();
   });
   field.addEventListener('change', () => {
+    locallyEditedFields.add(fieldId);
     profile[fieldId] = field.value;
     queueSave();
   });
 });
 $('#instituteEmail').addEventListener('input', (event) => {
+  locallyEditedFields.add('email');
   profile.email = event.target.value;
   queueSave();
 });
