@@ -9,7 +9,11 @@ export async function apiRequest(path, options = {}) {
   });
   const payload = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
-    const error = new Error(payload?.message || `Request failed with status ${response.status}`);
+    const validationMessages=Object.values(payload?.details?.fieldErrors||{}).flat().filter(Boolean);
+    const message=validationMessages.length
+      ? validationMessages.join(' ')
+      : (payload?.message || `Request failed with status ${response.status}`);
+    const error = new Error(message);
     error.details = payload?.details;
     throw error;
   }

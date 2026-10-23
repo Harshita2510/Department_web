@@ -1,4 +1,4 @@
-import { apiRequest } from './api-client.js';
+import { apiRequest } from './api-client.js?v=20261023-1';
 
 export const contentService={
   listPublic:(type='')=>apiRequest(`/content/public${type?`?type=${encodeURIComponent(type)}`:''}`),

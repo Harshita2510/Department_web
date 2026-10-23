@@ -4,7 +4,7 @@ import { formatDate } from './shared/format.js';
 import { authService } from './services/auth.service.js';
 import { facultyService } from './services/faculty.service.js';
 import { placementService } from './services/placement.service.js';
-import { contentService } from './services/content.service.js';
+import { contentService } from './services/content.service.js?v=20261023-1';
 import { uploadService } from './services/upload.service.js';
 import { academicDocumentService } from './services/academic-document.service.js';
 import { academicSubjectService } from './services/academic-subject.service.js';
